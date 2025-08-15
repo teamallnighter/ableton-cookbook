@@ -11,4 +11,8 @@ Alpine.plugin(collapse);
 Alpine.plugin(focus);
 
 window.Alpine = Alpine;
-Alpine.start();
+
+// Wait for DOM to be ready before starting Alpine
+document.addEventListener('DOMContentLoaded', () => {
+    Alpine.start();
+});
