@@ -14,5 +14,7 @@ window.Alpine = Alpine;
 
 // Wait for DOM to be ready before starting Alpine
 document.addEventListener('DOMContentLoaded', () => {
-    Alpine.start();
+    if (!window.Alpine.version) {
+        Alpine.start();
+    }
 });
