@@ -1,7 +1,9 @@
 <x-app-layout>
     {{-- Pass SEO data to layout --}}
     <x-slot name="seoMetaTags">
-        {!! app('App\Services\SeoService')->renderMetaTags(app('App\Services\SeoService')->getUploadMetaTags()) !!}
+        @php
+            $seoMetaTags = app('App\Services\SeoService')->getUploadMetaTags();
+        @endphp
     </x-slot>
     
     <x-slot name="breadcrumbs">
