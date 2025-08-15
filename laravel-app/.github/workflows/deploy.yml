@@ -1,0 +1,281 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: ableton_cookbook_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP 8.2
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, pdo_mysql, dom, filter, gd, iconv, json, mbstring, redis
+        coverage: none
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install NPM dependencies
+      run: npm ci
+
+    - name: Build assets
+      run: npm run build
+
+    - name: Copy environment file
+      run: cp .env.example .env
+
+    - name: Generate application key
+      run: php artisan key:generate
+
+    - name: Configure test database
+      run: |
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=ableton_cookbook_test" >> .env
+        echo "DB_USERNAME=root" >> .env
+        echo "DB_PASSWORD=root" >> .env
+        echo "REDIS_HOST=127.0.0.1" >> .env
+
+    - name: Run database migrations
+      run: php artisan migrate --force
+
+    - name: Run PHPUnit tests
+      run: vendor/bin/phpunit
+
+    - name: Run Laravel Pint (Code Style)
+      run: vendor/bin/pint --test
+
+  security-scan:
+    runs-on: ubuntu-22.04
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP 8.2
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader
+
+    - name: Run security audit
+      run: composer audit
+
+    - name: Scan for vulnerabilities
+      uses: symfonycorp/security-checker-action@v5
+
+  deploy:
+    runs-on: ubuntu-22.04
+    needs: [test, security-scan]
+    if: github.ref == 'refs/heads/main'
+    
+    environment:
+      name: production
+      url: https://ableton.recipes
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+    - name: Add server to known hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -p 22022 209.74.83.240 >> ~/.ssh/known_hosts
+
+    - name: Deploy to production
+      run: |
+        ssh -p 22022 deploy@209.74.83.240 << 'ENDSSH'
+          set -e
+          
+          # Set deployment variables
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          RELEASE_DIR="/var/www/ableton-cookbook/releases/$TIMESTAMP"
+          SHARED_DIR="/var/www/ableton-cookbook/shared"
+          CURRENT_DIR="/var/www/ableton-cookbook/current"
+          REPO_URL="https://github.com/${{ github.repository }}.git"
+          
+          echo "🚀 Starting deployment: $TIMESTAMP"
+          
+          # Create release directory
+          mkdir -p "$RELEASE_DIR"
+          
+          # Clone repository
+          echo "📦 Cloning repository..."
+          git clone --depth 1 --branch main "$REPO_URL" "$RELEASE_DIR"
+          cd "$RELEASE_DIR"
+          
+          # Install Composer dependencies
+          echo "📚 Installing Composer dependencies..."
+          composer install --no-dev --optimize-autoloader --no-interaction
+          
+          # Install Node.js dependencies and build assets
+          echo "🎨 Building frontend assets..."
+          npm ci --only=production
+          npm run build
+          
+          # Create symlinks to shared directories
+          echo "🔗 Creating symlinks..."
+          rm -rf "$RELEASE_DIR/storage"
+          ln -nfs "$SHARED_DIR/storage" "$RELEASE_DIR/storage"
+          
+          rm -rf "$RELEASE_DIR/.env"
+          ln -nfs "$SHARED_DIR/.env" "$RELEASE_DIR/.env"
+          
+          # Set permissions
+          echo "🔐 Setting permissions..."
+          sudo chown -R deploy:www-data "$RELEASE_DIR"
+          sudo chmod -R 755 "$RELEASE_DIR"
+          sudo chmod -R 775 "$RELEASE_DIR/bootstrap/cache"
+          
+          # Run Laravel optimization commands
+          echo "⚡ Optimizing Laravel..."
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          
+          # Run database migrations
+          echo "🗄️ Running database migrations..."
+          php artisan migrate --force
+          
+          # Clear old caches
+          php artisan cache:clear
+          php artisan queue:restart
+          
+          # Update current symlink (atomic deployment)
+          echo "🔄 Updating current symlink..."
+          ln -nfs "$RELEASE_DIR" "$CURRENT_DIR"
+          
+          # Reload services
+          echo "🔄 Reloading services..."
+          sudo systemctl reload php8.2-fpm
+          sudo systemctl reload nginx
+          
+          # Restart queue workers
+          echo "👷 Restarting queue workers..."
+          sudo supervisorctl restart ableton-cookbook:*
+          
+          # Cleanup old releases (keep last 5)
+          echo "🧹 Cleaning up old releases..."
+          cd "/var/www/ableton-cookbook/releases"
+          ls -t | tail -n +6 | xargs -r rm -rf
+          
+          echo "✅ Deployment completed successfully!"
+          
+          # Verify deployment
+          echo "🔍 Verifying deployment..."
+          curl -f -s -o /dev/null https://ableton.recipes || {
+            echo "❌ Health check failed!"
+            exit 1
+          }
+          
+          echo "🎉 Health check passed! Deployment successful."
+        ENDSSH
+
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "✅ Production deployment successful!"
+        echo "🌐 Site: https://ableton.recipes"
+        echo "📝 Commit: ${{ github.sha }}"
+
+    - name: Notify deployment failure
+      if: failure()
+      run: |
+        echo "❌ Production deployment failed!"
+        echo "📝 Commit: ${{ github.sha }}"
+        exit 1
+
+  health-check:
+    runs-on: ubuntu-22.04
+    needs: deploy
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Wait for deployment
+      run: sleep 30
+
+    - name: Health check
+      run: |
+        echo "🔍 Running post-deployment health checks..."
+        
+        # Test main site
+        if curl -f -s -o /dev/null https://ableton.recipes; then
+          echo "✅ Main site responsive"
+        else
+          echo "❌ Main site health check failed"
+          exit 1
+        fi
+        
+        # Test sitemap
+        if curl -f -s -o /dev/null https://ableton.recipes/sitemap.xml; then
+          echo "✅ Sitemap accessible"
+        else
+          echo "❌ Sitemap health check failed"
+          exit 1
+        fi
+        
+        echo "🎉 All health checks passed!"
+
+    - name: Performance check
+      run: |
+        echo "⚡ Running performance checks..."
+        
+        # Measure response time
+        RESPONSE_TIME=$(curl -o /dev/null -s -w '%{time_total}' https://ableton.recipes)
+        echo "📊 Response time: ${RESPONSE_TIME}s"
+        
+        # Alert if response time > 3 seconds
+        if (( $(echo "$RESPONSE_TIME > 3.0" | bc -l) )); then
+          echo "⚠️ Warning: Response time is high (${RESPONSE_TIME}s)"
+        else
+          echo "✅ Response time is good (${RESPONSE_TIME}s)"
+        fi

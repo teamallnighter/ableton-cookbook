@@ -1,0 +1,131 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security checks daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, dom, fileinfo, mysql
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Composer dependencies
+      run: composer install --no-progress --prefer-dist
+
+    - name: Install NPM dependencies
+      run: npm ci
+
+    - name: Run Composer security audit
+      run: composer audit
+
+    - name: Run NPM security audit
+      run: npm audit --audit-level=high
+
+    - name: Check for hardcoded secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+
+    - name: Run PHP security checker
+      run: |
+        curl -sS https://get.sensiolabs.org/security-checker.phar -o security-checker.phar
+        php security-checker.phar security:check composer.lock
+
+    - name: Scan for malware
+      run: |
+        # Install ClamAV
+        sudo apt-get update
+        sudo apt-get install -y clamav clamav-daemon
+        sudo freshclam
+        
+        # Scan uploaded files and PHP files
+        clamscan -r --infected --remove=no storage/app/private/ || true
+        clamscan -r --infected --remove=no app/ resources/ || true
+
+    - name: Check file permissions
+      run: |
+        # Check for files with dangerous permissions
+        find . -type f -perm -002 -not -path "./.git/*" -not -path "./node_modules/*" -not -path "./vendor/*"
+        
+        # Check for executable PHP files (should not be executable)
+        find . -name "*.php" -executable -not -path "./vendor/*" -not -path "./node_modules/*"
+
+    - name: Validate environment configuration
+      run: |
+        # Check for debug mode in production configs
+        if grep -q "APP_DEBUG=true" .env.production; then
+          echo "ERROR: Debug mode enabled in production config"
+          exit 1
+        fi
+        
+        # Check for default keys/passwords
+        if grep -q "APP_KEY=$" .env.production; then
+          echo "WARNING: Default application key in production config"
+        fi
+
+    - name: Check for exposed sensitive files
+      run: |
+        # Files that should not be in public directory
+        SENSITIVE_FILES=(
+          "public/.env"
+          "public/config/"
+          "public/storage/app/private/"
+          "public/database/"
+        )
+        
+        for file in "${SENSITIVE_FILES[@]}"; do
+          if [ -e "$file" ]; then
+            echo "ERROR: Sensitive file exposed in public directory: $file"
+            exit 1
+          fi
+        done
+
+    - name: Validate upload security
+      run: |
+        # Check upload validation rules
+        if ! grep -q "adg_file" app/Http/Controllers/RackUploadController.php; then
+          echo "ERROR: Custom file validation missing"
+          exit 1
+        fi
+        
+        # Check file size limits
+        if ! grep -q "max:10240" app/Http/Controllers/RackUploadController.php; then
+          echo "WARNING: File size validation may be missing or incorrect"
+        fi
+
+    - name: Check database security
+      run: |
+        # Check for SQL injection vulnerabilities in models
+        grep -r "DB::raw\|->raw" app/ && echo "WARNING: Raw database queries found - review for SQL injection" || true
+        
+        # Check for mass assignment vulnerabilities
+        grep -r "fillable\|guarded" app/Models/ || echo "WARNING: Mass assignment protection may be missing"
+
+    - name: Report security issues
+      if: failure()
+      run: |
+        echo "Security scan failed! Please review the issues above."
+        echo "Critical security issues must be fixed before deployment."
+        exit 1

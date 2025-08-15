@@ -5,22 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $user->name }} - {{ config('app.name', 'Ableton Cookbook') }}</title>
+    {{-- SEO Meta Tags --}}
+    <x-seo-meta :metaTags="app('App\Services\SeoService')->getUserMetaTags($user)" />
+
+    {{-- Structured Data --}}
+    <x-structured-data :data="app('App\Services\SeoService')->getStructuredData('user', ['user' => $user])" />
+
+    {{-- Favicon and App Icons --}}
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
 
     <!-- Fonts -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/teamallnighter/abletonSans@latest/abletonSans.css">
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="font-sans antialiased" style="background-color: #C3C3C3;">
+<body class="font-sans antialiased" style="background-color: #C3C3C3;" itemscope itemtype="https://schema.org/ProfilePage">
     <!-- Navigation -->
     <nav class="shadow-sm border-b-2" style="background-color: #0D0D0D; border-color: #01CADA;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="{{ route('home') }}" class="flex items-center">
+                    <a href="{{ route('home') }}" class="flex items-center" aria-label="Ableton Cookbook - Home">
                         <span class="text-xl font-bold" style="color: #ffdf00;">🎵 Ableton Cookbook</span>
                     </a>
                 </div>
@@ -57,7 +69,22 @@
     </nav>
 
     <!-- Main Content -->
-    <main>
+    <main role="main">
+        {{-- Breadcrumbs --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <x-breadcrumbs :items="[
+                ['name' => 'Home', 'url' => route('home')],
+                ['name' => 'Producers', 'url' => route('home')],
+                ['name' => $user->name, 'url' => route('users.show', $user)]
+            ]" />
+        </div>
+
+        {{-- Hidden SEO content --}}
+        <div class="sr-only">
+            <h1>{{ $user->name }} - Music Producer Profile</h1>
+            <p>Discover Ableton Live racks created by {{ $user->name }}. Browse their instrument racks, audio effect racks, and MIDI racks for your music production workflow.</p>
+        </div>
+
         @livewire('user-profile', ['user' => $user])
     </main>
 

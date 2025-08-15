@@ -29,7 +29,7 @@
                     {{ strtoupper(substr($user->name, 0, 2)) }}
                 </div>
                 <div class="flex-1">
-                    <h1 class="text-3xl font-bold" style="color: #BBBBBB;">{{ $user->name }}</h1>
+                    <h1 class="text-3xl font-bold" style="color: #BBBBBB;" itemprop="name">{{ $user->name }}</h1>
                     <p class="text-lg" style="color: #6C6C6C;">
                         @if($isOwnProfile)
                             Your Profile
@@ -45,8 +45,17 @@
                     </p>
                     
                     @if($user->bio)
-                        <p class="mt-2 text-sm" style="color: #BBBBBB;">{{ $user->bio }}</p>
+                        <div class="mt-2 text-sm" style="color: #BBBBBB;" itemprop="description">{{ $user->bio }}</div>
                     @endif
+                    
+                    {{-- Hidden SEO content --}}
+                    <div class="sr-only">
+                        <span itemprop="jobTitle">Music Producer</span>
+                        <span itemprop="knowsAbout">Ableton Live, Music Production</span>
+                        <div itemprop="memberOf" itemscope itemtype="https://schema.org/Organization">
+                            <span itemprop="name">Ableton Cookbook Community</span>
+                        </div>
+                    </div>
                     
                     <!-- Social Media Links -->
                     @php
@@ -158,7 +167,16 @@
         <div class="mb-8">
             <h2 class="text-xl font-bold mb-4" style="color: #0D0D0D;">
                 {{ $isOwnProfile ? 'Your Uploaded Racks' : $user->name . '\'s Uploaded Racks' }}
+                @if($stats['total_uploads'] > 0)
+                    <span class="text-sm font-normal text-gray-600">({{ $stats['total_uploads'] }} {{ Str::plural('rack', $stats['total_uploads']) }})</span>
+                @endif
             </h2>
+            
+            {{-- Hidden SEO content --}}
+            <div class="sr-only">
+                <h3>Professional Music Production Content</h3>
+                <p>{{ $user->name }} has shared {{ $stats['total_uploads'] }} high-quality Ableton Live racks with the music production community.</p>
+            </div>
             
             @if($racks->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
@@ -403,4 +421,21 @@
             {{ session('error') }}
         </div>
     @endif
+    
+    {{-- Internal Linking for SEO --}}
+    <x-internal-links :user="$user" />
+    
+    {{-- Additional SEO content --}}
+    <div class="sr-only">
+        <h2>About {{ $user->name }}</h2>
+        <p>{{ $user->name }} is a talented music producer and member of the Ableton Cookbook community since {{ $user->created_at->format('F Y') }}. They have contributed {{ $stats['total_uploads'] }} Ableton Live racks to help fellow producers in their music creation journey.</p>
+        
+        @if($stats['total_uploads'] > 0)
+            <h3>Music Production Expertise</h3>
+            <p>{{ $user->name }}'s racks have gained significant traction in the community with {{ number_format($stats['total_downloads']) }} total downloads and an average rating of {{ number_format($stats['average_rating'], 1) }} stars.</p>
+        @endif
+        
+        <h3>Join the Community</h3>
+        <p>Discover more Ableton Live racks, connect with music producers, and share your own creations on Ableton Cookbook. Whether you're looking for instrument racks, audio effect racks, or MIDI racks, our community has everything you need for your music production workflow.</p>
+    </div>
 </div>

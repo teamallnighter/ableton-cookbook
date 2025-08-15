@@ -214,3 +214,7 @@ test_*.php
 # Test rack files (real racks stored in laravel-app/storage)
 *.adg
 
+# Claude Code agent directories
+.claude/
+**/.claude/
+

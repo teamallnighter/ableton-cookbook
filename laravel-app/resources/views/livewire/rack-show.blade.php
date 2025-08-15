@@ -25,7 +25,7 @@
             <div class="flex-1">
                 <div class="flex items-start justify-between mb-4">
                     <div>
-                        <h1 class="text-4xl font-bold mb-4 text-black">{{ $rack->title }}</h1>
+                        <h1 class="text-4xl font-bold mb-4 text-black" itemprop="name">{{ $rack->title }}</h1>
                         <p class="text-lg text-gray-700">
                             by 
                             <a 
@@ -58,15 +58,24 @@
 
                 <!-- Description -->
                 <div class="mb-8">
-                    <p class="text-lg leading-relaxed text-gray-800">{{ $rack->description }}</p>
+                    <div itemprop="description" class="text-lg leading-relaxed text-gray-800">{{ $rack->description }}</div>
+                    
+                    {{-- Keywords for SEO --}}
+                    <div class="sr-only">
+                        <span itemprop="keywords">{{ $rack->tags->pluck('name')->implode(', ') }}</span>
+                        <span itemprop="applicationCategory">Music Production Software</span>
+                        <span itemprop="operatingSystem">Windows, macOS</span>
+                    </div>
                 </div>
 
                 <!-- Tags -->
                 <div class="flex flex-wrap gap-3 mb-8">
                     @foreach($rack->tags as $tag)
-                        <span class="badge-tag">
+                        <a href="{{ route('home') }}?tag={{ urlencode($tag->name) }}" 
+                           class="badge-tag hover:bg-gray-200 transition-colors"
+                           title="Browse more racks tagged with {{ $tag->name }}">
                             {{ $tag->name }}
-                        </span>
+                        </a>
                     @endforeach
                 </div>
 
@@ -618,4 +627,25 @@
             {{ session('error') }}
         </div>
     @endif
+
+    {{-- Internal Linking for SEO --}}
+    <x-internal-links :rack="$rack" />
+    
+    {{-- Additional SEO content --}}
+    <div class="sr-only">
+        <h2>How to Use This {{ ucfirst($rack->rack_type) }} Rack</h2>
+        <p>To use this {{ $rack->rack_type }} rack in Ableton Live:</p>
+        <ol>
+            <li>Download the .adg file</li>
+            <li>Open Ableton Live {{ $rack->ableton_version ?? '9+' }}</li>
+            <li>Drag the file into your Live Set</li>
+            <li>Start creating music with this {{ $rack->category }} rack</li>
+        </ol>
+        
+        <h3>About the Creator</h3>
+        <p>{{ $rack->user->name }} is a talented music producer sharing quality Ableton Live content. Discover more racks and follow their work on Ableton Cookbook.</p>
+        
+        <h3>Similar Music Production Content</h3>
+        <p>If you enjoyed this {{ $rack->rack_type }} rack, explore more {{ $rack->category }} content, browse racks by {{ $rack->user->name }}, or discover other {{ $rack->rack_type }} racks in our community.</p>
+    </div>
 </div>

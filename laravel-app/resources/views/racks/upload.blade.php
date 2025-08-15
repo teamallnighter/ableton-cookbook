@@ -1,4 +1,16 @@
 <x-app-layout>
+    {{-- Pass SEO data to layout --}}
+    <x-slot name="seoMetaTags">
+        {{ app('App\Services\SeoService')->getUploadMetaTags() }}
+    </x-slot>
+    
+    <x-slot name="breadcrumbs">
+        [
+            ['name' => 'Home', 'url' => route('home')],
+            ['name' => 'Dashboard', 'url' => route('dashboard')],
+            ['name' => 'Upload Rack', 'url' => route('racks.upload')]
+        ]
+    </x-slot>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Breadcrumb -->
         <div class="mb-8">
@@ -21,8 +33,14 @@
 
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-black mb-2">Upload Your Rack</h1>
-            <p class="text-gray-700">Share your Ableton Live rack with the community and help others discover new sounds</p>
+            <h1 class="text-3xl font-bold text-black mb-2">Upload Your Ableton Rack</h1>
+            <p class="text-gray-700">Share your Ableton Live instrument racks, audio effect racks, and MIDI racks with music producers worldwide. Help grow the community and showcase your creativity.</p>
+            
+            {{-- Hidden SEO content --}}
+            <div class="sr-only">
+                <h2>Share Your Music Production Creations</h2>
+                <p>Upload Ableton Live racks to share with fellow music producers. Whether you've created innovative instrument racks, powerful audio effect chains, or useful MIDI racks, share them with the Ableton Cookbook community.</p>
+            </div>
         </div>
 
         <!-- Upload Form -->
@@ -32,8 +50,8 @@
                 
                 <!-- File Upload Section -->
                 <div class="mb-8">
-                    <label class="block text-sm font-medium mb-3 text-black">
-                        Rack File (.adg) *
+                    <label for="rack_file" class="block text-sm font-medium mb-3 text-black">
+                        Ableton Rack File (.adg) *
                     </label>
                     
                     <div 
@@ -80,12 +98,15 @@
                     
                     <input 
                         type="file" 
+                        id="rack_file"
                         name="rack_file" 
                         accept=".adg"
                         class="hidden"
                         x-ref="fileInput"
                         @change="handleFileSelect($event)"
+                        aria-describedby="rack_file_help"
                     >
+                    <div id="rack_file_help" class="sr-only">Upload your Ableton Live rack file (.adg format) to share with the community. File size limit is 10MB.</div>
                     
                     @error('rack_file')
                         <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
@@ -105,7 +126,10 @@
                         required
                         maxlength="255"
                         class="input-field"
-                        placeholder="Enter a descriptive title for your rack"
+                        placeholder="e.g., Vintage Bass Rack, Ambient Pad Collection, Hip Hop Drums"
+                        aria-describedby="title_help"
+                    >
+                    <div id="title_help" class="sr-only">Enter a descriptive title that helps other producers understand what your rack does. Include the type of sounds or effects it creates.</div>
                     >
                     @error('title')
                         <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
@@ -124,8 +148,10 @@
                         maxlength="1000"
                         rows="4"
                         class="input-field resize-none"
-                        placeholder="Describe what your rack does, how to use it, and what makes it special..."
+                        placeholder="Describe what your rack does, how to use it, and what makes it special. Include musical genres, sound characteristics, and any unique features..."
+                        aria-describedby="description_help"
                     >{{ old('description') }}</textarea>
+                    <div id="description_help" class="sr-only">Provide a detailed description of your rack including what sounds it makes, what musical styles it's good for, and any special features or techniques used.</div>
                     @error('description')
                         <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
                     @enderror
@@ -182,10 +208,11 @@
                         value="{{ old('tags') }}"
                         maxlength="500"
                         class="input-field"
-                        placeholder="e.g., vintage, warm, reverb, lead (comma separated)"
+                        placeholder="e.g., vintage, warm, reverb, lead, electronic, ambient (comma separated)"
+                        aria-describedby="tags_help"
                     >
-                    <p class="mt-1 text-sm text-gray-600">
-                        Add specific tags to help others find your rack. Separate multiple tags with commas.
+                    <p id="tags_help" class="mt-1 text-sm text-gray-600">
+                        Add specific tags to help others find your rack. Include genres, sound characteristics, instruments, and effects. Separate multiple tags with commas.
                     </p>
                     @error('tags')
                         <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
