@@ -28,7 +28,7 @@
                 <div class="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold" style="background-color: #01CADA; color: #0D0D0D;">
                     {{ strtoupper(substr($user->name, 0, 2)) }}
                 </div>
-                <div>
+                <div class="flex-1">
                     <h1 class="text-3xl font-bold" style="color: #BBBBBB;">{{ $user->name }}</h1>
                     <p class="text-lg" style="color: #6C6C6C;">
                         @if($isOwnProfile)
@@ -39,38 +39,97 @@
                     </p>
                     <p class="text-sm" style="color: #6C6C6C;">
                         Member since {{ $user->created_at->format('F Y') }}
+                        @if($user->location)
+                            • {{ $user->location }}
+                        @endif
                     </p>
+                    
+                    @if($user->bio)
+                        <p class="mt-2 text-sm" style="color: #BBBBBB;">{{ $user->bio }}</p>
+                    @endif
+                    
+                    <!-- Social Media Links -->
+                    @php
+                        $socialLinks = [
+                            'website' => ['icon' => '🌐', 'label' => 'Website'],
+                            'soundcloud_url' => ['icon' => '🎵', 'label' => 'SoundCloud'],
+                            'bandcamp_url' => ['icon' => '🎶', 'label' => 'Bandcamp'],
+                            'spotify_url' => ['icon' => '🟢', 'label' => 'Spotify'],
+                            'youtube_url' => ['icon' => '▶️', 'label' => 'YouTube'],
+                            'instagram_url' => ['icon' => '📷', 'label' => 'Instagram'],
+                            'twitter_url' => ['icon' => '🐦', 'label' => 'Twitter'],
+                        ];
+                        $userSocialLinks = array_filter($socialLinks, fn($key) => !empty($user->{$key}), ARRAY_FILTER_USE_KEY);
+                    @endphp
+                    
+                    @if(count($userSocialLinks) > 0)
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            @foreach($userSocialLinks as $field => $social)
+                                <a href="{{ $user->{$field} }}" target="_blank" 
+                                   class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs hover:opacity-80 transition-opacity"
+                                   style="background-color: #01CADA; color: #0D0D0D;"
+                                   title="{{ $social['label'] }}">
+                                    <span>{{ $social['icon'] }}</span>
+                                    {{ $social['label'] }}
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
 
             <!-- Profile Stats -->
-            <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 text-center">
-                <div>
-                    <div class="text-2xl font-bold" style="color: #01CADA;">{{ $stats['total_uploads'] }}</div>
-                    <div class="text-sm" style="color: #6C6C6C;">Uploads</div>
+            @if($isOwnProfile)
+                <!-- Full stats for owner -->
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 text-center">
+                    <div>
+                        <div class="text-2xl font-bold" style="color: #01CADA;">{{ $stats['total_uploads'] }}</div>
+                        <div class="text-sm" style="color: #6C6C6C;">Uploads</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold" style="color: #01CADA;">{{ number_format($stats['total_downloads']) }}</div>
+                        <div class="text-sm" style="color: #6C6C6C;">Downloads</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold" style="color: #01CADA;">{{ number_format($stats['total_views']) }}</div>
+                        <div class="text-sm" style="color: #6C6C6C;">Views</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold" style="color: #01CADA;">{{ $stats['total_favorites'] }}</div>
+                        <div class="text-sm" style="color: #6C6C6C;">Favorited</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold" style="color: #ffdf00;">{{ number_format($stats['average_rating'], 1) }}</div>
+                        <div class="text-sm" style="color: #6C6C6C;">Avg Rating</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-2xl font-bold" style="color: #01CADA;">{{ number_format($stats['total_downloads']) }}</div>
-                    <div class="text-sm" style="color: #6C6C6C;">Downloads</div>
+            @else
+                <!-- Public stats for others -->
+                <div class="grid grid-cols-1 gap-6 text-center">
+                    <div>
+                        <div class="text-2xl font-bold" style="color: #01CADA;">{{ $stats['total_uploads'] }}</div>
+                        <div class="text-sm" style="color: #6C6C6C;">Public Uploads</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-2xl font-bold" style="color: #01CADA;">{{ number_format($stats['total_views']) }}</div>
-                    <div class="text-sm" style="color: #6C6C6C;">Views</div>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold" style="color: #01CADA;">{{ $stats['total_favorites'] }}</div>
-                    <div class="text-sm" style="color: #6C6C6C;">Favorited</div>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold" style="color: #ffdf00;">{{ number_format($stats['average_rating'], 1) }}</div>
-                    <div class="text-sm" style="color: #6C6C6C;">Avg Rating</div>
-                </div>
-            </div>
+            @endif
         </div>
     </div>
 
-    <!-- Tabs -->
+    <!-- Profile Actions & Tabs -->
     <div class="mb-8">
+        @if($isOwnProfile)
+            <div class="mb-4">
+                <a href="/user/profile" 
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                   style="background-color: #01DA48; color: #0D0D0D;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Edit Profile & Settings
+                </a>
+            </div>
+        @endif
+        
         <div class="rounded-lg p-1" style="background-color: #4a4a4a;">
             <div class="flex gap-1">
                 <button 
@@ -184,6 +243,19 @@
                                     >
                                         View Rack
                                     </a>
+                                    
+                                    @if(auth()->check() && auth()->id() === $rack->user_id)
+                                        <a 
+                                            href="{{ route('racks.edit', $rack) }}"
+                                            class="px-3 py-2 rounded hover:opacity-90 transition-opacity text-sm font-medium text-center"
+                                            style="background-color: #6C6C6C; color: #BBBBBB;"
+                                            title="Edit rack"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -281,6 +353,19 @@
                                     >
                                         View Rack
                                     </a>
+                                    
+                                    @if(auth()->check() && auth()->id() === $rack->user_id)
+                                        <a 
+                                            href="{{ route('racks.edit', $rack) }}"
+                                            class="px-3 py-2 rounded hover:opacity-90 transition-opacity text-sm font-medium text-center"
+                                            style="background-color: #6C6C6C; color: #BBBBBB;"
+                                            title="Edit rack"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>

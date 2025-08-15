@@ -22,6 +22,10 @@ Route::get('/users/{user}', function (App\Models\User $user) {
 Route::middleware('auth')->group(function () {
     Route::get('/upload', [App\Http\Controllers\RackUploadController::class, 'create'])->name('racks.upload');
     Route::post('/upload', [App\Http\Controllers\RackUploadController::class, 'store'])->name('racks.store');
+    
+    // Edit routes (require authentication and ownership)
+    Route::get('/racks/{rack}/edit', [App\Http\Controllers\RackEditController::class, 'edit'])->name('racks.edit');
+    Route::put('/racks/{rack}', [App\Http\Controllers\RackEditController::class, 'update'])->name('racks.update');
 });
 
 Route::middleware([

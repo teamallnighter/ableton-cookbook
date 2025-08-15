@@ -17,19 +17,36 @@ export default {
                 sans: ['Ableton Sans', 'AbletonSans-Regular', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                // Custom Ableton Cookbook palette
-                ableton: {
-                    gray: {
-                        light: '#BBBBBB',
-                        medium: '#C3C3C3',
-                        dark: '#6C6C6C',
-                        darker: '#4a4a4a',
-                        black: '#0D0D0D',
-                    },
-                    yellow: '#ffdf00',
-                    cyan: '#01CADA', 
-                    pink: '#F87680',
-                    green: '#01DA48',
+                // Clean, simple design system
+                'favorite-pink': '#FF1493',  // Hot pink for favorites
+                'star-yellow': '#FFD700',    // Yellow for stars
+                'vibrant': {
+                    'blue': '#0066FF',       // For Live Suite
+                    'green': '#00CC66',      // For Live Standard  
+                    'orange': '#FF6600',     // For Live Intro
+                    'purple': '#9966FF',     // For categories
+                    'red': '#FF3366',        // For tags
+                    'cyan': '#00CCFF',       // For other highlights
+                },
+            },
+            spacing: {
+                // 8px base unit system for consistent spacing
+                '18': '4.5rem',   // 72px
+                '22': '5.5rem',   // 88px
+            },
+            animation: {
+                // Ableton-inspired subtle animations
+                'fade-in': 'fadeIn 0.3s ease-in-out',
+                'slide-up': 'slideUp 0.2s ease-out',
+            },
+            keyframes: {
+                fadeIn: {
+                    '0%': { opacity: '0' },
+                    '100%': { opacity: '1' },
+                },
+                slideUp: {
+                    '0%': { transform: 'translateY(10px)', opacity: '0' },
+                    '100%': { transform: 'translateY(0)', opacity: '1' },
                 },
             },
         },

@@ -5,6 +5,7 @@ namespace App\Services\AbletonRackAnalyzer;
 use Exception;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Ableton Rack Analyzer V3 - PHP Port
@@ -229,22 +230,22 @@ class AbletonRackAnalyzer {
         try {
             // Check if file exists and is readable
             if (!file_exists($filePath)) {
-                error_log("File does not exist: $filePath");
+                Log::error("File does not exist: $filePath");
                 return null;
             }
             
             if (!is_readable($filePath)) {
-                error_log("File is not readable: $filePath");
+                Log::error("File is not readable: $filePath");
                 return null;
             }
             
             // Check file size (avoid extremely large files)
             $fileSize = filesize($filePath);
             if ($fileSize > 100 * 1024 * 1024) { // 100MB limit
-                error_log("File is too large ($fileSize bytes): $filePath");
+                Log::warning("File is too large ($fileSize bytes): $filePath");
                 return null;
             } elseif ($fileSize < 100) { // Too small to be a valid rack
-                error_log("File is too small ($fileSize bytes): $filePath");
+                Log::warning("File is too small ($fileSize bytes): $filePath");
                 return null;
             }
             
@@ -252,47 +253,46 @@ class AbletonRackAnalyzer {
             $xmlContent = @file_get_contents("compress.zlib://$filePath");
             
             if ($xmlContent === false) {
-                error_log("Failed to decompress gzip file: $filePath");
+                Log::error("Failed to decompress gzip file: $filePath");
                 return null;
             }
             
             // Basic XML validation
             if (empty($xmlContent)) {
-                error_log("Empty file after decompression: $filePath");
+                Log::error("Empty file after decompression: $filePath");
                 return null;
             }
             
             // Check if it looks like XML
             $trimmedContent = ltrim($xmlContent);
             if (!str_starts_with($trimmedContent, '<?xml') && !str_starts_with($trimmedContent, '<')) {
-                error_log("File does not appear to contain XML: $filePath");
+                Log::error("File does not appear to contain XML: $filePath");
                 return null;
             }
             
             // Parse XML
             $xml = @simplexml_load_string($xmlContent);
             if ($xml === false) {
-                error_log("XML parsing error in $filePath");
+                Log::error("XML parsing error in $filePath");
                 return null;
             }
             
             // Basic structure validation
             if (!$xml) {
-                error_log("Failed to parse XML root element: $filePath");
+                Log::error("Failed to parse XML root element: $filePath");
                 return null;
             }
             
             // Check if it looks like an Ableton file
             $rootTag = $xml->getName();
             if (!in_array($rootTag, ['Ableton', 'GroupDevicePreset', 'PresetRef'])) {
-                error_log("Root element '$rootTag' doesn't look like Ableton format: $filePath");
+                Log::warning("Root element '$rootTag' doesn't look like Ableton format: $filePath");
             }
             
-            error_log("Successfully parsed XML from $filePath (root: $rootTag)");
             return $xml;
             
         } catch (Exception $e) {
-            error_log("Unexpected error processing $filePath: " . $e->getMessage());
+            Log::error("Unexpected error processing $filePath: " . $e->getMessage());
             return null;
         }
     }
@@ -492,21 +492,21 @@ class AbletonRackAnalyzer {
 
         list($rackType, $mainDevice) = self::detectRackTypeAndDevice($root);
         if ($verbose) {
-            error_log("Detected rack type: " . ($rackType ?? 'null'));
+            Log::debug("Detected rack type: " . ($rackType ?? 'null'));
         }
 
         $rackInfo["rack_type"] = $rackType;
 
         if (!$rackType) {
             $msg = "Unknown rack type - unable to detect AudioEffectGroupDevice, InstrumentGroupDevice, or MidiEffectGroupDevice";
-            error_log($msg);
+            Log::error($msg);
             $rackInfo["parsing_errors"][] = $msg;
             return $rackInfo;
         }
 
         if ($mainDevice === null) {
             $msg = "Detected rack type $rackType but could not find main device element.";
-            error_log($msg);
+            Log::error($msg);
             $rackInfo["parsing_errors"][] = $msg;
             return $rackInfo;
         }
@@ -534,13 +534,13 @@ class AbletonRackAnalyzer {
                     }
                 } catch (Exception $e) {
                     $errorMsg = "Error parsing macro control $i: " . $e->getMessage();
-                    error_log($errorMsg);
+                    Log::warning($errorMsg);
                     $rackInfo["parsing_warnings"][] = $errorMsg;
                 }
             }
         } catch (Exception $e) {
             $errorMsg = "Error parsing macro controls: " . $e->getMessage();
-            error_log($errorMsg);
+            Log::error($errorMsg);
             $rackInfo["parsing_errors"][] = $errorMsg;
         }
 
@@ -551,11 +551,11 @@ class AbletonRackAnalyzer {
             if ($branchType) {
                 $branches = $branchPresetsElem[0]->xpath($branchType);
                 if ($verbose) {
-                    error_log("Found " . count($branches) . " $branchType elements");
+                    Log::debug("Found " . count($branches) . " $branchType elements");
                 }
                 if (empty($branches)) {
                     $msg = "No chains found - expected $branchType elements";
-                    error_log($msg);
+                    Log::warning($msg);
                     $rackInfo["parsing_warnings"][] = $msg;
                 }
 
@@ -566,23 +566,23 @@ class AbletonRackAnalyzer {
                             $rackInfo["chains"][] = $chain;
                         } else {
                             $msgWarn = "Failed to parse chain " . ($idx + 1);
-                            error_log($msgWarn);
+                            Log::warning($msgWarn);
                             $rackInfo["parsing_warnings"][] = $msgWarn;
                         }
                     } catch (Exception $e) {
                         $errorMsg = "Error parsing chain " . ($idx + 1) . ": " . $e->getMessage();
-                        error_log($errorMsg);
+                        Log::error($errorMsg);
                         $rackInfo["parsing_errors"][] = $errorMsg;
                     }
                 }
             } else {
                 $msg = "Unknown branch preset type for rack type $rackType.";
-                error_log($msg);
+                Log::error($msg);
                 $rackInfo["parsing_errors"][] = $msg;
             }
         } else {
             if ($verbose) {
-                error_log("No BranchPresets element found in XML; rack may not contain chains.");
+                Log::info("No BranchPresets element found in XML; rack may not contain chains.");
             }
         }
 
@@ -675,7 +675,7 @@ class AbletonRackAnalyzer {
 
         if ($depth > 10) {
             if ($verbose) {
-                error_log("Max nesting depth reached at $deviceType");
+                Log::warning("Max nesting depth reached at $deviceType");
             }
             return null;
         }
@@ -728,7 +728,7 @@ class AbletonRackAnalyzer {
             if (empty($branchPresets) && $parentPreset !== null && $parentPreset->getName() === "GroupDevicePreset") {
                 $branchPresets = $parentPreset->xpath('BranchPresets');
                 if ($verbose && !empty($branchPresets)) {
-                    error_log("Found BranchPresets at parent level for $deviceType");
+                    Log::debug("Found BranchPresets at parent level for $deviceType");
                 }
             }
 
@@ -736,7 +736,7 @@ class AbletonRackAnalyzer {
                 $nestedType = self::getBranchPresetType($deviceType);
                 $nestedBranches = $branchPresets[0]->xpath($nestedType);
                 if ($verbose) {
-                    error_log("Found " . count($nestedBranches) . " $nestedType in nested $deviceType");
+                    Log::debug("Found " . count($nestedBranches) . " $nestedType in nested $deviceType");
                 }
                 foreach ($nestedBranches as $idx => $branch) {
                     $nestedChain = self::parseSingleChainBranch($branch, $idx, $verbose, $depth + 1);
@@ -746,7 +746,7 @@ class AbletonRackAnalyzer {
                 }
             } else {
                 if ($verbose) {
-                    error_log("No BranchPresets found for nested $deviceType");
+                    Log::info("No BranchPresets found for nested $deviceType");
                 }
             }
 
@@ -766,14 +766,14 @@ class AbletonRackAnalyzer {
             $jsonData = json_encode($rackInfo, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
             
             if (file_put_contents($outputPath, $jsonData) !== false) {
-                error_log("Analysis exported to: $outputPath");
+                Log::info("Analysis exported to: $outputPath");
                 return $outputPath;
             } else {
-                error_log("Error writing JSON file: $outputPath");
+                Log::error("Error writing JSON file: $outputPath");
                 return null;
             }
         } catch (Exception $e) {
-            error_log("Error exporting analysis: " . $e->getMessage());
+            Log::error("Error exporting analysis: " . $e->getMessage());
             return null;
         }
     }

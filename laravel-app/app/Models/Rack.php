@@ -34,6 +34,7 @@ class Rack extends Model
         'macro_controls',
         'devices',
         'chains',
+        'chain_annotations',
         'version_details',
         'parsing_errors',
         'parsing_warnings',
@@ -56,6 +57,7 @@ class Rack extends Model
         'macro_controls' => 'array',
         'devices' => 'array',
         'chains' => 'array',
+        'chain_annotations' => 'array',
         'version_details' => 'array',
         'parsing_errors' => 'array',
         'parsing_warnings' => 'array',
@@ -111,6 +113,14 @@ class Rack extends Model
     public function favorites(): HasMany
     {
         return $this->hasMany(RackFavorite::class);
+    }
+
+    /**
+     * Get the reports for the rack
+     */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(RackReport::class);
     }
 
     /**

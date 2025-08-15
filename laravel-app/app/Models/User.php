@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -36,6 +35,18 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'bio',
+        'location',
+        'website',
+        'soundcloud_url',
+        'bandcamp_url',
+        'spotify_url',
+        'youtube_url',
+        'instagram_url',
+        'twitter_url',
+        'notification_preferences',
+        'email_notifications_enabled',
+        'last_notification_read_at',
     ];
 
     /**
@@ -69,6 +80,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_preferences' => 'array',
+            'last_notification_read_at' => 'datetime',
         ];
     }
 
@@ -118,6 +131,29 @@ class User extends Authenticatable
     public function downloads(): HasMany
     {
         return $this->hasMany(RackDownload::class);
+    }
+
+    /**
+     * Get the user's favorite racks
+     */
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(RackFavorite::class);
+    }
+
+    /**
+     * Get the racks this user has favorited through the pivot table
+     */
+    public function favoriteRacks()
+    {
+        return $this->hasManyThrough(
+            Rack::class,
+            RackFavorite::class,
+            'user_id', // Foreign key on RackFavorite table
+            'id',      // Foreign key on Rack table
+            'id',      // Local key on User table
+            'rack_id'  // Local key on RackFavorite table
+        );
     }
 
     /**
