@@ -1,0 +1,2152 @@
+{
+    "racks": {
+        "1": {
+            "filename": "Spacehead_analysis.json",
+            "filepath": "uploads/Spacehead_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Spacehead.adg",
+            "original_filename": "Spacehead.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Spacehead"
+        },
+        "2": {
+            "filename": "Channel Strip - Acoustic Guit Enhancer_analysis.json",
+            "filepath": "uploads/Channel Strip - Acoustic Guit Enhancer_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Acoustic Guit Enhancer.adg",
+            "original_filename": "Channel Strip - Acoustic Guit Enhancer.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Acoustic Guit Enhancer"
+        },
+        "3": {
+            "filename": "Stereo Vocal Trembler_analysis.json",
+            "filepath": "uploads/Stereo Vocal Trembler_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Stereo Vocal Trembler.adg",
+            "original_filename": "Stereo Vocal Trembler.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Stereo Vocal Trembler"
+        },
+        "4": {
+            "filename": "Channel Strip - Simple Warm_analysis.json",
+            "filepath": "uploads/Channel Strip - Simple Warm_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Simple Warm.adg",
+            "original_filename": "Channel Strip - Simple Warm.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Simple Warm"
+        },
+        "5": {
+            "filename": "DnB Roller_analysis.json",
+            "filepath": "uploads/DnB Roller_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/DnB Roller.adg",
+            "original_filename": "DnB Roller.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "DnB Roller"
+        },
+        "7": {
+            "filename": "DJ Master Channel_analysis.json",
+            "filepath": "uploads/DJ Master Channel_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/DJ Master Channel.adg",
+            "original_filename": "DJ Master Channel.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "DJ Master Channel"
+        },
+        "8": {
+            "filename": "Beatspit_analysis.json",
+            "filepath": "uploads/Beatspit_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Beatspit.adg",
+            "original_filename": "Beatspit.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Beatspit"
+        },
+        "9": {
+            "filename": "st st Stick to it_analysis.json",
+            "filepath": "uploads/st st Stick to it_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/st st Stick to it.adg",
+            "original_filename": "st st Stick to it.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "st st Stick to it"
+        },
+        "10": {
+            "filename": "Five Stage Delay_analysis.json",
+            "filepath": "uploads/Five Stage Delay_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Five Stage Delay.adg",
+            "original_filename": "Five Stage Delay.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Five Stage Delay"
+        },
+        "11": {
+            "filename": "Underclock10_analysis.json",
+            "filepath": "uploads/Underclock10_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Underclock10.adg",
+            "original_filename": "Underclock10.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Underclock10"
+        },
+        "12": {
+            "filename": "Crazy Modulators - Stereo Psycho_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Stereo Psycho_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Stereo Psycho.adg",
+            "original_filename": "Crazy Modulators - Stereo Psycho.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Stereo Psycho"
+        },
+        "13": {
+            "filename": "Vokoshay Kit_analysis.json",
+            "filepath": "uploads/Vokoshay Kit_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Vokoshay Kit.adg",
+            "original_filename": "Vokoshay Kit.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Vokoshay Kit"
+        },
+        "14": {
+            "filename": "Crusg and destroy - Drumkit Freak_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Drumkit Freak_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Drumkit Freak.adg",
+            "original_filename": "Crusg and destroy - Drumkit Freak.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Drumkit Freak",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "15": {
+            "filename": "High Hat Effektor_analysis.json",
+            "filepath": "uploads/High Hat Effektor_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/High Hat Effektor.adg",
+            "original_filename": "High Hat Effektor.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "High Hat Effektor"
+        },
+        "16": {
+            "filename": "Crusg and destroy - MegaWatt Guitar Amp_analysis.json",
+            "filepath": "uploads/Crusg and destroy - MegaWatt Guitar Amp_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - MegaWatt Guitar Amp.adg",
+            "original_filename": "Crusg and destroy - MegaWatt Guitar Amp.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "MegaWatt Guitar Amp",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "17": {
+            "filename": "Spectral Spacetime_analysis.json",
+            "filepath": "uploads/Spectral Spacetime_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Spectral Spacetime.adg",
+            "original_filename": "Spectral Spacetime.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Spectral Spacetime"
+        },
+        "18": {
+            "filename": "Channel Strip - Phat Bass Strip_analysis.json",
+            "filepath": "uploads/Channel Strip - Phat Bass Strip_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Phat Bass Strip.adg",
+            "original_filename": "Channel Strip - Phat Bass Strip.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Phat Bass Strip"
+        },
+        "20": {
+            "filename": "Channel Strip - Master Curvebox_analysis.json",
+            "filepath": "uploads/Channel Strip - Master Curvebox_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Master Curvebox.adg",
+            "original_filename": "Channel Strip - Master Curvebox.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Master Curvebox"
+        },
+        "21": {
+            "filename": "Rehash_analysis.json",
+            "filepath": "uploads/Rehash_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Rehash.adg",
+            "original_filename": "Rehash.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Rehash"
+        },
+        "22": {
+            "filename": "Sagreane_analysis.json",
+            "filepath": "uploads/Sagreane_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Sagreane.adg",
+            "original_filename": "Sagreane.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Sagreane"
+        },
+        "23": {
+            "filename": "Philibrant_analysis.json",
+            "filepath": "uploads/Philibrant_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Philibrant.adg",
+            "original_filename": "Philibrant.adg",
+            "rack_type": "Instrument",
+            "raw_rack_type": "InstrumentGroupDevice",
+            "display_title": "Philibrant"
+        },
+        "24": {
+            "filename": "Followflow_analysis.json",
+            "filepath": "uploads/Followflow_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Followflow.adg",
+            "original_filename": "Followflow.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Followflow"
+        },
+        "27": {
+            "filename": "Quick Space Menu_analysis.json",
+            "filepath": "uploads/Quick Space Menu_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Quick Space Menu.adg",
+            "original_filename": "Quick Space Menu.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Quick Space Menu"
+        },
+        "30": {
+            "filename": "Channel Strip - One Stop Bus Shop_analysis.json",
+            "filepath": "uploads/Channel Strip - One Stop Bus Shop_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - One Stop Bus Shop.adg",
+            "original_filename": "Channel Strip - One Stop Bus Shop.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "One Stop Bus Shop"
+        },
+        "31": {
+            "filename": "Cuisinart Combi_analysis.json",
+            "filepath": "uploads/Cuisinart Combi_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Cuisinart Combi.adg",
+            "original_filename": "Cuisinart Combi.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Cuisinart Combi"
+        },
+        "32": {
+            "filename": "Crusg and destroy - Cabinet 1_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Cabinet 1_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Cabinet 1.adg",
+            "original_filename": "Crusg and destroy - Cabinet 1.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Cabinet 1",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "35": {
+            "filename": "Crusg and destroy - Artifact_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Artifact_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Artifact.adg",
+            "original_filename": "Crusg and destroy - Artifact.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Artifact",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "36": {
+            "filename": "Stormaker_analysis.json",
+            "filepath": "uploads/Stormaker_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Stormaker.adg",
+            "original_filename": "Stormaker.adg",
+            "rack_type": "Instrument",
+            "raw_rack_type": "InstrumentGroupDevice",
+            "display_title": "Stormaker"
+        },
+        "37": {
+            "filename": "Crazy Modulators - Robot Mod Maneuver_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Robot Mod Maneuver_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Robot Mod Maneuver.adg",
+            "original_filename": "Crazy Modulators - Robot Mod Maneuver.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Robot Mod Maneuver"
+        },
+        "38": {
+            "filename": "Crusg and destroy - Guitar Strip_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Guitar Strip_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Guitar Strip.adg",
+            "original_filename": "Crusg and destroy - Guitar Strip.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Guitar Strip",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "39": {
+            "filename": "Slipster_analysis.json",
+            "filepath": "uploads/Slipster_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Slipster.adg",
+            "original_filename": "Slipster.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Slipster"
+        },
+        "40": {
+            "filename": "Cave Dwelling Amplification_analysis.json",
+            "filepath": "uploads/Cave Dwelling Amplification_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Cave Dwelling Amplification.adg",
+            "original_filename": "Cave Dwelling Amplification.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Cave Dwelling Amplification"
+        },
+        "41": {
+            "filename": "Tin Plate_analysis.json",
+            "filepath": "uploads/Tin Plate_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Tin Plate.adg",
+            "original_filename": "Tin Plate.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Tin Plate"
+        },
+        "44": {
+            "filename": "Phokus Drum Comp_analysis.json",
+            "filepath": "uploads/Phokus Drum Comp_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Phokus Drum Comp.adg",
+            "original_filename": "Phokus Drum Comp.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Phokus Drum Comp"
+        },
+        "45": {
+            "filename": "Spectral Rhythms_analysis.json",
+            "filepath": "uploads/Spectral Rhythms_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Spectral Rhythms.adg",
+            "original_filename": "Spectral Rhythms.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Spectral Rhythms"
+        },
+        "46": {
+            "filename": "Crusg and destroy - Drum Vintage Blowout_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Drum Vintage Blowout_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Drum Vintage Blowout.adg",
+            "original_filename": "Crusg and destroy - Drum Vintage Blowout.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Drum Vintage Blowout",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "47": {
+            "filename": "Enter Kit Klobber_analysis.json",
+            "filepath": "uploads/Enter Kit Klobber_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Enter Kit Klobber.adg",
+            "original_filename": "Enter Kit Klobber.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Enter Kit Klobber"
+        },
+        "48": {
+            "filename": "Crusg and destroy - El Distorto_analysis.json",
+            "filepath": "uploads/Crusg and destroy - El Distorto_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - El Distorto.adg",
+            "original_filename": "Crusg and destroy - El Distorto.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "El Distorto",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "52": {
+            "filename": "Freakwensies_analysis.json",
+            "filepath": "uploads/Freakwensies_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Freakwensies.adg",
+            "original_filename": "Freakwensies.adg",
+            "rack_type": "Instrument",
+            "raw_rack_type": "InstrumentGroupDevice",
+            "display_title": "Freakwensies"
+        },
+        "53": {
+            "filename": "Mix Builder_analysis.json",
+            "filepath": "uploads/Mix Builder_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Mix Builder.adg",
+            "original_filename": "Mix Builder.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Mix Builder"
+        },
+        "54": {
+            "filename": "Channel Strip - Overdrive Bass Chorus_analysis.json",
+            "filepath": "uploads/Channel Strip - Overdrive Bass Chorus_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Overdrive Bass Chorus.adg",
+            "original_filename": "Channel Strip - Overdrive Bass Chorus.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Overdrive Bass Chorus"
+        },
+        "56": {
+            "filename": "Talked Radio_analysis.json",
+            "filepath": "uploads/Talked Radio_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Talked Radio.adg",
+            "original_filename": "Talked Radio.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Talked Radio"
+        },
+        "57": {
+            "filename": "Crusg and destroy - Cabinet 2_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Cabinet 2_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Cabinet 2.adg",
+            "original_filename": "Crusg and destroy - Cabinet 2.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Cabinet 2",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "58": {
+            "filename": "Chemist 149_analysis.json",
+            "filepath": "uploads/Chemist 149_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Chemist 149.adg",
+            "original_filename": "Chemist 149.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Chemist 149"
+        },
+        "59": {
+            "filename": "Magestik Filterbank_analysis.json",
+            "filepath": "uploads/Magestik Filterbank_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Magestik Filterbank.adg",
+            "original_filename": "Magestik Filterbank.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Magestik Filterbank"
+        },
+        "60": {
+            "filename": "Channel Strip - Stereo Stutter_analysis.json",
+            "filepath": "uploads/Channel Strip - Stereo Stutter_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Stereo Stutter.adg",
+            "original_filename": "Channel Strip - Stereo Stutter.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Stereo Stutter"
+        },
+        "61": {
+            "filename": "Channel Strip - Snare Drum QSquash_analysis.json",
+            "filepath": "uploads/Channel Strip - Snare Drum QSquash_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Snare Drum QSquash.adg",
+            "original_filename": "Channel Strip - Snare Drum QSquash.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Snare Drum QSquash"
+        },
+        "62": {
+            "filename": "Bugs in The Stew_analysis.json",
+            "filepath": "uploads/Bugs in The Stew_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Bugs in The Stew.adg",
+            "original_filename": "Bugs in The Stew.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Bugs in The Stew"
+        },
+        "63": {
+            "filename": "Channel Strip - Mid Band Assassin_analysis.json",
+            "filepath": "uploads/Channel Strip - Mid Band Assassin_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Mid Band Assassin.adg",
+            "original_filename": "Channel Strip - Mid Band Assassin.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Mid Band Assassin"
+        },
+        "64": {
+            "filename": "U Heart Electric Guitar_analysis.json",
+            "filepath": "uploads/U Heart Electric Guitar_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/U Heart Electric Guitar.adg",
+            "original_filename": "U Heart Electric Guitar.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "U Heart Electric Guitar"
+        },
+        "65": {
+            "filename": "Underclock5_analysis.json",
+            "filepath": "uploads/Underclock5_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Underclock5.adg",
+            "original_filename": "Underclock5.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Underclock5"
+        },
+        "67": {
+            "filename": "Loudband Smallroom_analysis.json",
+            "filepath": "uploads/Loudband Smallroom_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Loudband Smallroom.adg",
+            "original_filename": "Loudband Smallroom.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Loudband Smallroom"
+        },
+        "68": {
+            "filename": "Re-Annihilator_analysis.json",
+            "filepath": "uploads/Re-Annihilator_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Re-Annihilator.adg",
+            "original_filename": "Re-Annihilator.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Re-Annihilator"
+        },
+        "69": {
+            "filename": "Quadvrb_analysis.json",
+            "filepath": "uploads/Quadvrb_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Quadvrb.adg",
+            "original_filename": "Quadvrb.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Quadvrb"
+        },
+        "70": {
+            "filename": "Crazy Modulators - Fill the Gap_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Fill the Gap_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Fill the Gap.adg",
+            "original_filename": "Crazy Modulators - Fill the Gap.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Fill the Gap"
+        },
+        "73": {
+            "filename": "Crusg and destroy - This Ole Record_analysis.json",
+            "filepath": "uploads/Crusg and destroy - This Ole Record_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - This Ole Record.adg",
+            "original_filename": "Crusg and destroy - This Ole Record.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "This Ole Record",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "74": {
+            "filename": "1 Beat 2 Beat_analysis.json",
+            "filepath": "uploads/1 Beat 2 Beat_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/1 Beat 2 Beat.adg",
+            "original_filename": "1 Beat 2 Beat.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "1 Beat 2 Beat"
+        },
+        "75": {
+            "filename": "Deep Fried Burger_analysis.json",
+            "filepath": "uploads/Deep Fried Burger_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Deep Fried Burger.adg",
+            "original_filename": "Deep Fried Burger.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Deep Fried Burger"
+        },
+        "76": {
+            "filename": "Know 6 Oh 6_analysis.json",
+            "filepath": "uploads/Know 6 Oh 6_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Know 6 Oh 6.adg",
+            "original_filename": "Know 6 Oh 6.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Know 6 Oh 6"
+        },
+        "77": {
+            "filename": "Dangerous 6Tooth Maximize_analysis.json",
+            "filepath": "uploads/Dangerous 6Tooth Maximize_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Dangerous 6Tooth Maximize.adg",
+            "original_filename": "Dangerous 6Tooth Maximize.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Dangerous 6Tooth Maximize"
+        },
+        "80": {
+            "filename": "Magnetik Filterbank_analysis.json",
+            "filepath": "uploads/Magnetik Filterbank_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Magnetik Filterbank.adg",
+            "original_filename": "Magnetik Filterbank.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Magnetik Filterbank"
+        },
+        "82": {
+            "filename": "Sequencer with 1000 Eyes_analysis.json",
+            "filepath": "uploads/Sequencer with 1000 Eyes_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Sequencer with 1000 Eyes.adg",
+            "original_filename": "Sequencer with 1000 Eyes.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Sequencer with 1000 Eyes"
+        },
+        "83": {
+            "filename": "Dual Filter_analysis.json",
+            "filepath": "uploads/Dual Filter_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Dual Filter.adg",
+            "original_filename": "Dual Filter.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Dual Filter"
+        },
+        "84": {
+            "filename": "Beat Infector_analysis.json",
+            "filepath": "uploads/Beat Infector_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Beat Infector.adg",
+            "original_filename": "Beat Infector.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Beat Infector"
+        },
+        "85": {
+            "filename": "Time Machine Factory_analysis.json",
+            "filepath": "uploads/Time Machine Factory_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Time Machine Factory.adg",
+            "original_filename": "Time Machine Factory.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Time Machine Factory"
+        },
+        "86": {
+            "filename": "Image X-fade_analysis.json",
+            "filepath": "uploads/Image X-fade_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Image X-fade.adg",
+            "original_filename": "Image X-fade.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Image X-fade"
+        },
+        "87": {
+            "filename": "New Age Tape Bath_analysis.json",
+            "filepath": "uploads/New Age Tape Bath_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/New Age Tape Bath.adg",
+            "original_filename": "New Age Tape Bath.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "New Age Tape Bath"
+        },
+        "88": {
+            "filename": "Woodpecker_analysis.json",
+            "filepath": "uploads/Woodpecker_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Woodpecker.adg",
+            "original_filename": "Woodpecker.adg",
+            "rack_type": "Instrument",
+            "raw_rack_type": "InstrumentGroupDevice",
+            "display_title": "Woodpecker"
+        },
+        "89": {
+            "filename": "Channel Strip - Tone Control_analysis.json",
+            "filepath": "uploads/Channel Strip - Tone Control_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Tone Control.adg",
+            "original_filename": "Channel Strip - Tone Control.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Tone Control"
+        },
+        "90": {
+            "filename": "Channel Strip - Tape Head_analysis.json",
+            "filepath": "uploads/Channel Strip - Tape Head_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Tape Head.adg",
+            "original_filename": "Channel Strip - Tape Head.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Tape Head"
+        },
+        "92": {
+            "filename": "Crazy Modulators - Big Money_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Big Money_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Big Money.adg",
+            "original_filename": "Crazy Modulators - Big Money.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Big Money"
+        },
+        "93": {
+            "filename": "Beat Tweak Channel_analysis.json",
+            "filepath": "uploads/Beat Tweak Channel_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Beat Tweak Channel.adg",
+            "original_filename": "Beat Tweak Channel.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Beat Tweak Channel"
+        },
+        "94": {
+            "filename": "Space Freq_analysis.json",
+            "filepath": "uploads/Space Freq_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Space Freq.adg",
+            "original_filename": "Space Freq.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Space Freq"
+        },
+        "98": {
+            "filename": "Crazy Modulators - Grain Monkey_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Grain Monkey_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Grain Monkey.adg",
+            "original_filename": "Crazy Modulators - Grain Monkey.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Grain Monkey"
+        },
+        "99": {
+            "filename": "Crazy Modulators - Rubber Room_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Rubber Room_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Rubber Room.adg",
+            "original_filename": "Crazy Modulators - Rubber Room.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Rubber Room"
+        },
+        "101": {
+            "filename": "Drumshift_analysis.json",
+            "filepath": "uploads/Drumshift_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Drumshift.adg",
+            "original_filename": "Drumshift.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Drumshift"
+        },
+        "103": {
+            "filename": "Crazy Modulators - Filter Repeat_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Filter Repeat_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Filter Repeat.adg",
+            "original_filename": "Crazy Modulators - Filter Repeat.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Filter Repeat"
+        },
+        "104": {
+            "filename": "Loop 2 Lightning_analysis.json",
+            "filepath": "uploads/Loop 2 Lightning_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Loop 2 Lightning.adg",
+            "original_filename": "Loop 2 Lightning.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Loop 2 Lightning"
+        },
+        "105": {
+            "filename": "Crazy Modulators - Texture Creator_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Texture Creator_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Texture Creator.adg",
+            "original_filename": "Crazy Modulators - Texture Creator.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Texture Creator"
+        },
+        "107": {
+            "filename": "Lophy-Bitburger_analysis.json",
+            "filepath": "uploads/Lophy-Bitburger_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Lophy-Bitburger.adg",
+            "original_filename": "Lophy-Bitburger.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Lophy-Bitburger"
+        },
+        "108": {
+            "filename": "HexBand Delay_analysis.json",
+            "filepath": "uploads/HexBand Delay_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/HexBand Delay.adg",
+            "original_filename": "HexBand Delay.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "HexBand Delay"
+        },
+        "109": {
+            "filename": "Catchin the Griggles_analysis.json",
+            "filepath": "uploads/Catchin the Griggles_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Catchin the Griggles.adg",
+            "original_filename": "Catchin the Griggles.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Catchin the Griggles"
+        },
+        "111": {
+            "filename": "Crazy Modulators - Twangit_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Twangit_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Twangit.adg",
+            "original_filename": "Crazy Modulators - Twangit.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Twangit"
+        },
+        "113": {
+            "filename": "Spinning Wah Room_analysis.json",
+            "filepath": "uploads/Spinning Wah Room_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Spinning Wah Room.adg",
+            "original_filename": "Spinning Wah Room.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Spinning Wah Room"
+        },
+        "118": {
+            "filename": "Crazy Modulators - Resogen (Sound Generator)_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Resogen (Sound Generator)_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Resogen (Sound Generator).adg",
+            "original_filename": "Crazy Modulators - Resogen (Sound Generator).adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Resogen (Sound Generator)"
+        },
+        "119": {
+            "filename": "Glitch IDM Face-Off_analysis.json",
+            "filepath": "uploads/Glitch IDM Face-Off_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Glitch IDM Face-Off.adg",
+            "original_filename": "Glitch IDM Face-Off.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Glitch IDM Face-Off"
+        },
+        "120": {
+            "filename": "Double Dementia_analysis.json",
+            "filepath": "uploads/Double Dementia_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Double Dementia.adg",
+            "original_filename": "Double Dementia.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Double Dementia"
+        },
+        "123": {
+            "filename": "Crazy Modulators - Chirpaholic_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Chirpaholic_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Chirpaholic.adg",
+            "original_filename": "Crazy Modulators - Chirpaholic.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Chirpaholic"
+        },
+        "124": {
+            "filename": "Hollowyood_analysis.json",
+            "filepath": "uploads/Hollowyood_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Hollowyood.adg",
+            "original_filename": "Hollowyood.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Hollowyood"
+        },
+        "126": {
+            "filename": "Channel Strip - Classic Channel_analysis.json",
+            "filepath": "uploads/Channel Strip - Classic Channel_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Classic Channel.adg",
+            "original_filename": "Channel Strip - Classic Channel.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Classic Channel"
+        },
+        "128": {
+            "filename": "Crazy Modulators - Quad Phaser_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Quad Phaser_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Quad Phaser.adg",
+            "original_filename": "Crazy Modulators - Quad Phaser.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Quad Phaser"
+        },
+        "130": {
+            "filename": "Big Big Room_analysis.json",
+            "filepath": "uploads/Big Big Room_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Big Big Room.adg",
+            "original_filename": "Big Big Room.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Big Big Room"
+        },
+        "131": {
+            "filename": "Crusg and destroy - Tube Farm_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Tube Farm_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Tube Farm.adg",
+            "original_filename": "Crusg and destroy - Tube Farm.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Tube Farm",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "132": {
+            "filename": "Phantom Dennis_analysis.json",
+            "filepath": "uploads/Phantom Dennis_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Phantom Dennis.adg",
+            "original_filename": "Phantom Dennis.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Phantom Dennis"
+        },
+        "134": {
+            "filename": "Scary Monster_analysis.json",
+            "filepath": "uploads/Scary Monster_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Scary Monster.adg",
+            "original_filename": "Scary Monster.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Scary Monster"
+        },
+        "135": {
+            "filename": "Crazy Modulators - Brainstretch_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Brainstretch_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Brainstretch.adg",
+            "original_filename": "Crazy Modulators - Brainstretch.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Brainstretch"
+        },
+        "136": {
+            "filename": "Crusg and destroy - Make Me Do Analog_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Make Me Do Analog_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Make Me Do Analog.adg",
+            "original_filename": "Crusg and destroy - Make Me Do Analog.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Make Me Do Analog",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "138": {
+            "filename": "Grumpy DJ_analysis.json",
+            "filepath": "uploads/Grumpy DJ_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Grumpy DJ.adg",
+            "original_filename": "Grumpy DJ.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Grumpy DJ"
+        },
+        "140": {
+            "filename": "Crazy Modulators - Mega Flange Morph_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Mega Flange Morph_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Mega Flange Morph.adg",
+            "original_filename": "Crazy Modulators - Mega Flange Morph.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Mega Flange Morph"
+        },
+        "143": {
+            "filename": "Down the Stairs_analysis.json",
+            "filepath": "uploads/Down the Stairs_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Down the Stairs.adg",
+            "original_filename": "Down the Stairs.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Down the Stairs"
+        },
+        "144": {
+            "filename": "Weird Dentist_analysis.json",
+            "filepath": "uploads/Weird Dentist_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Weird Dentist.adg",
+            "original_filename": "Weird Dentist.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Weird Dentist"
+        },
+        "145": {
+            "filename": "Crusg and destroy - Phaser Puree_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Phaser Puree_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Phaser Puree.adg",
+            "original_filename": "Crusg and destroy - Phaser Puree.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Phaser Puree",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "146": {
+            "filename": "Leon Larger_analysis.json",
+            "filepath": "uploads/Leon Larger_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Leon Larger.adg",
+            "original_filename": "Leon Larger.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Leon Larger"
+        },
+        "147": {
+            "filename": "Channel Strip - Dance Master Phatty_analysis.json",
+            "filepath": "uploads/Channel Strip - Dance Master Phatty_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Dance Master Phatty.adg",
+            "original_filename": "Channel Strip - Dance Master Phatty.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Dance Master Phatty"
+        },
+        "148": {
+            "filename": "We All Float Up Here_analysis.json",
+            "filepath": "uploads/We All Float Up Here_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/We All Float Up Here.adg",
+            "original_filename": "We All Float Up Here.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "We All Float Up Here"
+        },
+        "150": {
+            "filename": "Doctor Gator_analysis.json",
+            "filepath": "uploads/Doctor Gator_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Doctor Gator.adg",
+            "original_filename": "Doctor Gator.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Doctor Gator"
+        },
+        "151": {
+            "filename": "Junkyard Android_analysis.json",
+            "filepath": "uploads/Junkyard Android_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Junkyard Android.adg",
+            "original_filename": "Junkyard Android.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Junkyard Android"
+        },
+        "155": {
+            "filename": "Globe U Alls_analysis.json",
+            "filepath": "uploads/Globe U Alls_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Globe U Alls.adg",
+            "original_filename": "Globe U Alls.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Globe U Alls"
+        },
+        "157": {
+            "filename": "Tonedeaf Orchestra_analysis.json",
+            "filepath": "uploads/Tonedeaf Orchestra_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Tonedeaf Orchestra.adg",
+            "original_filename": "Tonedeaf Orchestra.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Tonedeaf Orchestra"
+        },
+        "159": {
+            "filename": "SingleD RumP Itcher_analysis.json",
+            "filepath": "uploads/SingleD RumP Itcher_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/SingleD RumP Itcher.adg",
+            "original_filename": "SingleD RumP Itcher.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "SingleD RumP Itcher"
+        },
+        "161": {
+            "filename": "Lazer Tag_analysis.json",
+            "filepath": "uploads/Lazer Tag_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Lazer Tag.adg",
+            "original_filename": "Lazer Tag.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Lazer Tag"
+        },
+        "163": {
+            "filename": "Catacombs_analysis.json",
+            "filepath": "uploads/Catacombs_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Catacombs.adg",
+            "original_filename": "Catacombs.adg",
+            "rack_type": "Instrument",
+            "raw_rack_type": "InstrumentGroupDevice",
+            "display_title": "Catacombs"
+        },
+        "164": {
+            "filename": "Globe U Later_analysis.json",
+            "filepath": "uploads/Globe U Later_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Globe U Later.adg",
+            "original_filename": "Globe U Later.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Globe U Later"
+        },
+        "172": {
+            "filename": "Gigantesco_analysis.json",
+            "filepath": "uploads/Gigantesco_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Gigantesco.adg",
+            "original_filename": "Gigantesco.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Gigantesco"
+        },
+        "173": {
+            "filename": "Crusg and destroy - Jammed Transmission_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Jammed Transmission_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Jammed Transmission.adg",
+            "original_filename": "Crusg and destroy - Jammed Transmission.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Jammed Transmission",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "176": {
+            "filename": "The Organ Chord Werbler_analysis.json",
+            "filepath": "uploads/The Organ Chord Werbler_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/The Organ Chord Werbler.adg",
+            "original_filename": "The Organ Chord Werbler.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "The Organ Chord Werbler"
+        },
+        "177": {
+            "filename": "Dim Mak Amplification_analysis.json",
+            "filepath": "uploads/Dim Mak Amplification_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Dim Mak Amplification.adg",
+            "original_filename": "Dim Mak Amplification.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Dim Mak Amplification"
+        },
+        "179": {
+            "filename": "Crusg and destroy - Liposuction_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Liposuction_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Liposuction.adg",
+            "original_filename": "Crusg and destroy - Liposuction.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Liposuction",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "181": {
+            "filename": "Popkorn_analysis.json",
+            "filepath": "uploads/Popkorn_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Popkorn.adg",
+            "original_filename": "Popkorn.adg",
+            "rack_type": "Instrument",
+            "raw_rack_type": "InstrumentGroupDevice",
+            "display_title": "Popkorn"
+        },
+        "182": {
+            "filename": "A Verb With a View_analysis.json",
+            "filepath": "uploads/A Verb With a View_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/A Verb With a View.adg",
+            "original_filename": "A Verb With a View.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "A Verb With a View"
+        },
+        "184": {
+            "filename": "I & I Bass Box_analysis.json",
+            "filepath": "uploads/I & I Bass Box_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/I & I Bass Box.adg",
+            "original_filename": "I & I Bass Box.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "I & I Bass Box"
+        },
+        "185": {
+            "filename": "Channel Strip - Drumkit Pumpit the Sequel_analysis.json",
+            "filepath": "uploads/Channel Strip - Drumkit Pumpit the Sequel_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Drumkit Pumpit the Sequel.adg",
+            "original_filename": "Channel Strip - Drumkit Pumpit the Sequel.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Drumkit Pumpit the Sequel"
+        },
+        "188": {
+            "filename": "Channel Strip - Bass Kicka_analysis.json",
+            "filepath": "uploads/Channel Strip - Bass Kicka_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Bass Kicka.adg",
+            "original_filename": "Channel Strip - Bass Kicka.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Bass Kicka"
+        },
+        "189": {
+            "filename": "On the Power Grid_analysis.json",
+            "filepath": "uploads/On the Power Grid_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/On the Power Grid.adg",
+            "original_filename": "On the Power Grid.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "On the Power Grid"
+        },
+        "191": {
+            "filename": "Crusg and destroy - Captain Crunch_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Captain Crunch_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Captain Crunch.adg",
+            "original_filename": "Crusg and destroy - Captain Crunch.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Captain Crunch",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "192": {
+            "filename": "Noyzsplattz_analysis.json",
+            "filepath": "uploads/Noyzsplattz_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Noyzsplattz.adg",
+            "original_filename": "Noyzsplattz.adg",
+            "rack_type": "Instrument",
+            "raw_rack_type": "InstrumentGroupDevice",
+            "display_title": "Noyzsplattz"
+        },
+        "193": {
+            "filename": "Crusg and destroy - Hellraiser_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Hellraiser_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Hellraiser.adg",
+            "original_filename": "Crusg and destroy - Hellraiser.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Hellraiser",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "194": {
+            "filename": "Crazy Modulators - Flange Face_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Flange Face_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Flange Face.adg",
+            "original_filename": "Crazy Modulators - Flange Face.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Flange Face"
+        },
+        "195": {
+            "filename": "Retract and Masticate_analysis.json",
+            "filepath": "uploads/Retract and Masticate_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Retract and Masticate.adg",
+            "original_filename": "Retract and Masticate.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Retract and Masticate"
+        },
+        "196": {
+            "filename": "Crusg and destroy - The Rack Yer Mother Will Hate_analysis.json",
+            "filepath": "uploads/Crusg and destroy - The Rack Yer Mother Will Hate_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - The Rack Yer Mother Will Hate.adg",
+            "original_filename": "Crusg and destroy - The Rack Yer Mother Will Hate.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "The Rack Yer Mother Will Hate",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "198": {
+            "filename": "Quayzoin_analysis.json",
+            "filepath": "uploads/Quayzoin_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Quayzoin.adg",
+            "original_filename": "Quayzoin.adg",
+            "rack_type": "Instrument",
+            "raw_rack_type": "InstrumentGroupDevice",
+            "display_title": "Quayzoin"
+        },
+        "199": {
+            "filename": "Channel Strip - Drumkit Pumpit_analysis.json",
+            "filepath": "uploads/Channel Strip - Drumkit Pumpit_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Drumkit Pumpit.adg",
+            "original_filename": "Channel Strip - Drumkit Pumpit.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Drumkit Pumpit"
+        },
+        "200": {
+            "filename": "Brainwashing Machine_analysis.json",
+            "filepath": "uploads/Brainwashing Machine_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Brainwashing Machine.adg",
+            "original_filename": "Brainwashing Machine.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Brainwashing Machine"
+        },
+        "201": {
+            "filename": "Channel Strip - Vocal Enzyme_analysis.json",
+            "filepath": "uploads/Channel Strip - Vocal Enzyme_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Vocal Enzyme.adg",
+            "original_filename": "Channel Strip - Vocal Enzyme.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Vocal Enzyme"
+        },
+        "202": {
+            "filename": "Crazy Modulators - Spring Wang_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Spring Wang_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Spring Wang.adg",
+            "original_filename": "Crazy Modulators - Spring Wang.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Spring Wang"
+        },
+        "204": {
+            "filename": "Fry Factory_analysis.json",
+            "filepath": "uploads/Fry Factory_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Fry Factory.adg",
+            "original_filename": "Fry Factory.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Fry Factory"
+        },
+        "205": {
+            "filename": "Crazy Modulators - Multicombat_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Multicombat_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Multicombat.adg",
+            "original_filename": "Crazy Modulators - Multicombat.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Multicombat"
+        },
+        "206": {
+            "filename": "CrispyWet_analysis.json",
+            "filepath": "uploads/CrispyWet_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/CrispyWet.adg",
+            "original_filename": "CrispyWet.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "CrispyWet"
+        },
+        "208": {
+            "filename": "Antique Digi-Radio Taper_analysis.json",
+            "filepath": "uploads/Antique Digi-Radio Taper_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Antique Digi-Radio Taper.adg",
+            "original_filename": "Antique Digi-Radio Taper.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Antique Digi-Radio Taper"
+        },
+        "209": {
+            "filename": "Flooded Pad Verb_analysis.json",
+            "filepath": "uploads/Flooded Pad Verb_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Flooded Pad Verb.adg",
+            "original_filename": "Flooded Pad Verb.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Flooded Pad Verb"
+        },
+        "210": {
+            "filename": "Artifactory_analysis.json",
+            "filepath": "uploads/Artifactory_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Artifactory.adg",
+            "original_filename": "Artifactory.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Artifactory"
+        },
+        "212": {
+            "filename": "Frog Talker_analysis.json",
+            "filepath": "uploads/Frog Talker_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Frog Talker.adg",
+            "original_filename": "Frog Talker.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Frog Talker"
+        },
+        "213": {
+            "filename": "Crazy Modulators - Animal House_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Animal House_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Animal House.adg",
+            "original_filename": "Crazy Modulators - Animal House.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Animal House"
+        },
+        "214": {
+            "filename": "Channel Strip - Hi Enhancer_analysis.json",
+            "filepath": "uploads/Channel Strip - Hi Enhancer_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Channel Strip - Hi Enhancer.adg",
+            "original_filename": "Channel Strip - Hi Enhancer.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Mixing",
+            "tags": [
+                "channel strip"
+            ],
+            "display_title": "Hi Enhancer"
+        },
+        "216": {
+            "filename": "Crusg and destroy - Chemical Drumkit Assault_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Chemical Drumkit Assault_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Chemical Drumkit Assault.adg",
+            "original_filename": "Crusg and destroy - Chemical Drumkit Assault.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Chemical Drumkit Assault",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "217": {
+            "filename": "Nasty Billionaire_analysis.json",
+            "filepath": "uploads/Nasty Billionaire_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Nasty Billionaire.adg",
+            "original_filename": "Nasty Billionaire.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Nasty Billionaire"
+        },
+        "218": {
+            "filename": "Creepy Voice_analysis.json",
+            "filepath": "uploads/Creepy Voice_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Creepy Voice.adg",
+            "original_filename": "Creepy Voice.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Creepy Voice"
+        },
+        "219": {
+            "filename": "Fluids_analysis.json",
+            "filepath": "uploads/Fluids_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Fluids.adg",
+            "original_filename": "Fluids.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Fluids"
+        },
+        "224": {
+            "filename": "Drumres_analysis.json",
+            "filepath": "uploads/Drumres_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Drumres.adg",
+            "original_filename": "Drumres.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Drumres"
+        },
+        "225": {
+            "filename": "Total Tape Dub Delay_analysis.json",
+            "filepath": "uploads/Total Tape Dub Delay_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Total Tape Dub Delay.adg",
+            "original_filename": "Total Tape Dub Delay.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Total Tape Dub Delay"
+        },
+        "226": {
+            "filename": "4Band Blrrgz_analysis.json",
+            "filepath": "uploads/4Band Blrrgz_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/4Band Blrrgz.adg",
+            "original_filename": "4Band Blrrgz.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "4Band Blrrgz"
+        },
+        "227": {
+            "filename": "Nasal Detuner_analysis.json",
+            "filepath": "uploads/Nasal Detuner_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Nasal Detuner.adg",
+            "original_filename": "Nasal Detuner.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Nasal Detuner"
+        },
+        "228": {
+            "filename": "Lectro Drum Sheen_analysis.json",
+            "filepath": "uploads/Lectro Drum Sheen_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Lectro Drum Sheen.adg",
+            "original_filename": "Lectro Drum Sheen.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Lectro Drum Sheen"
+        },
+        "229": {
+            "filename": "Ma's Basement_analysis.json",
+            "filepath": "uploads/Ma's Basement_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Ma's Basement.adg",
+            "original_filename": "Ma's Basement.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Ma's Basement"
+        },
+        "231": {
+            "filename": "Galaxy Traveler_analysis.json",
+            "filepath": "uploads/Galaxy Traveler_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Galaxy Traveler.adg",
+            "original_filename": "Galaxy Traveler.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Galaxy Traveler"
+        },
+        "233": {
+            "filename": "Crazy Modulators - Megamod Combi_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Megamod Combi_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Megamod Combi.adg",
+            "original_filename": "Crazy Modulators - Megamod Combi.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Megamod Combi"
+        },
+        "234": {
+            "filename": "Stratoperc_analysis.json",
+            "filepath": "uploads/Stratoperc_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Stratoperc.adg",
+            "original_filename": "Stratoperc.adg",
+            "rack_type": "Instrument",
+            "raw_rack_type": "InstrumentGroupDevice",
+            "display_title": "Stratoperc"
+        },
+        "236": {
+            "filename": "ill Repeater_analysis.json",
+            "filepath": "uploads/ill Repeater_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/ill Repeater.adg",
+            "original_filename": "ill Repeater.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "ill Repeater"
+        },
+        "241": {
+            "filename": "Phasebrush_analysis.json",
+            "filepath": "uploads/Phasebrush_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Phasebrush.adg",
+            "original_filename": "Phasebrush.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Phasebrush"
+        },
+        "245": {
+            "filename": "Crazy Modulators - Chorus Deluxe_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Chorus Deluxe_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Chorus Deluxe.adg",
+            "original_filename": "Crazy Modulators - Chorus Deluxe.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Chorus Deluxe"
+        },
+        "247": {
+            "filename": "Dee-Lay Duo_analysis.json",
+            "filepath": "uploads/Dee-Lay Duo_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Dee-Lay Duo.adg",
+            "original_filename": "Dee-Lay Duo.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Dee-Lay Duo"
+        },
+        "248": {
+            "filename": "Crusg and destroy - Laugher Combi_analysis.json",
+            "filepath": "uploads/Crusg and destroy - Laugher Combi_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusg and destroy - Laugher Combi.adg",
+            "original_filename": "Crusg and destroy - Laugher Combi.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Laugher Combi",
+            "category": "Distortion",
+            "tags": [
+                "bit crushing"
+            ]
+        },
+        "249": {
+            "filename": "Frequeezy_analysis.json",
+            "filepath": "uploads/Frequeezy_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Frequeezy.adg",
+            "original_filename": "Frequeezy.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Frequeezy"
+        },
+        "250": {
+            "filename": "Cielo Deep_analysis.json",
+            "filepath": "uploads/Cielo Deep_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Cielo Deep.adg",
+            "original_filename": "Cielo Deep.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Cielo Deep"
+        },
+        "253": {
+            "filename": "Blubstepper_analysis.json",
+            "filepath": "uploads/Blubstepper_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Blubstepper.adg",
+            "original_filename": "Blubstepper.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Blubstepper"
+        },
+        "254": {
+            "filename": "Echo Factory_analysis.json",
+            "filepath": "uploads/Echo Factory_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Echo Factory.adg",
+            "original_filename": "Echo Factory.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Echo Factory"
+        },
+        "255": {
+            "filename": "Filter Shift_analysis.json",
+            "filepath": "uploads/Filter Shift_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Filter Shift.adg",
+            "original_filename": "Filter Shift.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Filter Shift"
+        },
+        "256": {
+            "filename": "Awesomereception_analysis.json",
+            "filepath": "uploads/Awesomereception_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Awesomereception.adg",
+            "original_filename": "Awesomereception.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Awesomereception"
+        },
+        "258": {
+            "filename": "Firebomb_analysis.json",
+            "filepath": "uploads/Firebomb_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Firebomb.adg",
+            "original_filename": "Firebomb.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Firebomb"
+        },
+        "260": {
+            "filename": "Simple Double Band_analysis.json",
+            "filepath": "uploads/Simple Double Band_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Simple Double Band.adg",
+            "original_filename": "Simple Double Band.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Simple Double Band"
+        },
+        "263": {
+            "filename": "Crazy Modulators - Instant Robot Groove_analysis.json",
+            "filepath": "uploads/Crazy Modulators - Instant Robot Groove_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crazy Modulators - Instant Robot Groove.adg",
+            "original_filename": "Crazy Modulators - Instant Robot Groove.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "category": "Creative effects",
+            "tags": [
+                "modulation"
+            ],
+            "display_title": "Instant Robot Groove"
+        },
+        "264": {
+            "filename": "American Baseball_analysis.json",
+            "filepath": "uploads/American Baseball_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/American Baseball.adg",
+            "original_filename": "American Baseball.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "American Baseball"
+        },
+        "265": {
+            "filename": "TuberGate_analysis.json",
+            "filepath": "uploads/TuberGate_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/TuberGate.adg",
+            "original_filename": "TuberGate.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "TuberGate"
+        },
+        "266": {
+            "filename": "Fuzzborn_analysis.json",
+            "filepath": "uploads/Fuzzborn_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Fuzzborn.adg",
+            "original_filename": "Fuzzborn.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Fuzzborn"
+        },
+        "267": {
+            "filename": "Crusty Dusty_analysis.json",
+            "filepath": "uploads/Crusty Dusty_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Crusty Dusty.adg",
+            "original_filename": "Crusty Dusty.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Crusty Dusty"
+        },
+        "268": {
+            "filename": "Quick Verb Menu_analysis.json",
+            "filepath": "uploads/Quick Verb Menu_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Quick Verb Menu.adg",
+            "original_filename": "Quick Verb Menu.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Quick Verb Menu"
+        },
+        "269": {
+            "filename": "Clocked FIlters_analysis.json",
+            "filepath": "uploads/Clocked FIlters_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Clocked FIlters.adg",
+            "original_filename": "Clocked FIlters.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Clocked FIlters"
+        },
+        "270": {
+            "filename": "Ping Transient Messup_analysis.json",
+            "filepath": "uploads/Ping Transient Messup_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Ping Transient Messup.adg",
+            "original_filename": "Ping Transient Messup.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Ping Transient Messup"
+        },
+        "272": {
+            "filename": "Decks, EFX & Grain_analysis.json",
+            "filepath": "uploads/Decks, EFX & Grain_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Decks, EFX & Grain.adg",
+            "original_filename": "Decks, EFX & Grain.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Decks, EFX & Grain"
+        },
+        "273": {
+            "filename": "Mid-Hi Slicer_analysis.json",
+            "filepath": "uploads/Mid-Hi Slicer_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Mid-Hi Slicer.adg",
+            "original_filename": "Mid-Hi Slicer.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Mid-Hi Slicer"
+        },
+        "276": {
+            "filename": "Pepto S-Punk Bass Box_analysis.json",
+            "filepath": "uploads/Pepto S-Punk Bass Box_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Pepto S-Punk Bass Box.adg",
+            "original_filename": "Pepto S-Punk Bass Box.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Pepto S-Punk Bass Box"
+        },
+        "277": {
+            "filename": "Multiband Chorus_analysis.json",
+            "filepath": "uploads/Multiband Chorus_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Multiband Chorus.adg",
+            "original_filename": "Multiband Chorus.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Multiband Chorus"
+        },
+        "283": {
+            "filename": "Fidelity Thief_analysis.json",
+            "filepath": "uploads/Fidelity Thief_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Fidelity Thief.adg",
+            "original_filename": "Fidelity Thief.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Fidelity Thief"
+        },
+        "284": {
+            "filename": "EQ'd Gated Verb_analysis.json",
+            "filepath": "uploads/EQ'd Gated Verb_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/EQ'd Gated Verb.adg",
+            "original_filename": "EQ'd Gated Verb.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "EQ'd Gated Verb"
+        },
+        "285": {
+            "filename": "Steel Reverse Pickup_analysis.json",
+            "filepath": "uploads/Steel Reverse Pickup_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Steel Reverse Pickup.adg",
+            "original_filename": "Steel Reverse Pickup.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Steel Reverse Pickup"
+        },
+        "286": {
+            "filename": "Lo Sci Fi_analysis.json",
+            "filepath": "uploads/Lo Sci Fi_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Lo Sci Fi.adg",
+            "original_filename": "Lo Sci Fi.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Lo Sci Fi"
+        },
+        "287": {
+            "filename": "Short Term Memory Parking_analysis.json",
+            "filepath": "uploads/Short Term Memory Parking_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Short Term Memory Parking.adg",
+            "original_filename": "Short Term Memory Parking.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Short Term Memory Parking"
+        },
+        "289": {
+            "filename": "Pork Chop_analysis.json",
+            "filepath": "uploads/Pork Chop_analysis.json",
+            "user": "bassdaddy",
+            "download_location": "../racks/Pork Chop.adg",
+            "original_filename": "Pork Chop.adg",
+            "rack_type": "Audio Effect",
+            "raw_rack_type": "AudioEffectGroupDevice",
+            "display_title": "Pork Chop"
+        },
+        "290": {
+            "filename": "INVISIBLESPLIT.adg",
+            "filepath": "uploads/INVISIBLESPLIT.adg",
+            "user": "bassdaddy",
+            "category": "Mixing",
+            "tags": [
+                "splitter",
+                "frequency splitter"
+            ]
+        },
+        "291": {
+            "filename": "INVISIBLESPLIT.adg",
+            "filepath": "uploads/INVISIBLESPLIT.adg",
+            "user": "bassdaddy",
+            "category": "Mixing",
+            "tags": [
+                "splitter",
+                "frequency splitter"
+            ]
+        },
+        "292": {
+            "filename": "INVISIBLESPLIT.adg",
+            "filepath": "uploads/INVISIBLESPLIT.adg",
+            "user": "bassdaddy",
+            "category": "Mixing",
+            "tags": [
+                "splitter"
+            ]
+        }
+    },
+    "users": {
+        "1": {
+            "id": "1",
+            "username": "bassdaddy",
+            "password": "scrypt:32768:8:1$lDQCiD88xjwd9EEb$5f470f2cb67bb9b0ea228460fbe00d6a82dda39be9583432a5fe120e1c05d9f26a2aa7b91b492d31a8ba5feac9a4504655943657c11c9263cd75dfa75816375c"
+        }
+    }
+}

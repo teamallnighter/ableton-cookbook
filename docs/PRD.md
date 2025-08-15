@@ -89,5 +89,6 @@ Maya downloads the .adg file, imports it into her project, and within minutes ha
 
 ---
 
-### Character 2: Marcus "Voltage" Rodriguez - The Professional Producer
-**Background:** Marcus is a 31-year-old professional producer from Miami specializing in house and techno. He's been producing for
+## Important
+
+All though we have created this project in the past we have come across many challanges. I believe we are ready for this project now. The script is now in PHP. 
