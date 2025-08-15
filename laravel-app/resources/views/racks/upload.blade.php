@@ -1,7 +1,7 @@
 <x-app-layout>
     {{-- Pass SEO data to layout --}}
     <x-slot name="seoMetaTags">
-        {{ app('App\Services\SeoService')->getUploadMetaTags() }}
+        {!! app('App\Services\SeoService')->renderMetaTags(app('App\Services\SeoService')->getUploadMetaTags()) !!}
     </x-slot>
     
     <x-slot name="breadcrumbs">
@@ -130,7 +130,6 @@
                         aria-describedby="title_help"
                     >
                     <div id="title_help" class="sr-only">Enter a descriptive title that helps other producers understand what your rack does. Include the type of sounds or effects it creates.</div>
-                    >
                     @error('title')
                         <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
                     @enderror

@@ -1,0 +1,906 @@
+{
+	"info": {
+		"_postman_id": "ableton-cookbook-api",
+		"name": "Ableton Cookbook API",
+		"description": "Complete API collection for the Ableton Cookbook platform - upload, browse, and manage Ableton Live rack files (.adg)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{api_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Get CSRF token if needed",
+					"if (pm.request.method !== 'GET') {",
+					"    pm.sendRequest({",
+					"        url: pm.environment.get('base_url') + '/sanctum/csrf-cookie',",
+					"        method: 'GET'",
+					"    });",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://ableton.recipes",
+			"type": "string"
+		},
+		{
+			"key": "api_base",
+			"value": "{{base_url}}/api/v1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authentication",
+			"description": "Authentication endpoints for API access",
+			"item": [
+				{
+					"name": "Get CSRF Cookie",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sanctum/csrf-cookie",
+							"host": ["{{base_url}}"],
+							"path": ["sanctum", "csrf-cookie"]
+						},
+						"description": "Get CSRF cookie for subsequent authenticated requests"
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Store the API token from response",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.token) {",
+									"        pm.environment.set('api_token', response.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": ["{{base_url}}"],
+							"path": ["login"]
+						},
+						"description": "Login to get API token"
+					}
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/user",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user"]
+						},
+						"description": "Get current authenticated user information"
+					}
+				}
+			]
+		},
+		{
+			"name": "Racks",
+			"description": "Manage Ableton Live rack files",
+			"item": [
+				{
+					"name": "Get All Racks",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/racks?page=1&per_page=20&search=&category=&edition=&sort=newest",
+							"host": ["{{api_base}}"],
+							"path": ["racks"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (1-based)"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "Items per page (max 50)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search term for rack name/description"
+								},
+								{
+									"key": "category",
+									"value": "",
+									"description": "Filter by category: synth, effect, utility, etc."
+								},
+								{
+									"key": "edition",
+									"value": "",
+									"description": "Filter by Ableton edition: live, suite, standard, intro"
+								},
+								{
+									"key": "sort",
+									"value": "newest",
+									"description": "Sort by: newest, oldest, popular, rated"
+								}
+							]
+						},
+						"description": "Get paginated list of all racks with optional filtering and search"
+					}
+				},
+				{
+					"name": "Get Featured Racks",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/racks/featured",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "featured"]
+						},
+						"description": "Get featured racks (curated selection)"
+					}
+				},
+				{
+					"name": "Get Trending Racks",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/racks/trending",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "trending"]
+						},
+						"description": "Get trending racks (based on recent activity)"
+					}
+				},
+				{
+					"name": "Get Rack Details",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/racks/1",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1"]
+						},
+						"description": "Get detailed information about a specific rack including devices, chains, and metadata"
+					}
+				},
+				{
+					"name": "Upload New Rack",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"description": "Ableton Live rack file (.adg)",
+									"src": []
+								},
+								{
+									"key": "name",
+									"value": "My Awesome Synth Rack",
+									"type": "text",
+									"description": "Rack name (optional - will extract from file if not provided)"
+								},
+								{
+									"key": "description",
+									"value": "A powerful synthesizer rack with modulated filters",
+									"type": "text",
+									"description": "Rack description"
+								},
+								{
+									"key": "category",
+									"value": "synth",
+									"type": "text",
+									"description": "Category: synth, effect, utility, drums, etc."
+								},
+								{
+									"key": "ableton_edition",
+									"value": "suite",
+									"type": "text",
+									"description": "Required Ableton edition: intro, standard, suite"
+								},
+								{
+									"key": "tags",
+									"value": "bass,analog,warm",
+									"type": "text",
+									"description": "Comma-separated tags"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_base}}/racks",
+							"host": ["{{api_base}}"],
+							"path": ["racks"]
+						},
+						"description": "Upload a new Ableton Live rack file with metadata"
+					}
+				},
+				{
+					"name": "Update Rack",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Rack Name\",\n    \"description\": \"Updated description\",\n    \"category\": \"effect\",\n    \"ableton_edition\": \"standard\",\n    \"tags\": [\"reverb\", \"ambient\", \"spacious\"]\n}"
+						},
+						"url": {
+							"raw": "{{api_base}}/racks/1",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1"]
+						},
+						"description": "Update rack metadata (only rack owner can update)"
+					}
+				},
+				{
+					"name": "Delete Rack",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/racks/1",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1"]
+						},
+						"description": "Delete a rack (only rack owner can delete)"
+					}
+				},
+				{
+					"name": "Download Rack",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/racks/1/download",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1", "download"]
+						},
+						"description": "Download rack file (increments download counter)"
+					}
+				},
+				{
+					"name": "Like/Unlike Rack",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/racks/1/like",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1", "like"]
+						},
+						"description": "Toggle like status for a rack"
+					}
+				}
+			]
+		},
+		{
+			"name": "Ratings",
+			"description": "Rate and review racks",
+			"item": [
+				{
+					"name": "Rate Rack",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 5,\n    \"review\": \"Excellent rack! Great sound design and very useful for ambient music.\"\n}"
+						},
+						"url": {
+							"raw": "{{api_base}}/racks/1/rate",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1", "rate"]
+						},
+						"description": "Rate a rack (1-5 stars) with optional review"
+					}
+				},
+				{
+					"name": "Update Rating",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 4,\n    \"review\": \"Updated review: Still great but found a small issue with the filter.\"\n}"
+						},
+						"url": {
+							"raw": "{{api_base}}/racks/1/rate",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1", "rate"]
+						},
+						"description": "Update existing rating and review"
+					}
+				},
+				{
+					"name": "Delete Rating",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/racks/1/rate",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1", "rate"]
+						},
+						"description": "Remove your rating for a rack"
+					}
+				}
+			]
+		},
+		{
+			"name": "Comments",
+			"description": "Rack comments and discussions",
+			"item": [
+				{
+					"name": "Get Rack Comments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/racks/1/comments?page=1",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1", "comments"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get paginated comments for a rack"
+					}
+				},
+				{
+					"name": "Add Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Love this rack! The bass response is incredible. Perfect for my techno tracks.\"\n}"
+						},
+						"url": {
+							"raw": "{{api_base}}/racks/1/comments",
+							"host": ["{{api_base}}"],
+							"path": ["racks", "1", "comments"]
+						},
+						"description": "Add a comment to a rack"
+					}
+				},
+				{
+					"name": "Update Comment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Updated comment: Still love this rack, but found it works even better with some additional EQ.\"\n}"
+						},
+						"url": {
+							"raw": "{{api_base}}/comments/1",
+							"host": ["{{api_base}}"],
+							"path": ["comments", "1"]
+						},
+						"description": "Update your own comment"
+					}
+				},
+				{
+					"name": "Delete Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/comments/1",
+							"host": ["{{api_base}}"],
+							"path": ["comments", "1"]
+						},
+						"description": "Delete your own comment"
+					}
+				},
+				{
+					"name": "Like/Unlike Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/comments/1/like",
+							"host": ["{{api_base}}"],
+							"path": ["comments", "1", "like"]
+						},
+						"description": "Toggle like status for a comment"
+					}
+				}
+			]
+		},
+		{
+			"name": "Collections",
+			"description": "User rack collections",
+			"item": [
+				{
+					"name": "Get My Collections",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/collections",
+							"host": ["{{api_base}}"],
+							"path": ["collections"]
+						},
+						"description": "Get current user's collections"
+					}
+				},
+				{
+					"name": "Create Collection",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My Favorite Synths\",\n    \"description\": \"Collection of my go-to synthesizer racks for various genres\",\n    \"is_public\": true\n}"
+						},
+						"url": {
+							"raw": "{{api_base}}/collections",
+							"host": ["{{api_base}}"],
+							"path": ["collections"]
+						},
+						"description": "Create a new collection"
+					}
+				},
+				{
+					"name": "Get Collection",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/collections/1",
+							"host": ["{{api_base}}"],
+							"path": ["collections", "1"]
+						},
+						"description": "Get collection with its racks"
+					}
+				},
+				{
+					"name": "Update Collection",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Collection Name\",\n    \"description\": \"Updated description\",\n    \"is_public\": false\n}"
+						},
+						"url": {
+							"raw": "{{api_base}}/collections/1",
+							"host": ["{{api_base}}"],
+							"path": ["collections", "1"]
+						},
+						"description": "Update collection metadata"
+					}
+				},
+				{
+					"name": "Delete Collection",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/collections/1",
+							"host": ["{{api_base}}"],
+							"path": ["collections", "1"]
+						},
+						"description": "Delete a collection"
+					}
+				},
+				{
+					"name": "Add Rack to Collection",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/collections/1/racks/1",
+							"host": ["{{api_base}}"],
+							"path": ["collections", "1", "racks", "1"]
+						},
+						"description": "Add a rack to a collection"
+					}
+				},
+				{
+					"name": "Remove Rack from Collection",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/collections/1/racks/1",
+							"host": ["{{api_base}}"],
+							"path": ["collections", "1", "racks", "1"]
+						},
+						"description": "Remove a rack from a collection"
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"description": "User profiles and social features",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/users/1",
+							"host": ["{{api_base}}"],
+							"path": ["users", "1"]
+						},
+						"description": "Get public user profile information"
+					}
+				},
+				{
+					"name": "Get User Racks",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/users/1/racks?page=1",
+							"host": ["{{api_base}}"],
+							"path": ["users", "1", "racks"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get paginated list of user's public racks"
+					}
+				},
+				{
+					"name": "Get User Followers",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/users/1/followers",
+							"host": ["{{api_base}}"],
+							"path": ["users", "1", "followers"]
+						},
+						"description": "Get user's followers list"
+					}
+				},
+				{
+					"name": "Get User Following",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/users/1/following",
+							"host": ["{{api_base}}"],
+							"path": ["users", "1", "following"]
+						},
+						"description": "Get list of users this user follows"
+					}
+				},
+				{
+					"name": "Follow User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/users/1/follow",
+							"host": ["{{api_base}}"],
+							"path": ["users", "1", "follow"]
+						},
+						"description": "Follow a user"
+					}
+				},
+				{
+					"name": "Unfollow User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/users/1/follow",
+							"host": ["{{api_base}}"],
+							"path": ["users", "1", "follow"]
+						},
+						"description": "Unfollow a user"
+					}
+				},
+				{
+					"name": "Get My Feed",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/user/feed?page=1",
+							"host": ["{{api_base}}"],
+							"path": ["user", "feed"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get personalized activity feed from followed users"
+					}
+				},
+				{
+					"name": "Get My Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_base}}/user/notifications",
+							"host": ["{{api_base}}"],
+							"path": ["user", "notifications"]
+						},
+						"description": "Get current user's notifications"
+					}
+				}
+			]
+		}
+	]
+}
