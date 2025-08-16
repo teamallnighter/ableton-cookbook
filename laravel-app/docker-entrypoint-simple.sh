@@ -49,5 +49,12 @@ php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
 
+# Run migrations with fallback for conflicts
+echo "Running database migrations..."
+php artisan migrate --force || {
+    echo "Migration conflict detected, trying fresh migration..."
+    php artisan migrate:fresh --force --seed
+}
+
 echo "Starting simple PHP server on port $PORT..."
 exec php artisan serve --host=0.0.0.0 --port=$PORT --no-reload
