@@ -65,7 +65,7 @@ install_php() {
         php8.2-curl \
         php8.2-xml \
         php8.2-bcmath \
-        php8.2-json \
+    # php8.2-json (removed, bundled with PHP 8.2 core) \
         php8.2-intl \
         php8.2-redis \
         php8.2-imagick \
