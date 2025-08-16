@@ -31,6 +31,14 @@ until php artisan tinker --execute="DB::connection()->getPdo(); echo 'DB Connect
 done
 echo "Database connected successfully!"
 
+# Debug environment variables
+echo "=== Environment Debug ==="
+echo "DATABASE_URL: ${DATABASE_URL:0:50}..."
+echo "DB_CONNECTION: $DB_CONNECTION"
+echo "DB_HOST: $DB_HOST"
+echo "DB_PORT: $DB_PORT"
+echo "DB_DATABASE: $DB_DATABASE"
+
 # Basic Laravel check
 echo "Testing Laravel..."
 php artisan --version || exit 1
