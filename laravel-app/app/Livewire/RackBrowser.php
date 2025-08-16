@@ -107,7 +107,7 @@ class RackBrowser extends Component
             ->select([
                 'id', 'uuid', 'title', 'slug', 'user_id', 'rack_type', 'category',
                 'average_rating', 'ratings_count', 'downloads_count', 'views_count',
-                'created_at', 'published_at', 'description', 'ableton_edition'
+                'created_at', 'published_at', 'description', 'ableton_edition', 'chain_annotations'
             ]);
 
         // Search

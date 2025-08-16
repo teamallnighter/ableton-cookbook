@@ -71,7 +71,7 @@
                         $userSocialLinks = array_filter($socialLinks, fn($key) => !empty($user->{$key}), ARRAY_FILTER_USE_KEY);
                     @endphp
                     
-                    @if(count($userSocialLinks) > 0)
+                    @if(is_countable($userSocialLinks) && count($userSocialLinks) > 0)
                         <div class="flex flex-wrap gap-2 mt-3">
                             @foreach($userSocialLinks as $field => $social)
                                 <a href="{{ $user->{$field} }}" target="_blank" 

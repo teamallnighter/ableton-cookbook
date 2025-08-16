@@ -1,6 +1,6 @@
 @props(['items' => []])
 
-@if(count($items) > 1)
+@if(is_countable($items) && count($items) > 1)
 <nav aria-label="Breadcrumb" class="flex items-center space-x-2 text-sm text-gray-600 mb-4">
     @foreach($items as $index => $item)
         @if($index > 0)
