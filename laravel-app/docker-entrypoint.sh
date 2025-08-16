@@ -6,6 +6,23 @@ echo "Starting Railway deployment..."
 # Set default port if not provided
 PORT=${PORT:-8000}
 
+# Create minimal .env file if it doesn't exist (Railway provides env vars directly)
+if [ ! -f /var/www/html/.env ]; then
+    echo "Creating minimal .env file for Laravel..."
+    cat > /var/www/html/.env << EOF
+APP_NAME="Ableton Cookbook"
+APP_ENV=production
+APP_DEBUG=false
+DB_CONNECTION=sqlite
+DB_DATABASE=/var/www/html/database/database.sqlite
+LOG_CHANNEL=stderr
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+FILESYSTEM_DISK=private
+EOF
+fi
+
 # Ensure database directory exists
 mkdir -p /var/www/html/database
 
@@ -31,7 +48,11 @@ php artisan view:clear
 
 # Run migrations
 echo "Running database migrations..."
-php artisan migrate --force
+php artisan migrate --force || {
+    echo "Migration failed, retrying after 5 seconds..."
+    sleep 5
+    php artisan migrate --force
+}
 
 # Cache configuration for production
 echo "Caching configuration..."

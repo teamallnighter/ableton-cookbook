@@ -14,9 +14,6 @@ USER www-data
 # Copy application files
 COPY --chown=www-data:www-data . /var/www/html
 
-# Copy Railway environment configuration
-COPY --chown=www-data:www-data .env.railway /var/www/html/.env
-
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
@@ -35,8 +32,7 @@ USER www-data
 
 # Create entrypoint script for Railway
 USER root
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/
 
 USER www-data
 
