@@ -2,6 +2,9 @@ FROM serversideup/php:8.4-fpm-nginx
 
 USER root
 
+# Install required PHP extensions
+RUN docker-php-ext-install exif
+
 # Install Node.js for building assets
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
