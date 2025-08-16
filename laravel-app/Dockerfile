@@ -14,6 +14,9 @@ USER www-data
 # Copy application files
 COPY --chown=www-data:www-data . /var/www/html
 
+# Copy Railway environment configuration
+COPY --chown=www-data:www-data .env.railway /var/www/html/.env
+
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
@@ -30,9 +33,13 @@ RUN mkdir -p /var/www/html/database \
 
 USER www-data
 
-# Laravel optimizations - run after database creation
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Create entrypoint script for Railway
+USER root
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-EXPOSE 80
+USER www-data
+
+EXPOSE 8000
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

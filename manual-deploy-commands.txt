@@ -1,0 +1,95 @@
+# Manual Deployment Commands for Ableton Cookbook
+# Run these commands on your VM after SSHing in
+
+# 1. First, on your LOCAL machine, create the tarball:
+cd /Volumes/BassDaddy/projects/abletonCookbookPHP/laravel-app
+tar -czf ../app.tar.gz --exclude=node_modules --exclude=.git --exclude=storage/logs/* .
+
+# 2. Then transfer it to your VM (from your local machine):
+scp -P 22022 app.tar.gz your-user@your-vm-ip:/tmp/
+
+# 3. SSH into your VM and run these commands:
+
+# Setup application directory
+sudo rm -rf /var/www/ableton-cookbook
+sudo mkdir -p /var/www/ableton-cookbook
+cd /var/www/ableton-cookbook
+sudo tar -xzf /tmp/app.tar.gz
+
+# Install dependencies
+sudo composer install --no-dev --optimize-autoloader
+
+# Create environment file
+sudo tee .env > /dev/null << 'EOF'
+APP_NAME="Ableton Cookbook"
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=false
+APP_URL=http://your-server-ip
+
+DB_CONNECTION=sqlite
+DB_DATABASE=/var/www/ableton-cookbook/database/database.sqlite
+
+CACHE_DRIVER=file
+SESSION_DRIVER=file
+QUEUE_CONNECTION=sync
+EOF
+
+# Setup database
+sudo mkdir -p database
+sudo touch database/database.sqlite
+sudo chmod 664 database/database.sqlite
+
+# Generate key and run migrations
+sudo php artisan key:generate
+sudo php artisan migrate --force
+
+# Build assets (if Node.js is installed)
+# sudo npm ci && sudo npm run build
+
+# Optimize Laravel
+sudo php artisan config:cache
+sudo php artisan route:cache
+sudo php artisan view:cache
+sudo php artisan optimize
+
+# Set permissions
+sudo chown -R www-data:www-data /var/www/ableton-cookbook
+sudo chmod -R 755 /var/www/ableton-cookbook
+sudo chmod -R 775 storage bootstrap/cache database
+
+# Configure Nginx (if not already done)
+sudo tee /etc/nginx/sites-available/ableton-cookbook > /dev/null << 'NGINX'
+server {
+    listen 80;
+    server_name _;
+    root /var/www/ableton-cookbook/public;
+    index index.php;
+    
+    client_max_body_size 25M;
+    
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+    
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+NGINX
+
+# Enable site
+sudo ln -sf /etc/nginx/sites-available/ableton-cookbook /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Test and restart services
+sudo nginx -t
+sudo systemctl restart php8.2-fpm nginx
+
+echo "✅ Deployment complete!"
