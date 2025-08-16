@@ -20,6 +20,11 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Install Node dependencies and build assets
 RUN npm ci && npm run build && rm -rf node_modules
 
+# Create database directory and file
+RUN mkdir -p /var/www/html/database \
+    && touch /var/www/html/database/database.sqlite \
+    && chmod 664 /var/www/html/database/database.sqlite
+
 # Laravel optimizations
 RUN php artisan config:cache \
     && php artisan route:cache \
@@ -27,8 +32,9 @@ RUN php artisan config:cache \
 
 # Fix permissions
 USER root
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod 664 /var/www/html/database/database.sqlite
 
 USER www-data
 EXPOSE 80
