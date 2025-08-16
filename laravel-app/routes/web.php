@@ -2,8 +2,26 @@
 
 use Illuminate\Support\Facades\Route;
 
+// Health check for Railway
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toISOString(),
+        'app' => config('app.name'),
+        'env' => config('app.env')
+    ]);
+});
+
 Route::get('/', function () {
-    return view('racks');
+    try {
+        return view('racks');
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'View loading failed',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
 })->name('home');
 
 Route::get('/racks/{rack}', function (App\Models\Rack $rack) {

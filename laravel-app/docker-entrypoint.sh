@@ -66,6 +66,27 @@ if [ ! -L /var/www/html/public/storage ]; then
     php artisan storage:link
 fi
 
-# Start the web server
-echo "Starting web server on port $PORT..."
-exec php artisan serve --host=0.0.0.0 --port=$PORT
+# Update Nginx configuration to use Railway's port
+sed -i "s/listen 8000;/listen $PORT;/" /etc/nginx/sites-available/default
+sed -i "s/listen \[::\]:8000;/listen [::]:$PORT;/" /etc/nginx/sites-available/default
+
+# Test if the app can bootstrap
+echo "Testing Laravel bootstrap..."
+php artisan --version || {
+    echo "Laravel bootstrap failed!"
+    exit 1
+}
+
+echo "Environment check:"
+echo "APP_ENV: $APP_ENV"
+echo "APP_KEY: ${APP_KEY:0:20}..."
+echo "DB_CONNECTION: $DB_CONNECTION"
+echo "PORT: $PORT"
+
+# Start PHP-FPM in background
+echo "Starting PHP-FPM..."
+php-fpm8.4 -D
+
+# Start Nginx in foreground
+echo "Starting Nginx on port $PORT..."
+exec nginx -g "daemon off;"

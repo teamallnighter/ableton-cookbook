@@ -33,9 +33,11 @@ USER www-data
 # Create entrypoint script for Railway
 USER root
 COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/
+COPY --chmod=755 docker-entrypoint-simple.sh /usr/local/bin/
 
 USER www-data
 
 EXPOSE 8000
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+# Use simple entrypoint for debugging
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint-simple.sh"]
