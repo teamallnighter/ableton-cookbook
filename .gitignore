@@ -225,3 +225,9 @@ CLAUDE.md
 docs/
 nginx-config.conf
 supervisor-config.conf
+
+# Platform-specific deployment files
+*.env.example
+*.env.production*
+*.env.railway
+fly.toml
