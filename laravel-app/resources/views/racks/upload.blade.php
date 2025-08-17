@@ -222,7 +222,7 @@
                 <div class="border-t-2 border-black pt-6">
                     <div class="flex items-center justify-between">
                         <div class="text-sm text-gray-600">
-                            <p>Your rack will be automatically analyzed and require approval before being published.</p>
+                            <p>Your rack will be automatically analyzed and published once processing is complete.</p>
                         </div>
                         
                         <div class="flex gap-4">
