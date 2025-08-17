@@ -218,3 +218,7 @@ test_*.php
 .claude/
 **/.claude/
 
+
+# Development and internal files
+WARP.md
+CLAUDE.md
