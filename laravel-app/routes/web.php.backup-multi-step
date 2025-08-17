@@ -42,15 +42,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/upload', [App\Http\Controllers\RackUploadController::class, 'store'])->name('racks.store');
     
     // Edit routes (require authentication and ownership)
-    // Edit routes (require authentication and ownership) - Multi-step process
-    Route::get("/racks/{rack}/edit", [App\Http\Controllers\RackEditController::class, "edit"])->name("racks.edit");
-    Route::get("/racks/{rack}/edit/upload", [App\Http\Controllers\RackEditController::class, "editUpload"])->name("racks.edit.upload");
-    Route::post("/racks/{rack}/edit/upload", [App\Http\Controllers\RackEditController::class, "processUpload"])->name("racks.edit.upload.process");
-    Route::get("/racks/{rack}/edit/analysis", [App\Http\Controllers\RackEditController::class, "editAnalysis"])->name("racks.edit.analysis");
-    Route::get("/racks/{rack}/edit/annotate", [App\Http\Controllers\RackEditController::class, "editAnnotate"])->name("racks.edit.annotate");
-    Route::post("/racks/{rack}/edit/annotate", [App\Http\Controllers\RackEditController::class, "saveAnnotations"])->name("racks.edit.annotate.save");
-    Route::get("/racks/{rack}/edit/metadata", [App\Http\Controllers\RackEditController::class, "editMetadata"])->name("racks.edit.metadata");
-    Route::put("/racks/{rack}", [App\Http\Controllers\RackEditController::class, "update"])->name("racks.update");
+    Route::get('/racks/{rack}/edit', [App\Http\Controllers\RackEditController::class, 'edit'])->name('racks.edit');
+    Route::put('/racks/{rack}', [App\Http\Controllers\RackEditController::class, 'update'])->name('racks.update');
 });
 
 Route::middleware([
@@ -73,13 +66,4 @@ Route::get('/sitemap-users.xml', [App\Http\Controllers\SitemapController::class,
 Route::prefix('seo')->group(function () {
     Route::post('/refresh-sitemap', [App\Http\Controllers\SeoWebhookController::class, 'refreshSitemap'])->name('seo.refresh');
     Route::get('/ping', [App\Http\Controllers\SeoWebhookController::class, 'ping'])->name('seo.ping');
-});
-
-// Multi-step upload workflow
-Route::middleware('auth')->group(function () {
-    Route::get('/racks/{rack}/analysis', [App\Http\Controllers\RackUploadController::class, 'analysis'])->name('racks.analysis');
-    Route::get('/racks/{rack}/annotate', [App\Http\Controllers\RackAnnotationController::class, 'annotate'])->name('racks.annotate');
-    Route::post('/racks/{rack}/annotate', [App\Http\Controllers\RackAnnotationController::class, 'saveAnnotations'])->name('racks.annotate.save');
-    Route::get('/racks/{rack}/metadata', [App\Http\Controllers\RackAnnotationController::class, 'metadata'])->name('racks.metadata');
-    Route::post('/racks/{rack}/publish', [App\Http\Controllers\RackAnnotationController::class, 'publish'])->name('racks.publish');
 });
