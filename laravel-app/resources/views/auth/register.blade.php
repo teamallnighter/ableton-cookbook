@@ -21,20 +21,20 @@
             <form method="POST" action="{{ route('register') }}" class="space-y-6">
                 @csrf
 
-                <!-- Name Field -->
+                <!-- Username Field -->
                 <div>
-                    <label for="name" class="block text-sm font-medium text-black mb-2">
-                        {{ __('Name') }}
+                    <label for="username" class="block text-sm font-medium text-black mb-2">
+                        {{ __('Username') }}
                     </label>
                     <input 
-                        id="name" 
+                        id="username" 
                         type="text" 
-                        name="name" 
-                        value="{{ old('name') }}" 
+                        name="username" 
+                        value="{{ old('username') }}" 
                         required 
                         autofocus 
-                        autocomplete="name"
-                        placeholder="Enter your full name"
+                        autocomplete="username"
+                        placeholder="Pick a unique username"
                         class="input-field"
                     />
                 </div>
@@ -50,7 +50,7 @@
                         name="email" 
                         value="{{ old('email') }}" 
                         required 
-                        autocomplete="username"
+                        autocomplete="email"
                         placeholder="Enter your email address"
                         class="input-field"
                     />
@@ -87,6 +87,21 @@
                         class="input-field"
                     />
                 </div>
+
+                <!-- Email Consent -->
+                <div class="flex items-start">
+                    <input 
+                        id="email_consent" 
+                        name="email_consent" 
+                        type="checkbox" 
+                        required
+                        class="mt-1 h-4 w-4 text-black bg-white border-2 border-black rounded focus:ring-2 focus:ring-black"
+                    >
+                    <label for="email_consent" class="ml-3 text-sm text-black">
+                        I consent to receive emails from Ableton Cookbook including account notifications, community updates, and occasional newsletters.
+                    </label>
+                </div>
+
 
                 <!-- Terms and Privacy Policy -->
                 @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())

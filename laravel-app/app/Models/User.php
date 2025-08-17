@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -13,7 +14,9 @@ use Overtrue\LaravelFollow\Traits\Followable;
 use Overtrue\LaravelFollow\Traits\Follower;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+use App\Notifications\CustomVerifyEmail;
+
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;
 
@@ -33,6 +36,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
         'bio',
@@ -47,6 +51,8 @@ class User extends Authenticatable
         'notification_preferences',
         'email_notifications_enabled',
         'last_notification_read_at',
+        'email_consent',
+        'email_consent_at',
     ];
 
     /**
@@ -82,6 +88,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'notification_preferences' => 'array',
             'last_notification_read_at' => 'datetime',
+            'email_consent_at' => 'datetime',
         ];
     }
 
@@ -159,6 +166,15 @@ class User extends Authenticatable
     /**
      * Get user statistics
      */
+    /**
+     * Send the email verification notification.
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail);
+    }
+
+
     public function getStatistics(): array
     {
         return [
