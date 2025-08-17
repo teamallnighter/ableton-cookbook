@@ -63,10 +63,19 @@
                     <label class="block text-sm font-medium mb-3 text-black">Category</label>
                     <select wire:model="selectedCategory" wire:change="$refresh" class="input-field">
                         <option value="">All Categories</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category }}">{{ $category }}</option>
+                        @foreach($categories as $key => $label)
+                            <option value="{{ $key }}">{{ $label }}</option>
                         @endforeach
                     </select>
+                    @if($selectedRackType)
+                        <p class="text-xs mt-2 text-gray-600">
+                            Showing categories for {{ $rackTypes[$selectedRackType] ?? $selectedRackType }}
+                        </p>
+                    @else
+                        <p class="text-xs mt-2 text-gray-600">
+                            Select a rack type above to see specific categories
+                        </p>
+                    @endif
                 </div>
 
                 <!-- Ableton Edition Filter -->
@@ -192,13 +201,6 @@
                             @if($rack->category)
                                 <span class="badge-category">
                                     {{ $rack->category }}
-                                </span>
-                            @endif
-                            
-                            <!-- Chain Annotations Indicator -->
-                            @if($rack->chain_annotations && collect($rack->chain_annotations)->some(fn($annotation) => !empty($annotation['custom_name']) || !empty($annotation['note'])))
-                                <span class="badge-warning" title="This rack has educational notes from the creator">
-                                    Notes
                                 </span>
                             @endif
                         </div>

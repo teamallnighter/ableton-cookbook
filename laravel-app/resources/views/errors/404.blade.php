@@ -32,7 +32,7 @@
             </a>
             
             <div class="flex gap-3 justify-center">
-                <a href="{{ route('racks.index') }}" class="btn-secondary">Browse Racks</a>
+                <a href="{{ route('home') }}" class="btn-secondary">Browse Racks</a>
                 <a href="{{ route('racks.upload') }}" class="btn-secondary">Upload Rack</a>
             </div>
         </div>

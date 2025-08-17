@@ -1,289 +1,259 @@
-<x-app-layout>
-    {{-- Pass SEO data to layout --}}
-    @php
-        $seoMetaTags = app('App\Services\SeoService')->getUploadMetaTags();
-    @endphp
-    
-    <x-slot name="breadcrumbs">
-        [
-            ['name' => 'Home', 'url' => route('home')],
-            ['name' => 'Dashboard', 'url' => route('dashboard')],
-            ['name' => 'Upload Rack', 'url' => route('racks.upload')]
-        ]
-    </x-slot>
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Breadcrumb -->
-        <div class="mb-8">
-            <nav class="flex" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-3">
-                    <li class="inline-flex items-center">
-                        <a href="{{ route('dashboard') }}" class="link">
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>Upload Rack - {{ config('app.name', 'Ableton Cookbook') }}</title>
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/teamallnighter/abletonSans@latest/abletonSans.css">
+
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="font-sans antialiased" style="background-color: #C3C3C3;">
+    <!-- Navigation -->
+    <nav class="shadow-sm border-b-2" style="background-color: #0D0D0D; border-color: #01CADA;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ route('home') }}" class="flex items-center">
+                        <span class="text-xl font-bold" style="color: #ffdf00;">🎵 Ableton Cookbook</span>
+                    </a>
+                </div>
+
+                <!-- Auth Links -->
+                <div class="flex items-center space-x-4">
+                    @auth
+                        <a href="{{ route('profile') }}" style="color: #BBBBBB;" class="hover:text-opacity-80 transition-colors">
+                            My Profile
+                        </a>
+                        <a href="{{ route('dashboard') }}" style="color: #BBBBBB;" class="hover:text-opacity-80 transition-colors">
                             Dashboard
                         </a>
-                    </li>
-                    <li>
-                        <div class="flex items-center">
-                            <span class="text-gray-600">/</span>
-                            <span class="ml-3 text-sm font-medium text-black">Upload Rack</span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
-        </div>
-
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-black mb-2">Upload Your Ableton Rack</h1>
-            <p class="text-gray-700">Share your Ableton Live instrument racks, audio effect racks, and MIDI racks with music producers worldwide. Help grow the community and showcase your creativity.</p>
-            
-            {{-- Hidden SEO content --}}
-            <div class="sr-only">
-                <h2>Share Your Music Production Creations</h2>
-                <p>Upload Ableton Live racks to share with fellow music producers. Whether you've created innovative instrument racks, powerful audio effect chains, or useful MIDI racks, share them with the Ableton Cookbook community.</p>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" style="color: #BBBBBB;" class="hover:text-opacity-80 transition-colors">
+                                Logout
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" style="color: #BBBBBB;" class="hover:text-opacity-80 transition-colors">
+                            Login
+                        </a>
+                        <a href="{{ route('register') }}" style="background-color: #01CADA; color: #0D0D0D;" class="px-4 py-2 rounded-lg hover:opacity-90 transition-opacity font-semibold">
+                            Register
+                        </a>
+                    @endauth
+                </div>
             </div>
         </div>
+    </nav>
 
-        <!-- Upload Form -->
-        <div class="card card-body" x-data="uploadForm()">
-            <form method="POST" action="{{ route('racks.store') }}" enctype="multipart/form-data">
+    <!-- Progress Indicator -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div class="flex items-center justify-center mb-8">
+            <div class="flex items-center space-x-4">
+                <!-- Step 1: Upload (Active) -->
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-vibrant-green flex items-center justify-center text-black font-bold">
+                        1
+                    </div>
+                    <span class="ml-2 text-black font-semibold">Upload</span>
+                </div>
+                
+                <!-- Connector -->
+                <div class="w-16 h-1 bg-gray-300"></div>
+                
+                <!-- Step 2: Annotate (Inactive) -->
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
+                        2
+                    </div>
+                    <span class="ml-2 text-gray-600">Annotate</span>
+                </div>
+                
+                <!-- Connector -->
+                <div class="w-16 h-1 bg-gray-300"></div>
+                
+                <!-- Step 3: Details (Inactive) -->
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
+                        3
+                    </div>
+                    <span class="ml-2 text-gray-600">Details</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="card card-body text-center">
+            <h1 class="text-3xl font-bold mb-2 text-black">Upload Your Ableton Rack</h1>
+            <p class="text-gray-600 mb-8">Share your creative racks with the community</p>
+
+            @if ($errors->any())
+                <div class="mb-6 p-4 bg-vibrant-red/10 border border-vibrant-red rounded-lg">
+                    <div class="text-vibrant-red font-medium mb-2">Please fix the following errors:</div>
+                    <ul class="text-vibrant-red text-sm list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="mb-6 p-4 bg-vibrant-green/10 border border-vibrant-green rounded-lg">
+                    <div class="text-vibrant-green font-medium">{{ session('success') }}</div>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('racks.store') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 
-                <!-- File Upload Section -->
+                <!-- File Upload Zone -->
                 <div class="mb-8">
-                    <label for="rack_file" class="block text-sm font-medium mb-3 text-black">
-                        Ableton Rack File (.adg) *
-                    </label>
-                    
-                    <div 
-                        class="border-2 border-dashed border-gray-400 rounded-lg p-8 text-center transition-all cursor-pointer hover:border-vibrant-blue hover:bg-gray-50"
-                        :class="isDragOver ? 'border-vibrant-blue bg-gray-50' : ''"
-                        @dragover.prevent="isDragOver = true"
-                        @dragleave.prevent="isDragOver = false"
-                        @drop.prevent="handleDrop($event)"
-                        @click="$refs.fileInput.click()"
-                    >
-                        <div x-show="!selectedFile">
-                            <div class="w-16 h-16 mx-auto mb-4 bg-vibrant-blue rounded-full flex items-center justify-center border-2 border-black">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                            </div>
-                            <p class="mb-2 text-black">
-                                <span class="font-bold">Click to upload</span> or drag and drop
-                            </p>
-                            <p class="text-sm text-gray-600">
-                                Ableton rack files (.adg) up to 10MB
-                            </p>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 bg-gray-50 hover:border-vibrant-green transition-colors duration-300" 
+                         id="dropZone"
+                         ondrop="handleDrop(event)" 
+                         ondragover="handleDragOver(event)" 
+                         ondragleave="handleDragLeave(event)"
+                         onclick="document.getElementById('rackFile').click()">
+                        
+                        <div id="dropZoneContent">
+                            <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <p class="text-xl text-gray-600 font-semibold mb-2">Drop your .adg file here</p>
+                            <p class="text-gray-500 mb-4">or click to browse</p>
+                            <p class="text-sm text-gray-400">Maximum file size: 10MB</p>
                         </div>
                         
-                        <div x-show="selectedFile" class="flex items-center justify-center">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-vibrant-green rounded-lg flex items-center justify-center border-2 border-black">
-                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p x-text="selectedFile?.name" class="text-black font-medium"></p>
-                                    <p class="text-sm text-gray-600" x-text="formatFileSize(selectedFile?.size)"></p>
-                                </div>
-                                <button type="button" @click.stop="removeFile()" class="ml-4 text-vibrant-red hover:text-red-700 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
-                            </div>
+                        <div id="fileInfo" class="hidden">
+                            <svg class="mx-auto h-12 w-12 text-vibrant-green mb-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <p class="text-vibrant-green font-semibold" id="fileName"></p>
+                            <p class="text-sm text-gray-500" id="fileSize"></p>
                         </div>
+                        
+                        <input type="file" 
+                               id="rackFile" 
+                               name="rack_file" 
+                               accept=".adg" 
+                               class="hidden"
+                               onchange="handleFileSelect(event)"
+                               required>
                     </div>
-                    
-                    <input 
-                        type="file" 
-                        id="rack_file"
-                        name="rack_file" 
-                        accept=".adg"
-                        class="hidden"
-                        x-ref="fileInput"
-                        @change="handleFileSelect($event)"
-                        aria-describedby="rack_file_help"
-                    >
-                    <div id="rack_file_help" class="sr-only">Upload your Ableton Live rack file (.adg format) to share with the community. File size limit is 10MB.</div>
                     
                     @error('rack_file')
                         <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Title Field -->
-                <div class="mb-6">
-                    <label for="title" class="block text-sm font-medium mb-2 text-black">
-                        Title *
-                    </label>
-                    <input 
-                        type="text" 
-                        id="title"
-                        name="title" 
-                        value="{{ old('title') }}"
-                        required
-                        maxlength="255"
-                        class="input-field"
-                        placeholder="e.g., Vintage Bass Rack, Ambient Pad Collection, Hip Hop Drums"
-                        aria-describedby="title_help"
-                    >
-                    <div id="title_help" class="sr-only">Enter a descriptive title that helps other producers understand what your rack does. Include the type of sounds or effects it creates.</div>
-                    @error('title')
-                        <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Description Field -->
-                <div class="mb-6">
-                    <label for="description" class="block text-sm font-medium mb-2 text-black">
-                        Description *
-                    </label>
-                    <textarea 
-                        id="description"
-                        name="description" 
-                        required
-                        maxlength="1000"
-                        rows="4"
-                        class="input-field resize-none"
-                        placeholder="Describe what your rack does, how to use it, and what makes it special. Include musical genres, sound characteristics, and any unique features..."
-                        aria-describedby="description_help"
-                    >{{ old('description') }}</textarea>
-                    <div id="description_help" class="sr-only">Provide a detailed description of your rack including what sounds it makes, what musical styles it's good for, and any special features or techniques used.</div>
-                    @error('description')
-                        <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Category Field -->
-                <div class="mb-6">
-                    <label for="category" class="block text-sm font-medium mb-2 text-black">
-                        Category
-                    </label>
-                    <select name="category" id="category" class="input-field">
-                        <option value="">Select a category</option>
-                        <option value="Bass" {{ old('category') === 'Bass' ? 'selected' : '' }}>Bass</option>
-                        <option value="Lead" {{ old('category') === 'Lead' ? 'selected' : '' }}>Lead</option>
-                        <option value="Pad" {{ old('category') === 'Pad' ? 'selected' : '' }}>Pad</option>
-                        <option value="Drum" {{ old('category') === 'Drum' ? 'selected' : '' }}>Drum</option>
-                        <option value="FX" {{ old('category') === 'FX' ? 'selected' : '' }}>FX</option>
-                        <option value="Utility" {{ old('category') === 'Utility' ? 'selected' : '' }}>Utility</option>
-                        <option value="Other" {{ old('category') === 'Other' ? 'selected' : '' }}>Other</option>
-                    </select>
-                    @error('category')
-                        <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Ableton Edition Field -->
-                <div class="mb-6">
-                    <label for="ableton_edition" class="block text-sm font-medium mb-2 text-black">
-                        Minimum Ableton Live Edition Required
-                    </label>
-                    <select name="ableton_edition" id="ableton_edition" class="input-field">
-                        <option value="">Auto-detect from file</option>
-                        <option value="intro" {{ old('ableton_edition') === 'intro' ? 'selected' : '' }}>Live Intro</option>
-                        <option value="standard" {{ old('ableton_edition') === 'standard' ? 'selected' : '' }}>Live Standard</option>
-                        <option value="suite" {{ old('ableton_edition') === 'suite' ? 'selected' : '' }}>Live Suite</option>
-                    </select>
-                    <p class="mt-1 text-sm text-gray-600">
-                        This helps users know if they can use your rack with their version of Live
-                    </p>
-                    @error('ableton_edition')
-                        <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Tags Field -->
-                <div class="mb-8">
-                    <label for="tags" class="block text-sm font-medium mb-2 text-black">
-                        Tags (optional)
-                    </label>
-                    <input 
-                        type="text" 
-                        id="tags"
-                        name="tags" 
-                        value="{{ old('tags') }}"
-                        maxlength="500"
-                        class="input-field"
-                        placeholder="e.g., vintage, warm, reverb, lead, electronic, ambient (comma separated)"
-                        aria-describedby="tags_help"
-                    >
-                    <p id="tags_help" class="mt-1 text-sm text-gray-600">
-                        Add specific tags to help others find your rack. Include genres, sound characteristics, instruments, and effects. Separate multiple tags with commas.
-                    </p>
-                    @error('tags')
-                        <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Submit Section -->
-                <div class="border-t-2 border-black pt-6">
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-600">
-                            <p>Your rack will be automatically analyzed and published once processing is complete.</p>
-                        </div>
-                        
-                        <div class="flex gap-4">
-                            <a href="{{ route('dashboard') }}" class="btn-secondary">
-                                Cancel
-                            </a>
-                            
-                            <button type="submit" class="btn-primary">
-                                Upload Rack
-                            </button>
-                        </div>
-                    </div>
+                <!-- Upload Button -->
+                <div class="flex justify-center">
+                    <button type="submit" 
+                            id="uploadBtn"
+                            class="px-8 py-3 bg-vibrant-green text-black font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="uploadBtnText">Upload & Analyze Rack</span>
+                        <svg id="uploadSpinner" class="hidden animate-spin -ml-1 mr-3 h-5 w-5 text-black inline" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
                 </div>
             </form>
+
+            <!-- Info Section -->
+            <div class="mt-12 text-left">
+                <h2 class="text-xl font-bold text-black mb-4">What happens next?</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center p-4">
+                        <div class="w-12 h-12 rounded-full bg-vibrant-green/20 flex items-center justify-center mx-auto mb-3">
+                            <span class="text-vibrant-green font-bold">1</span>
+                        </div>
+                        <h3 class="font-semibold text-black mb-2">Analysis</h3>
+                        <p class="text-sm text-gray-600">We'll analyze your rack structure, devices, and chains automatically.</p>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center mx-auto mb-3">
+                            <span class="text-gray-600 font-bold">2</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-600 mb-2">Customize</h3>
+                        <p class="text-sm text-gray-600">Name your chains for better organization and understanding.</p>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center mx-auto mb-3">
+                            <span class="text-gray-600 font-bold">3</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-600 mb-2">Publish</h3>
+                        <p class="text-sm text-gray-600">Add description, tags, and share with the community.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    @push('scripts')
     <script>
-        function uploadForm() {
-            return {
-                selectedFile: null,
-                isDragOver: false,
-                
-                handleFileSelect(event) {
-                    const file = event.target.files[0];
-                    if (file && file.name.endsWith('.adg')) {
-                        this.selectedFile = file;
-                    } else {
-                        alert('Please select a valid .adg file');
-                        event.target.value = '';
-                    }
-                },
-                
-                handleDrop(event) {
-                    this.isDragOver = false;
-                    const files = event.dataTransfer.files;
-                    if (files.length > 0) {
-                        const file = files[0];
-                        if (file.name.endsWith('.adg')) {
-                            this.selectedFile = file;
-                            this.$refs.fileInput.files = files;
-                        } else {
-                            alert('Please select a valid .adg file');
-                        }
-                    }
-                },
-                
-                removeFile() {
-                    this.selectedFile = null;
-                    this.$refs.fileInput.value = '';
-                },
-                
-                formatFileSize(bytes) {
-                    if (!bytes) return '';
-                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-                    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        // File drag and drop functionality
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.add('border-vibrant-green', 'bg-vibrant-green/5');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('border-vibrant-green', 'bg-vibrant-green/5');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('border-vibrant-green', 'bg-vibrant-green/5');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.name.toLowerCase().endsWith('.adg')) {
+                    document.getElementById('rackFile').files = files;
+                    displayFileInfo(file);
+                } else {
+                    alert('Please upload an .adg file');
                 }
             }
         }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                displayFileInfo(file);
+            }
+        }
+
+        function displayFileInfo(file) {
+            const fileName = file.name;
+            const fileSize = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+            
+            document.getElementById('dropZoneContent').classList.add('hidden');
+            document.getElementById('fileInfo').classList.remove('hidden');
+            document.getElementById('fileName').textContent = fileName;
+            document.getElementById('fileSize').textContent = fileSize;
+        }
+
+        // Handle form submission
+        document.querySelector('form').addEventListener('submit', function() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadBtnText = document.getElementById('uploadBtnText');
+            const uploadSpinner = document.getElementById('uploadSpinner');
+            
+            uploadBtn.disabled = true;
+            uploadBtnText.textContent = 'Uploading...';
+            uploadSpinner.classList.remove('hidden');
+        });
     </script>
-    @endpush
-</x-app-layout>
+</body>
+</html>

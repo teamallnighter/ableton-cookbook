@@ -72,7 +72,7 @@ class ProcessRackFileJob implements ShouldQueue
                 'version_details' => $versionInfo,
                 'parsing_errors' => $rackInfo['parsing_errors'] ?? [],
                 'parsing_warnings' => $rackInfo['parsing_warnings'] ?? [],
-                'status' => 'approved', // Auto-approve for now
+                'status' => 'pending', // Auto-approve for now
                 'published_at' => now()
             ]);
             

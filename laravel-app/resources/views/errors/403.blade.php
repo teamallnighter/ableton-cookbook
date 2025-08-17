@@ -41,7 +41,7 @@
             @endauth
             
             <div class="flex gap-3 justify-center">
-                <a href="{{ route('racks.index') }}" class="btn-secondary">Browse Public Racks</a>
+                <a href="{{ route('home') }}" class="btn-secondary">Browse Public Racks</a>
                 @auth
                     <a href="{{ route('profile.show') }}" class="btn-secondary">My Profile</a>
                 @endauth

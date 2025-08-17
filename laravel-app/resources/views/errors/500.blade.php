@@ -33,7 +33,7 @@
             
             <div class="flex gap-3 justify-center">
                 <a href="{{ route('dashboard') }}" class="btn-secondary">Dashboard</a>
-                <a href="{{ route('racks.index') }}" class="btn-secondary">Browse Racks</a>
+                <a href="{{ route('home') }}" class="btn-secondary">Browse Racks</a>
             </div>
         </div>
 

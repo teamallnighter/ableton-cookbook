@@ -45,6 +45,11 @@ class RackBrowser extends Component
         if (in_array($field, ['search', 'selectedRackType', 'selectedCategory', 'selectedEdition', 'sortBy', 'sortDirection'])) {
             $this->resetPage();
         }
+        
+        // Reset category when rack type changes
+        if ($field === 'selectedRackType') {
+            $this->selectedCategory = '';
+        }
     }
     
     public function updated($field, $value)
@@ -95,11 +100,66 @@ class RackBrowser extends Component
         }
     }
 
+    /**
+     * Get categories based on rack type - same logic as in metadata form
+     */
+    private function getCategoriesByRackType($rackType)
+    {
+        return match($rackType) {
+            'AudioEffectGroupDevice' => [
+                'dynamics' => 'Dynamics',
+                'time-based' => 'Time Based', 
+                'modulation' => 'Modulation',
+                'spectral' => 'Spectral',
+                'filters' => 'Filters',
+                'creative-effects' => 'Creative Effects',
+                'utility' => 'Utility',
+                'mixing' => 'Mixing',
+                'distortion' => 'Distortion'
+            ],
+            'InstrumentGroupDevice' => [
+                'drums' => 'Drums',
+                'samplers' => 'Samplers',
+                'synths' => 'Synths',
+                'bass' => 'Bass',
+                'fx' => 'FX'
+            ],
+            'MidiEffectGroupDevice' => [
+                'arpeggiators-sequencers' => 'Arpeggiators & Sequencers',
+                'music-theory' => 'Music Theory',
+                'other' => 'Other'
+            ],
+            default => [
+                'other' => 'Other'
+            ]
+        };
+    }
+
+    /**
+     * Get available categories based on selected rack type
+     */
+    public function getAvailableCategories()
+    {
+        if ($this->selectedRackType) {
+            // Return categories for selected rack type
+            return $this->getCategoriesByRackType($this->selectedRackType);
+        }
+        
+        // Return all categories from all rack types
+        $allCategories = [];
+        foreach (['AudioEffectGroupDevice', 'InstrumentGroupDevice', 'MidiEffectGroupDevice'] as $rackType) {
+            $allCategories = array_merge($allCategories, $this->getCategoriesByRackType($rackType));
+        }
+        
+        // Remove duplicates and sort
+        $allCategories = array_unique($allCategories);
+        asort($allCategories);
+        
+        return $allCategories;
+    }
+
     public function render()
     {
-        // Create cache key for categories to avoid repeated queries
-        $categoriesKey = 'rack_categories_' . md5(serialize([$this->search, $this->selectedRackType, $this->selectedEdition]));
-        
         $query = Rack::query()
             ->with(['user:id,name,profile_photo_path', 'tags'])
             ->published()
@@ -107,7 +167,7 @@ class RackBrowser extends Component
             ->select([
                 'id', 'uuid', 'title', 'slug', 'user_id', 'rack_type', 'category',
                 'average_rating', 'ratings_count', 'downloads_count', 'views_count',
-                'created_at', 'published_at', 'description', 'ableton_edition', 'chain_annotations'
+                'created_at', 'published_at', 'description', 'ableton_edition'
             ]);
 
         // Search
@@ -177,15 +237,8 @@ class RackBrowser extends Component
             });
         }
         
-        // Cache categories to avoid repeated queries
-        $categories = Cache::remember($categoriesKey, 300, function () {
-            return Rack::whereNotNull('category')
-                ->distinct()
-                ->pluck('category')
-                ->sort()
-                ->values()
-                ->toArray();
-        });
+        // Get dynamic categories based on current filters
+        $categories = $this->getAvailableCategories();
 
         return view('livewire.rack-browser', [
             'racks' => $racks,

@@ -244,7 +244,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                     </svg>
-                    Device Chain
+                    {{ $rack->title }}
                 </h2>
                 
                 <!-- Chain View Container -->
@@ -267,30 +267,6 @@
 
                     <!-- Root Rack Node -->
                     <div class="mb-8">
-                        <!-- Root Node -->
-                        <div class="bg-ableton-black rounded-lg p-6 border-2 border-ableton-warning shadow-lg">
-                            <div class="flex items-center gap-4">
-                                <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-ableton-warning">
-                                    <svg class="w-6 h-6 text-ableton-black" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <span class="font-bold text-ableton-light text-lg">{{ $rack->title }}</span>
-                                        <span class="text-xs px-3 py-1 rounded-full bg-ableton-gray text-ableton-light">
-                                            {{ $rackData['type'] === 'AudioEffectGroupDevice' ? 'Audio Effect Rack' : ($rackData['type'] === 'InstrumentGroupDevice' ? 'Instrument Rack' : 'MIDI Effect Rack') }}
-                                        </span>
-                                    </div>
-                                    @if(!empty($rackData['chains']))
-                                        <div class="text-sm text-ableton-light/70">
-                                            {{ count($rackData['chains']) }} {{ Str::plural('chain', count($rackData['chains'])) }} • 
-                                            {{ collect($rackData['chains'])->sum(fn($chain) => count($chain['devices'])) }} total devices
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Clean Chain Layout -->
                         @if(!empty($rackData['chains']))
