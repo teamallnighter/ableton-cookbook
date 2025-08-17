@@ -1,59 +1,12 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-app-layout>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {{-- Breadcrumbs --}}
+        <x-breadcrumbs :items="[
+            ['name' => 'Home', 'url' => route('home')],
+            ['name' => 'Upload Rack', 'url' => route('racks.upload')]
+        ]" />
 
-    <title>Upload Rack - {{ config('app.name', 'Ableton Cookbook') }}</title>
-
-    <!-- Fonts -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/teamallnighter/abletonSans@latest/abletonSans.css">
-
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="font-sans antialiased" style="background-color: #C3C3C3;">
-    <!-- Navigation -->
-    <nav class="shadow-sm border-b-2" style="background-color: #0D0D0D; border-color: #01CADA;">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="{{ route('home') }}" class="flex items-center">
-                        <span class="text-xl font-bold" style="color: #ffdf00;">🎵 Ableton Cookbook</span>
-                    </a>
-                </div>
-
-                <!-- Auth Links -->
-                <div class="flex items-center space-x-4">
-                    @auth
-                        <a href="{{ route('profile') }}" style="color: #BBBBBB;" class="hover:text-opacity-80 transition-colors">
-                            My Profile
-                        </a>
-                        <a href="{{ route('dashboard') }}" style="color: #BBBBBB;" class="hover:text-opacity-80 transition-colors">
-                            Dashboard
-                        </a>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" style="color: #BBBBBB;" class="hover:text-opacity-80 transition-colors">
-                                Logout
-                            </button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" style="color: #BBBBBB;" class="hover:text-opacity-80 transition-colors">
-                            Login
-                        </a>
-                        <a href="{{ route('register') }}" style="background-color: #01CADA; color: #0D0D0D;" class="px-4 py-2 rounded-lg hover:opacity-90 transition-opacity font-semibold">
-                            Register
-                        </a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Progress Indicator -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <!-- Progress Indicator -->
         <div class="flex items-center justify-center mb-8">
             <div class="flex items-center space-x-4">
                 <!-- Step 1: Upload (Active) -->
@@ -87,10 +40,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <!-- Main Content -->
         <div class="card card-body text-center">
             <h1 class="text-3xl font-bold mb-2 text-black">Upload Your Ableton Rack</h1>
             <p class="text-gray-600 mb-8">Share your creative racks with the community</p>
@@ -255,5 +206,4 @@
             uploadSpinner.classList.remove('hidden');
         });
     </script>
-</body>
-</html>
+</x-app-layout>
