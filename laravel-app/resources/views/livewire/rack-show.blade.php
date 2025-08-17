@@ -348,10 +348,73 @@
                                             @endif
                                         </div>
                                         
-                                        <!-- Devices in Chain -->
+                                        <!-- Chain Content -->
                                         <div x-show="expanded" x-collapse class="bg-gray-50 border-t-2 border-black">
-                                            @if(!empty($chain['devices']))
+                                            @if(!empty($chain['nested_chains']) || !empty($chain['devices']))
                                                 <!-- Tree Structure -->
+                                                    {{-- Render nested chains first --}}
+                                                    @if(!empty($chain['nested_chains']))
+                                                        @foreach($chain['nested_chains'] as $nestedChainIndex => $nestedChain)
+                                                            <div class="border-2 border-vibrant-cyan rounded-lg overflow-hidden mb-4" x-data="{ nestedExpanded: false }">
+                                                                <!-- Nested Chain Header -->
+                                                                <div class="bg-vibrant-cyan/10 p-4 cursor-pointer hover:bg-vibrant-cyan/20 transition-all border-b-2 border-vibrant-cyan" @click="nestedExpanded = !nestedExpanded">
+                                                                    <div class="flex items-center justify-between">
+                                                                        <div class="flex items-center gap-4">
+                                                                            <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-vibrant-cyan">
+                                                                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                                                    <path d="M7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/>
+                                                                                </svg>
+                                                                            </div>
+                                                                            <div>
+                                                                                <h3 class="text-lg font-bold text-black">
+                                                                                    {{ $nestedChain['name'] ?? 'Nested Chain ' . ($nestedChainIndex + 1) }}
+                                                                                </h3>
+                                                                                <p class="text-sm text-gray-600">
+                                                                                    {{ count($nestedChain['devices'] ?? []) }} {{ Str::plural('device', count($nestedChain['devices'] ?? [])) }}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <!-- Expand Icon -->
+                                                                        <svg class="w-5 h-5 text-black transform transition-transform duration-200" :class="nestedExpanded ? 'rotate-90' : ''" fill="none" stroke="currentColor">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                                        </svg>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <!-- Nested Chain Devices -->
+                                                                <div x-show="nestedExpanded" x-collapse class="bg-white border-t-2 border-vibrant-cyan">
+                                                                    @if(!empty($nestedChain['devices']))
+                                                                        <div class="p-4 space-y-3">
+                                                                            @foreach($nestedChain['devices'] as $nestedDevice)
+                                                                                <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-3 hover:shadow-md transition-shadow">
+                                                                                    <div class="flex items-center gap-3">
+                                                                                        <svg class="w-5 h-5 text-vibrant-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                                                            <circle cx="12" cy="12" r="3"/>
+                                                                                            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                                                                                        </svg>
+                                                                                        <div class="flex-1">
+                                                                                            <div class="flex items-center gap-2 flex-wrap">
+                                                                                                <span class="font-medium text-black">{{ $nestedDevice['display_name'] ?? $nestedDevice['name'] }}</span>
+                                                                                                @if(isset($nestedDevice['type']))
+                                                                                                    <span class="text-xs text-gray-600">{{ $nestedDevice['type'] }}</span>
+                                                                                                @endif
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            @endforeach
+                                                                        </div>
+                                                                    @else
+                                                                        <div class="text-center text-gray-500 text-sm py-6">Empty nested chain</div>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    @endif
+                                                    
+                                                    {{-- Then render regular devices --}}
+                                                    @if(!empty($chain['devices']))
+
                                                 <div class="p-6 space-y-4">
                                                     @foreach($chain['devices'] as $deviceIndex => $device)
                                                         <div class="relative">
@@ -472,6 +535,7 @@
                                             @else
                                                 <div class="text-center text-ableton-light/60 text-sm py-6">
                                                     No devices in this chain
+                                                    @endif {{-- End regular devices --}}
                                                 </div>
                                             @endif
                                         </div>

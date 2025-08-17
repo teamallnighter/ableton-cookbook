@@ -6,9 +6,9 @@ use App\Models\Rack;
 use App\Models\RackRating;
 use App\Models\RackFavorite;
 use App\Models\RackReport;
-use App\Notifications\RackRatedNotification;
 use App\Jobs\IncrementRackViewsJob;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
 
@@ -32,96 +32,49 @@ class RackShow extends Component
         // Increment view count asynchronously to avoid blocking response
         IncrementRackViewsJob::dispatch($this->rack->id);
         
-        // Parse rack structure for tree view with caching
         $this->parseRackStructure();
         
-        // Batch load user interactions to avoid N+1 queries
-        $this->loadUserInteractions();
-    }
-
-    public function downloadRack()
-    {
-        // Increment download count
-        $this->rack->increment('downloads_count');
-        
-        // Return download response
-        if ($this->rack->file_path && Storage::disk('private')->exists($this->rack->file_path)) {
-            return Storage::disk('private')->download(
-                $this->rack->file_path,
-                $this->rack->original_filename ?: $this->rack->slug . '.adg'
-            );
+        if (Auth::check()) {
+            // Load user's current rating for this rack
+            $userRating = RackRating::where('rack_id', $this->rack->id)
+                ->where('user_id', Auth::id())
+                ->first();
+            
+            if ($userRating) {
+                $this->userRating = $userRating->rating;
+            }
+            
+            // Check if user has favorited this rack
+            $this->isFavorited = RackFavorite::where('rack_id', $this->rack->id)
+                ->where('user_id', Auth::id())
+                ->exists();
         }
-        
-        session()->flash('error', 'Rack file not found.');
     }
 
     public function rateRack($rating)
     {
-        if (!auth()->check()) {
-            session()->flash('error', 'You must be logged in to rate racks.');
+        if (!Auth::check()) {
+            $this->dispatch('show-login-modal');
             return;
         }
 
-        if ($rating < 1 || $rating > 5) {
-            session()->flash('error', 'Invalid rating. Please select 1-5 stars.');
-            return;
-        }
+        $this->userRating = $rating;
 
-        // Create or update the user's rating
+        // Create or update the rating
         RackRating::updateOrCreate(
             [
                 'rack_id' => $this->rack->id,
-                'user_id' => auth()->id()
+                'user_id' => Auth::id(),
             ],
             [
-                'rating' => $rating
+                'rating' => $rating,
             ]
         );
 
         // Update the rack's cached rating statistics
         $this->updateRackRatingStats();
         
-        // Send notification to rack owner (if not rating their own rack)
-        if (auth()->id() !== $this->rack->user_id) {
-            $this->rack->user->notify(new RackRatedNotification($this->rack, auth()->user(), $rating));
-        }
-        
-        // Clear cache and update local state
-        $this->clearUserInteractionsCache();
-        $this->userRating = $rating;
-        $this->rack->refresh();
-        
-        session()->flash('success', 'Thank you for rating this rack!');
-    }
-
-    public function toggleFavorite()
-    {
-        if (!auth()->check()) {
-            session()->flash('error', 'You must be logged in to favorite racks.');
-            return;
-        }
-
-        $favorite = RackFavorite::where('rack_id', $this->rack->id)
-            ->where('user_id', auth()->id())
-            ->first();
-
-        if ($favorite) {
-            // Remove favorite
-            $favorite->delete();
-            $this->isFavorited = false;
-            session()->flash('success', 'Removed from favorites!');
-        } else {
-            // Add favorite
-            RackFavorite::create([
-                'rack_id' => $this->rack->id,
-                'user_id' => auth()->id()
-            ]);
-            $this->isFavorited = true;
-            session()->flash('success', 'Added to favorites!');
-        }
-        
-        // Clear user interactions cache after favorite change
-        $this->clearUserInteractionsCache();
+        $this->dispatch('rating-updated');
     }
 
     public function setHoveredStar($star)
@@ -134,10 +87,65 @@ class RackShow extends Component
         $this->hoveredStar = 0;
     }
 
+    private function updateRackRatingStats()
+    {
+        $ratings = RackRating::where('rack_id', $this->rack->id)->get();
+        
+        $this->rack->update([
+            'average_rating' => $ratings->avg('rating'),
+            'ratings_count' => $ratings->count(),
+        ]);
+        
+        // Clear related caches
+        Cache::forget("rack_structure_{$this->rack->id}");
+    }
+
+    public function toggleFavorite()
+    {
+        if (!Auth::check()) {
+            $this->dispatch('show-login-modal');
+            return;
+        }
+
+        $favorite = RackFavorite::where('rack_id', $this->rack->id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if ($favorite) {
+            $favorite->delete();
+            $this->isFavorited = false;
+            $this->dispatch('favorite-removed');
+        } else {
+            RackFavorite::create([
+                'rack_id' => $this->rack->id,
+                'user_id' => Auth::id(),
+            ]);
+            $this->isFavorited = true;
+            $this->dispatch('favorite-added');
+        }
+    }
+
+    public function downloadRack()
+    {
+        if (!Auth::check()) {
+            $this->dispatch('show-login-modal');
+            return;
+        }
+
+        // Increment download count
+        $this->rack->increment('downloads_count');
+        
+        // Return download response
+        return response()->download(
+            Storage::disk('private')->path($this->rack->file_path),
+            $this->rack->title . '.adg'
+        );
+    }
+
     public function openReportModal()
     {
-        if (!auth()->check()) {
-            session()->flash('error', 'You must be logged in to report issues.');
+        if (!Auth::check()) {
+            $this->dispatch('show-login-modal');
             return;
         }
         
@@ -155,113 +163,31 @@ class RackShow extends Component
 
     public function submitReport()
     {
-        if (!auth()->check()) {
-            session()->flash('error', 'You must be logged in to report issues.');
-            return;
-        }
-
         $this->validate([
             'reportIssueType' => 'required|string',
-            'reportDescription' => 'required|string|min:10|max:1000',
-        ], [
-            'reportIssueType.required' => 'Please select an issue type.',
-            'reportDescription.required' => 'Please describe the issue.',
-            'reportDescription.min' => 'Description must be at least 10 characters.',
-            'reportDescription.max' => 'Description cannot exceed 1000 characters.',
+            'reportDescription' => 'required|string|min:10|max:500',
         ]);
-
-        // Check if user already reported this rack recently
-        $existingReport = RackReport::where('rack_id', $this->rack->id)
-            ->where('user_id', auth()->id())
-            ->where('created_at', '>=', now()->subHours(24))
-            ->first();
-
-        if ($existingReport) {
-            session()->flash('error', 'You already reported this rack within the last 24 hours.');
-            return;
-        }
 
         RackReport::create([
             'rack_id' => $this->rack->id,
-            'user_id' => auth()->id(),
+            'reporter_id' => Auth::id(),
             'issue_type' => $this->reportIssueType,
             'description' => $this->reportDescription,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         $this->closeReportModal();
-        session()->flash('success', 'Thank you for your report. We\'ll review it and take appropriate action.');
+        $this->dispatch('report-submitted');
     }
 
-    public function deleteRack()
+    public function shareRack()
     {
-        if (!auth()->check() || auth()->id() !== $this->rack->user_id) {
-            session()->flash('error', 'You are not authorized to delete this rack.');
-            return;
-        }
-
-        // Delete the file from storage
-        if ($this->rack->file_path && Storage::disk('private')->exists($this->rack->file_path)) {
-            Storage::disk('private')->delete($this->rack->file_path);
-        }
-
-        // Delete related records (ratings, favorites, etc.)
-        $this->rack->ratings()->delete();
-        $this->rack->favorites()->delete();
-        $this->rack->tags()->detach();
-
-        // Delete the rack record
-        $this->rack->delete();
-
-        session()->flash('success', 'Rack deleted successfully.');
+        $url = url("/racks/{$this->rack->id}");
         
-        // Redirect to user's profile or home
-        return redirect()->route('profile');
-    }
-
-    private function loadUserInteractions()
-    {
-        if (auth()->check()) {
-            // Cache user interactions for 5 minutes to avoid repeated queries
-            $interactions = Cache::remember(
-                "user_interactions_{$this->rack->id}_" . auth()->id(), 
-                300, 
-                function() {
-                    $rating = RackRating::where('rack_id', $this->rack->id)
-                        ->where('user_id', auth()->id())
-                        ->value('rating');
-                    
-                    $favorited = RackFavorite::where('rack_id', $this->rack->id)
-                        ->where('user_id', auth()->id())
-                        ->exists();
-                    
-                    return [
-                        'rating' => $rating ?: 0,
-                        'favorited' => $favorited
-                    ];
-                }
-            );
-            
-            $this->userRating = $interactions['rating'];
-            $this->isFavorited = $interactions['favorited'];
-        }
-    }
-
-    private function updateRackRatingStats()
-    {
-        $ratings = RackRating::where('rack_id', $this->rack->id)->get();
-        
-        $this->rack->update([
-            'average_rating' => $ratings->avg('rating') ?: 0,
-            'ratings_count' => $ratings->count()
+        $this->dispatch('copy-to-clipboard', [
+            'text' => $url,
+            'message' => 'Rack URL copied to clipboard!'
         ]);
-    }
-
-    private function clearUserInteractionsCache()
-    {
-        if (auth()->check()) {
-            Cache::forget("user_interactions_{$this->rack->id}_" . auth()->id());
-        }
     }
 
     private function parseRackStructure()
@@ -277,8 +203,11 @@ class RackShow extends Component
                         ? $this->rack->chains 
                         : json_decode($this->rack->chains, true);
                     
+                    // Apply recursive flattening to all levels
+                    $flattenedChains = $this->flattenAllRackStructures($chains);
+                    
                     return [
-                        'chains' => $chains,
+                        'chains' => $flattenedChains,
                         'type' => $this->rack->rack_type
                     ];
                 } elseif ($this->rack->devices) {
@@ -299,35 +228,152 @@ class RackShow extends Component
         );
     }
 
+    /**
+     * Recursively flatten Audio Effect Rack structures at ALL levels
+     */
+    private function flattenAllRackStructures($chains)
+    {
+        // First, flatten the main level wrapper
+        $chains = $this->flattenMainWrapperLevel($chains);
+        
+        // Then, recursively process each chain to flatten nested structures
+        foreach ($chains as &$chain) {
+            $chain = $this->processChainRecursively($chain);
+        }
+        
+        return $chains;
+    }
+
+    /**
+     * Flatten main wrapper level (top-level fix)
+     */
+    private function flattenMainWrapperLevel($chains)
+    {
+        // Check if we have the main wrapper pattern:
+        // - Single chain containing single Audio Effect Rack device with chains
+        if (count($chains) === 1 && 
+            isset($chains[0]['devices']) && 
+            count($chains[0]['devices']) === 1) {
+            
+            $device = $chains[0]['devices'][0];
+            
+            // If the single device is an Audio Effect Rack with chains, flatten it
+            if (isset($device['type']) && 
+                $device['type'] === 'AudioEffectGroupDevice' &&
+                isset($device['chains']) && 
+                !empty($device['chains'])) {
+                
+                // Return the device's chains as the main rack chains
+                return $device['chains'];
+            }
+        }
+        
+        return $chains;
+    }
+
+    /**
+     * Process a single chain and flatten any nested Audio Effect Racks
+     */
+    private function processChainRecursively($chain)
+    {
+        if (!isset($chain['devices']) || empty($chain['devices'])) {
+            return $chain;
+        }
+
+        $processedDevices = [];
+        $hasNestedChains = false;
+        $nestedChains = [];
+
+        foreach ($chain['devices'] as $device) {
+            if (isset($device['type']) && 
+                $device['type'] === 'AudioEffectGroupDevice' &&
+                isset($device['chains']) && 
+                !empty($device['chains'])) {
+                
+                // This device is an Audio Effect Rack with chains
+                // Instead of showing it as a device, promote its chains
+                $hasNestedChains = true;
+                
+                foreach ($device['chains'] as $nestedChain) {
+                    // Recursively process nested chains
+                    $nestedChains[] = $this->processChainRecursively($nestedChain);
+                }
+            } else {
+                // Regular device - keep it
+                $processedDevices[] = $this->improveDeviceInfo($device);
+            }
+        }
+
+        // If we found nested chains, replace devices with nested chains
+        if ($hasNestedChains) {
+            $chain['nested_chains'] = $nestedChains;
+            $chain['devices'] = $processedDevices; // Keep any regular devices too
+        } else {
+            $chain['devices'] = $processedDevices;
+        }
+
+        return $chain;
+    }
+
+    /**
+     * Improve device information display
+     */
+    private function improveDeviceInfo($device)
+    {
+        // Map internal names to user-friendly names
+        $deviceNameMap = [
+            'StereoGain' => 'Utility',
+            'Eq8' => 'EQ Eight',
+            'AudioEffectGroupDevice' => 'Audio Effect Rack',
+        ];
+        
+        // Use type-based mapping first, then standard_name as fallback
+        if (isset($device['type']) && isset($deviceNameMap[$device['type']])) {
+            $device['display_name'] = $deviceNameMap[$device['type']];
+        } elseif (isset($device['standard_name'])) {
+            $device['display_name'] = $device['standard_name'];
+        } else {
+            $device['display_name'] = $device['name'] ?? 'Unknown Device';
+        }
+        
+        return $device;
+    }
+
     private function groupDevicesIntoChains($devices)
     {
         // Group devices into a single chain for display
         return [
             [
                 'name' => 'Chain 1',
-                'devices' => $devices
+                'devices' => $devices,
+                'is_soloed' => false,
+                'annotations' => ['tags' => [], 'purpose' => null, 'key_range' => null, 'description' => null, 'velocity_range' => null],
+                'chain_index' => 0,
             ]
         ];
     }
 
     private function reAnalyzeRackStructure()
     {
-        if ($this->rack->file_path && Storage::disk('private')->exists($this->rack->file_path)) {
+        if (Storage::disk('private')->exists($this->rack->file_path)) {
             try {
                 $filePath = Storage::disk('private')->path($this->rack->file_path);
                 $xml = \App\Services\AbletonRackAnalyzer\AbletonRackAnalyzer::decompressAndParseAbletonFile($filePath);
                 $analysis = \App\Services\AbletonRackAnalyzer\AbletonRackAnalyzer::parseChainsAndDevices($xml, $this->rack->title, false);
                 
                 if ($analysis && isset($analysis['chains'])) {
+                    // Apply recursive flattening to analyzed data
+                    $flattenedChains = $this->flattenAllRackStructures($analysis['chains']);
+                    
                     $rackData = [
-                        'chains' => $analysis['chains'],
+                        'chains' => $flattenedChains,
                         'type' => $this->rack->rack_type
                     ];
                     
                     // Update the rack with analyzed data for future use
                     $this->rack->update([
-                        'chains' => json_encode($analysis['chains']),
-                        'devices' => json_encode($this->flattenDevices($analysis['chains']))
+                        'chains' => json_encode($flattenedChains),
+                        'devices' => json_encode($this->flattenDevices($flattenedChains))
                     ]);
                     
                     return $rackData;
