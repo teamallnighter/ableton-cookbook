@@ -222,3 +222,6 @@ test_*.php
 # Development and internal files
 WARP.md
 CLAUDE.md
+docs/
+nginx-config.conf
+supervisor-config.conf
