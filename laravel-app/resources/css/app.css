@@ -58,6 +58,24 @@
     }
     
     .edition-intro {
+
+    /* Ableton SVG badges - using SVG icons */
+    .ableton-edition-svg {
+        @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-white border;
+    }
+    
+    .ableton-intro-svg {
+        @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-yellow-50 border border-yellow-200 text-yellow-800;
+    }
+    
+    .ableton-standard-svg {
+        @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-blue-50 border border-blue-200 text-blue-800;
+    }
+    
+    .ableton-suite-svg {
+        @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-pink-50 border border-pink-200 text-pink-800;
+    }
+
         @apply px-3 py-1 text-xs font-medium rounded-full bg-vibrant-orange text-white;
     }
     
