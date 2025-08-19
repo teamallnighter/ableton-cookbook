@@ -83,3 +83,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/racks/{rack}/metadata', [App\Http\Controllers\RackAnnotationController::class, 'metadata'])->name('racks.metadata');
     Route::post('/racks/{rack}/publish', [App\Http\Controllers\RackAnnotationController::class, 'publish'])->name('racks.publish');
 });
+
+// Issue Reporting System Routes
+Route::prefix('issues')->name('issues.')->group(function () {
+    // Public routes
+    Route::get('/', [App\Http\Controllers\IssueController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\IssueController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\IssueController::class, 'store'])->name('store');
+    Route::get('/{issue}', [App\Http\Controllers\IssueController::class, 'show'])->name('show');
+    
+    // Authenticated routes
+    Route::middleware('auth')->group(function () {
+        Route::post('/{issue}/comments', [App\Http\Controllers\IssueController::class, 'addComment'])->name('comments.store');
+    });
+});
+
+// Admin issue management routes
+Route::middleware(['auth', 'admin'])->prefix('admin/issues')->name('admin.issues.')->group(function () {
+    Route::get('/', [App\Http\Controllers\IssueController::class, 'adminIndex'])->name('index');
+    Route::get('/{issue}', [App\Http\Controllers\IssueController::class, 'adminShow'])->name('show');
+    Route::patch('/{issue}', [App\Http\Controllers\IssueController::class, 'update'])->name('update');
+});
+
+// Quick report routes for specific racks
+Route::get('/racks/{rack}/report', [App\Http\Controllers\IssueController::class, 'create'])
+    ->name('racks.report');

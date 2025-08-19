@@ -188,4 +188,20 @@ class User extends Authenticatable implements MustVerifyEmail
                 ->avg('average_rating'),
         ];
     }
+
+    /**
+     * Get the user's submitted issues
+     */
+    public function issues(): HasMany
+    {
+        return $this->hasMany(\App\Models\Issue::class);
+    }
+
+    /**
+     * Get the user's issue comments
+     */
+    public function issueComments(): HasMany
+    {
+        return $this->hasMany(\App\Models\IssueComment::class);
+    }
 }
