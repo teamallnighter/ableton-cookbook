@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Gate;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
+/**
+ * @OA\Tag(
+ *     name="Racks",
+ *     description="API Endpoints for managing Ableton Live racks"
+ * )
+ */
 class RackController extends Controller
 {
     protected RackProcessingService $rackService;
@@ -21,7 +27,70 @@ class RackController extends Controller
     }
 
     /**
-     * Display a listing of racks with advanced filtering
+     * @OA\Get(
+     *     path="/api/v1/racks",
+     *     summary="Get a list of racks",
+     *     description="Retrieve a paginated list of published racks with optional filtering and sorting",
+     *     operationId="getRacks",
+     *     tags={"Racks"},
+     *     @OA\Parameter(
+     *         name="filter[rack_type]",
+     *         in="query",
+     *         description="Filter by rack type (instrument, audio_effect, midi_effect)",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"instrument", "audio_effect", "midi_effect"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="filter[user_id]",
+     *         in="query",
+     *         description="Filter by user ID",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="filter[tags]",
+     *         in="query",
+     *         description="Filter by tags (comma-separated)",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="filter[rating]",
+     *         in="query",
+     *         description="Filter by minimum rating",
+     *         required=false,
+     *         @OA\Schema(type="number", format="float", minimum=0, maximum=5)
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         description="Sort by field (prefix with - for descending)",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"-created_at", "created_at", "-downloads_count", "downloads_count", "-average_rating", "average_rating", "-views_count", "views_count"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=100, default=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(type="object")
+     *             ),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer")
+     *         )
+     *     )
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -52,7 +121,77 @@ class RackController extends Controller
     }
 
     /**
-     * Store a newly created rack
+     * @OA\Post(
+     *     path="/api/v1/racks",
+     *     summary="Upload a new rack",
+     *     description="Create a new rack by uploading an Ableton device group (.adg) file",
+     *     operationId="createRack",
+     *     tags={"Racks"},
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="file",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="Ableton device group (.adg) file"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="title",
+     *                     type="string",
+     *                     maxLength=255,
+     *                     description="Rack title"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="description",
+     *                     type="string",
+     *                     maxLength=1000,
+     *                     description="Rack description"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="tags",
+     *                     type="array",
+     *                     maxItems=10,
+     *                     @OA\Items(type="string", maxLength=50),
+     *                     description="Tags for the rack"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="is_public",
+     *                     type="boolean",
+     *                     description="Whether the rack is public"
+     *                 ),
+     *                 required={"file", "title"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Rack created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="rack", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Duplicate rack file",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="rack", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error or processing failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="error", type="string")
+     *         )
+     *     )
+     * )
      */
     public function store(Request $request): JsonResponse
     {
@@ -96,31 +235,158 @@ class RackController extends Controller
     }
 
     /**
-     * Display the specified rack
+     * @OA\Get(
+     *     path="/api/v1/racks/{id}",
+     *     summary="Get a specific rack",
+     *     description="Retrieve details of a specific rack by ID",
+     *     operationId="getRack",
+     *     tags={"Racks"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Rack not found"
+     *     )
+     * )
      */
     public function show(Rack $rack): JsonResponse
     {
-        if (!$rack->is_public && $rack->user_id !== auth()->id()) {
-            abort(403, 'This rack is private.');
-        }
-
+        $rack->load(['user:id,name,profile_photo_path,created_at', 'tags', 'comments.user:id,name,profile_photo_path']);
         $rack->increment('views_count');
-
-        $rack->load([
-            'user:id,name,profile_photo_path',
-            'tags',
-            'ratings' => function ($query) {
-                $query->with('user:id,name,profile_photo_path')
-                    ->latest()
-                    ->limit(10);
-            },
-        ]);
-
+        
         return response()->json($rack);
     }
 
     /**
-     * Update the specified rack
+     * @OA\Get(
+     *     path="/api/v1/racks/trending",
+     *     summary="Get trending racks",
+     *     description="Retrieve racks that are currently trending",
+     *     operationId="getTrendingRacks",
+     *     tags={"Racks"},
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Number of results to return",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=50, default=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function trending(Request $request): JsonResponse
+    {
+        $limit = $request->get('limit', 20);
+        
+        $racks = Rack::published()
+            ->with(['user:id,name,profile_photo_path', 'tags'])
+            ->where('created_at', '>=', now()->subWeeks(2))
+            ->orderByDesc('downloads_count')
+            ->orderByDesc('average_rating')
+            ->limit($limit)
+            ->get();
+
+        return response()->json($racks);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/racks/featured",
+     *     summary="Get featured racks",
+     *     description="Retrieve racks that are featured by administrators",
+     *     operationId="getFeaturedRacks",
+     *     tags={"Racks"},
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Number of results to return",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=50, default=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function featured(Request $request): JsonResponse
+    {
+        $limit = $request->get('limit', 20);
+        
+        $racks = Rack::featured()
+            ->published()
+            ->with(['user:id,name,profile_photo_path', 'tags'])
+            ->orderByDesc('featured_at')
+            ->limit($limit)
+            ->get();
+
+        return response()->json($racks);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/racks/{id}",
+     *     summary="Update a rack",
+     *     description="Update rack details (owner only)",
+     *     operationId="updateRack",
+     *     tags={"Racks"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="title", type="string", maxLength=255),
+     *             @OA\Property(property="description", type="string", maxLength=1000),
+     *             @OA\Property(property="is_public", type="boolean"),
+     *             @OA\Property(
+     *                 property="tags",
+     *                 type="array",
+     *                 maxItems=10,
+     *                 @OA\Items(type="string", maxLength=50)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Rack updated successfully",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - not the owner"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Rack not found"
+     *     )
+     * )
      */
     public function update(Request $request, Rack $rack): JsonResponse
     {
@@ -135,98 +401,128 @@ class RackController extends Controller
         ]);
 
         $rack->update($request->only(['title', 'description', 'is_public']));
-
+        
         if ($request->has('tags')) {
-            $this->rackService->attachTags($rack, $request->tags);
+            $this->rackService->syncTags($rack, $request->tags);
         }
 
-        return response()->json([
-            'message' => 'Rack updated successfully!',
-            'rack' => $rack->fresh(['user:id,name,profile_photo_path', 'tags']),
-        ]);
+        $rack->load(['user:id,name,profile_photo_path', 'tags']);
+
+        return response()->json($rack);
     }
 
     /**
-     * Remove the specified rack
+     * @OA\Delete(
+     *     path="/api/v1/racks/{id}",
+     *     summary="Delete a rack",
+     *     description="Delete a rack (owner only)",
+     *     operationId="deleteRack",
+     *     tags={"Racks"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Rack deleted successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - not the owner"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Rack not found"
+     *     )
+     * )
      */
     public function destroy(Rack $rack): JsonResponse
     {
         Gate::authorize('delete', $rack);
-
-        $rack->delete();
-
-        return response()->json([
-            'message' => 'Rack deleted successfully!',
-        ]);
-    }
-
-    /**
-     * Download a rack
-     */
-    public function download(Rack $rack): JsonResponse
-    {
-        if (!$rack->is_public && $rack->user_id !== auth()->id()) {
-            abort(403, 'This rack is private.');
-        }
-
-        $rack->recordDownload(auth()->user());
-
-        return response()->json([
-            'download_url' => $rack->getDownloadUrl(),
-        ]);
-    }
-
-    /**
-     * Like/unlike a rack
-     */
-    public function toggleLike(Rack $rack): JsonResponse
-    {
-        $user = auth()->user();
         
-        if ($user->hasLiked($rack)) {
-            $user->unlike($rack);
-            $message = 'Rack unliked!';
-        } else {
-            $user->like($rack);
-            $message = 'Rack liked!';
-        }
+        $this->rackService->deleteRack($rack);
+        
+        return response()->json(null, 204);
+    }
 
-        $rack->increment('likes_count');
-
+    /**
+     * @OA\Post(
+     *     path="/api/v1/racks/{id}/like",
+     *     summary="Toggle like on a rack",
+     *     description="Like or unlike a rack",
+     *     operationId="toggleLikeRack",
+     *     tags={"Racks"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Like toggled successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="liked", type="boolean"),
+     *             @OA\Property(property="likes_count", type="integer")
+     *         )
+     *     )
+     * )
+     */
+    public function toggleLike(Request $request, Rack $rack): JsonResponse
+    {
+        $user = $request->user();
+        $liked = $user->toggleLike($rack);
+        
         return response()->json([
-            'message' => $message,
-            'likes_count' => $rack->likes_count,
+            'liked' => $liked,
+            'likes_count' => $rack->fresh()->likesCount,
         ]);
     }
 
     /**
-     * Get trending racks
+     * @OA\Post(
+     *     path="/api/v1/racks/{id}/download",
+     *     summary="Download a rack",
+     *     description="Track a rack download and return download URL",
+     *     operationId="downloadRack",
+     *     tags={"Racks"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Download initiated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="download_url", type="string"),
+     *             @OA\Property(property="filename", type="string")
+     *         )
+     *     )
+     * )
      */
-    public function trending(): JsonResponse
+    public function download(Request $request, Rack $rack): JsonResponse
     {
-        $racks = Rack::published()
-            ->with(['user:id,name,profile_photo_path', 'tags'])
-            ->where('created_at', '>=', now()->subDays(7))
-            ->orderByDesc('downloads_count')
-            ->orderByDesc('views_count')
-            ->limit(20)
-            ->get();
+        // Track the download
+        $rack->increment('downloads_count');
+        $rack->downloads()->create([
+            'user_id' => $request->user()->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
-        return response()->json($racks);
-    }
-
-    /**
-     * Get featured racks
-     */
-    public function featured(): JsonResponse
-    {
-        $racks = Rack::published()
-            ->featured()
-            ->with(['user:id,name,profile_photo_path', 'tags'])
-            ->orderByDesc('created_at')
-            ->limit(12)
-            ->get();
-
-        return response()->json($racks);
+        return response()->json([
+            'download_url' => $rack->download_url,
+            'filename' => $rack->original_filename,
+        ]);
     }
 }

@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * @OA\Schema(
+ *     schema="Tag",
+ *     type="object",
+ *     title="Tag",
+ *     description="Tag model",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="name", type="string", example="bass"),
+ *     @OA\Property(property="slug", type="string", example="bass"),
+ *     @OA\Property(property="description", type="string", nullable=true)
+ * )
+ */
+
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;

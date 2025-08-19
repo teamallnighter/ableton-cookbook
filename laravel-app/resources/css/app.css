@@ -4,6 +4,10 @@
 
 [x-cloak] {
     display: none;
+    .badge-tag-small {
+        @apply px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700 border border-gray-200;
+    }
+
 }
 
 /* Clean, Simple Design System */
@@ -119,4 +123,8 @@
     .chain-icon {
         @apply w-6 h-6 text-black;
     }
+    .badge-tag-small {
+        @apply px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700 border border-gray-200;
+    }
+
 }

@@ -186,6 +186,20 @@
                     <!-- Description -->
                     <p class="text-sm mb-4 line-clamp-2 flex-1 text-gray-700 leading-relaxed">{{ $rack->description }}</p>
                     
+                    <!-- Tags -->
+                    @if($rack->tags->count() > 0)
+                        <div class="mb-3">
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($rack->tags->take(3) as $tag)
+                                    <span class="badge-tag-small">{{ $tag->name }}</span>
+                                @endforeach
+                                @if($rack->tags->count() > 3)
+                                    <span class="text-xs text-gray-500">+{{ $rack->tags->count() - 3 }} more</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                    
                     <!-- Bottom Info -->
                     <div class="mt-auto">
                         <!-- Badges Row -->
@@ -200,7 +214,7 @@
                             <!-- Category -->
                             @if($rack->category)
                                 <span class="badge-category">
-                                    {{ $rack->category }}
+                                    {{ $rack->category_display }}
                                 </span>
                             @endif
                         </div>

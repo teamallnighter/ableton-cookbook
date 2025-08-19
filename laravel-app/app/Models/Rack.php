@@ -1,5 +1,42 @@
 <?php
 
+/**
+ * @OA\Schema(
+ *     schema="Rack",
+ *     type="object",
+ *     title="Rack",
+ *     description="Ableton Live rack model",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="uuid", type="string", format="uuid"),
+ *     @OA\Property(property="title", type="string", example="Epic Bass Rack"),
+ *     @OA\Property(property="description", type="string", example="A powerful bass rack with multiple layers"),
+ *     @OA\Property(property="slug", type="string", example="epic-bass-rack"),
+ *     @OA\Property(property="rack_type", type="string", enum={"instrument", "audio_effect", "midi_effect"}),
+ *     @OA\Property(property="category", type="string", example="bass"),
+ *     @OA\Property(property="device_count", type="integer", example=5),
+ *     @OA\Property(property="chain_count", type="integer", example=3),
+ *     @OA\Property(property="ableton_version", type="string", example="11.3.4"),
+ *     @OA\Property(property="average_rating", type="number", format="float", example=4.5),
+ *     @OA\Property(property="ratings_count", type="integer", example=25),
+ *     @OA\Property(property="downloads_count", type="integer", example=150),
+ *     @OA\Property(property="views_count", type="integer", example=500),
+ *     @OA\Property(property="comments_count", type="integer", example=12),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time"),
+ *     @OA\Property(property="published_at", type="string", format="date-time"),
+ *     @OA\Property(
+ *         property="user",
+ *         ref="#/components/schemas/User"
+ *     ),
+ *     @OA\Property(
+ *         property="tags",
+ *         type="array",
+ *         @OA\Items(ref="#/components/schemas/Tag")
+ *     )
+ * )
+ */
+
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -78,6 +115,36 @@ class Rack extends Model
     /**
      * Get the tags for the rack
      */
+    /**
+     * Get the display name for the category
+     */
+    public function getCategoryDisplayAttribute()
+    {
+        // Map numeric categories to display names
+        $categoryMap = [
+            "1" => "Lead",
+            "2" => "Bass",
+            "3" => "Drums",
+            "4" => "Pad",
+            "5" => "Arp",
+            "6" => "FX",
+            "7" => "Texture",
+            "8" => "Vocal",
+            "dynamics" => "Dynamics",
+            "time-based" => "Time Based",
+            "modulation" => "Modulation",
+            "spectral" => "Spectral",
+            "filters" => "Filters",
+            "creative-effects" => "Creative Effects",
+            "utility" => "Utility",
+            "mixing" => "Mixing",
+            "distortion" => "Distortion"
+        ];
+        
+        return $categoryMap[$this->category] ?? $this->category;
+    }
+    
+
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'rack_tags');

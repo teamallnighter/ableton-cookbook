@@ -679,13 +679,13 @@
             <li>Download the .adg file</li>
             <li>Open Ableton Live {{ $rack->ableton_version ?? '9+' }}</li>
             <li>Drag the file into your Live Set</li>
-            <li>Start creating music with this {{ $rack->category }} rack</li>
+            <li>Start creating music with this {{ $rack->category_display }} rack</li>
         </ol>
         
         <h3>About the Creator</h3>
         <p>{{ $rack->user->name }} is a talented music producer sharing quality Ableton Live content. Discover more racks and follow their work on Ableton Cookbook.</p>
         
         <h3>Similar Music Production Content</h3>
-        <p>If you enjoyed this {{ $rack->rack_type }} rack, explore more {{ $rack->category }} content, browse racks by {{ $rack->user->name }}, or discover other {{ $rack->rack_type }} racks in our community.</p>
+        <p>If you enjoyed this {{ $rack->rack_type }} rack, explore more {{ $rack->category_display }} content, browse racks by {{ $rack->user->name }}, or discover other {{ $rack->rack_type }} racks in our community.</p>
     </div>
 </div>

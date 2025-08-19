@@ -84,6 +84,7 @@
             @endif
 
             <form method="POST" action="{{ route('racks.update', $rack) }}" class="space-y-6">
+                @method('PUT')
                 @csrf
 
                 <!-- Rack Summary -->
@@ -176,7 +177,7 @@
                     <input type="text" 
                            id="tags" 
                            name="tags" 
-                           value="{{ old('tags') }}" 
+                           value="{{ old('tags', $rack->tags->pluck('name')->implode(', ')) }}" 
                            maxlength="500"
                            placeholder="e.g., vintage, warm, experimental, techno, vocal processing"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vibrant-green focus:border-vibrant-green">
