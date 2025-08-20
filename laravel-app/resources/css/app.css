@@ -67,6 +67,19 @@
     .ableton-edition-svg {
         @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-white border;
     }
+    /* Enhanced Edition badges with Font Awesome icons */
+    .edition-suite .fa-kit.fa-circle-ableton {
+        @apply text-orange-500;
+    }
+    
+    .edition-standard .fa-kit.fa-circle-ableton {
+        @apply text-blue-500;
+    }
+    
+    .edition-intro .fa-kit.fa-circle-ableton {
+        @apply text-gray-500;
+    }
+
     
     .ableton-intro-svg {
         @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-yellow-50 border border-yellow-200 text-yellow-800;

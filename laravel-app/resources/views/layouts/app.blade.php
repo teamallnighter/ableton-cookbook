@@ -32,6 +32,19 @@
 
         {{-- Additional Head Content --}}
         @stack('head')
+
+    {{-- Google Analytics --}}
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZK491B502K"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-ZK491B502K');
+    </script>
+
+
+        {{-- Font Awesome Icons --}}
+        <script src="https://kit.fontawesome.com/0e3bf45d1b.js" crossorigin="anonymous"></script>
     </head>
     <body class="font-sans antialiased bg-gray-100" itemscope itemtype="https://schema.org/WebPage">
         <x-banner />

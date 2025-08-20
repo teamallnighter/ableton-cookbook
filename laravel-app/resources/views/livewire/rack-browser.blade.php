@@ -181,7 +181,7 @@
                     <!-- Bottom Info -->
                     <div class="mt-auto">
                         <!-- Badges Row -->
-                        <div class="flex flex-wrap gap-2">
+                        <div class="flex justify-between items-center w-full">
                             <!-- Ableton Edition -->
                             @if($rack->ableton_edition)
                                 <i class="fa-kit fa-circle-ableton" style="color: {{ $rack->ableton_edition === 'suite' ? '#f97316' : ($rack->ableton_edition === 'standard' ? '#3b82f6' : '#6b7280') }}; font-size: 18px;" title="Live {{ ucfirst($rack->ableton_edition) }}"></i>

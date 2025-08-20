@@ -40,9 +40,59 @@
                     <div class="flex items-center gap-3 ml-4">
                         <!-- Edition Badge -->
                         @if($rack->ableton_edition)
-                            <span class="text-sm px-4 py-2 rounded-full font-medium {{ $rack->ableton_edition === 'suite' ? 'edition-suite' : ($rack->ableton_edition === 'standard' ? 'edition-standard' : 'edition-intro') }}">
-                                Live {{ ucfirst($rack->ableton_edition) }}
-                            </span>
+                            <i class="fa-kit fa-circle-ableton" style="color: {{ $rack->ableton_edition === 'suite' ? '#f97316' : ($rack->ableton_edition === 'standard' ? '#3b82f6' : '#6b7280') }}; font-size: 18px;" title="Live {{ ucfirst($rack->ableton_edition) }}"></i>
+                        @endif
+                        
+                        {{-- Rack Type Badge --}}
+                        @if($rack->rack_type)
+                            @if($rack->rack_type === 'InstrumentGroupDevice')
+                                <i class="fa-duotone fa-thin fa-piano-keyboard" style="font-size: 18px;" title="Instrument"></i>
+                            @elseif($rack->rack_type === 'AudioEffectGroupDevice')
+                                <i class="fa-thin fa-dial-med" style="font-size: 18px;" title="Audio Effect"></i>
+                            @elseif($rack->rack_type === 'MidiEffectGroupDevice')
+                                <i class="fa-thin fa-file-midi" style="font-size: 18px;" title="MIDI Effect"></i>
+                            @endif
+                        @endif
+                        
+                        {{-- Category Badge --}}
+                        @if($rack->category)
+                            @if($rack->category === 'dynamics')
+                                <i class="fa-solid fa-wave-square" style="font-size: 18px;" title="Dynamics"></i>
+                            @elseif($rack->category === 'time-based')
+                                <i class="fa-solid fa-clock" style="font-size: 18px;" title="Time Based"></i>
+                            @elseif($rack->category === 'modulation')
+                                <i class="fa-solid fa-wave-sine" style="font-size: 18px;" title="Modulation"></i>
+                            @elseif($rack->category === 'spectral')
+                                <i class="fa-solid fa-chart-line" style="font-size: 18px;" title="Spectral"></i>
+                            @elseif($rack->category === 'filters')
+                                <i class="fa-solid fa-filter" style="font-size: 18px;" title="Filters"></i>
+                            @elseif($rack->category === 'creative-effects')
+                                <i class="fa-solid fa-sparkles" style="font-size: 18px;" title="Creative Effects"></i>
+                            @elseif($rack->category === 'utility')
+                                <i class="fa-solid fa-wrench" style="font-size: 18px;" title="Utility"></i>
+                            @elseif($rack->category === 'mixing')
+                                <i class="fa-solid fa-sliders" style="font-size: 18px;" title="Mixing"></i>
+                            @elseif($rack->category === 'distortion')
+                                <i class="fa-solid fa-bolt" style="font-size: 18px;" title="Distortion"></i>
+                            @elseif($rack->category === 'drums')
+                                <i class="fa-solid fa-drum" style="font-size: 18px;" title="Drums"></i>
+                            @elseif($rack->category === 'samplers')
+                                <i class="fa-solid fa-compact-disc" style="font-size: 18px;" title="Samplers"></i>
+                            @elseif($rack->category === 'synths')
+                                <i class="fa-solid fa-sine-wave" style="font-size: 18px;" title="Synths"></i>
+                            @elseif($rack->category === 'bass')
+                                <i class="fa-solid fa-guitar" style="font-size: 18px;" title="Bass"></i>
+                            @elseif($rack->category === 'fx')
+                                <i class="fa-solid fa-magic-wand-sparkles" style="font-size: 18px;" title="FX"></i>
+                            @elseif($rack->category === 'arpeggiators-sequencers')
+                                <i class="fa-solid fa-repeat" style="font-size: 18px;" title="Arpeggiators & Sequencers"></i>
+                            @elseif($rack->category === 'music-theory')
+                                <i class="fa-solid fa-music" style="font-size: 18px;" title="Music Theory"></i>
+                            @elseif($rack->category === 'other')
+                                <i class="fa-solid fa-ellipsis" style="font-size: 18px;" title="Other"></i>
+                            @else
+                                <i class="fa-solid fa-tag" style="font-size: 18px;" title="{{ ucfirst(str_replace('-', ' ', $rack->category)) }}"></i>
+                            @endif
                         @endif
                         
                         <!-- Rating Display -->
