@@ -39,7 +39,7 @@
 
                     <!-- Content -->
                     <div class="prose prose-lg max-w-none mb-12">
-                        {!! nl2br(e($post->content)) !!}
+                        {!! $post->html_content !!}
                     </div>
 
                     <!-- Back to Blog -->

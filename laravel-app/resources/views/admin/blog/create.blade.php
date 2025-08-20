@@ -262,7 +262,8 @@
     </div>
 
     @push('scripts')
-    <!-- Simple Rich Text Editor using execCommand -->
+    <!-- Markdown Editor with Preview -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const contentTextarea = document.getElementById('content');
@@ -273,95 +274,149 @@
             
             // Create toolbar
             const toolbar = document.createElement('div');
-            toolbar.className = 'border-b border-gray-300 p-2 bg-gray-50 flex flex-wrap gap-1';
+            toolbar.className = 'border-b border-gray-300 p-2 bg-gray-50 flex flex-wrap gap-1 items-center';
             toolbar.innerHTML = `
-                <button type="button" onclick="formatText('bold')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Bold">
+                <button type="button" onclick="insertMarkdown('**', '**')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Bold">
                     <strong>B</strong>
                 </button>
-                <button type="button" onclick="formatText('italic')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Italic">
+                <button type="button" onclick="insertMarkdown('*', '*')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Italic">
                     <em>I</em>
                 </button>
-                <button type="button" onclick="formatText('underline')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Underline">
-                    <u>U</u>
+                <button type="button" onclick="insertMarkdown('## ', '')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Heading">
+                    H2
                 </button>
-                <div class="border-l mx-1"></div>
-                <button type="button" onclick="formatText('insertUnorderedList')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Bullet List">
+                <button type="button" onclick="insertMarkdown('### ', '')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Subheading">
+                    H3
+                </button>
+                <div class="border-l mx-1 h-6"></div>
+                <button type="button" onclick="insertMarkdown('- ', '')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Bullet List">
                     • List
                 </button>
-                <button type="button" onclick="formatText('insertOrderedList')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Numbered List">
+                <button type="button" onclick="insertMarkdown('1. ', '')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Numbered List">
                     1. List
                 </button>
-                <div class="border-l mx-1"></div>
+                <button type="button" onclick="insertMarkdown('> ', '')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Quote">
+                    " Quote
+                </button>
+                <button type="button" onclick="insertMarkdown('\`', '\`')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Inline Code">
+                    &lt;/&gt;
+                </button>
+                <button type="button" onclick="insertCodeBlock()" class="px-2 py-1 border rounded hover:bg-gray-200" title="Code Block">
+                    [Code]
+                </button>
+                <div class="border-l mx-1 h-6"></div>
                 <button type="button" onclick="insertLink()" class="px-2 py-1 border rounded hover:bg-gray-200" title="Insert Link">
                     🔗 Link
                 </button>
-                <button type="button" onclick="formatText('removeFormat')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Remove Formatting">
-                    Clear
+                <button type="button" onclick="insertImage()" class="px-2 py-1 border rounded hover:bg-gray-200" title="Insert Image">
+                    🖼️ Image
                 </button>
-                <div class="border-l mx-1"></div>
-                <button type="button" onclick="toggleSource()" class="px-2 py-1 border rounded hover:bg-gray-200" title="View Source">
-                    &lt;/&gt; HTML
+                <div class="border-l mx-1 h-6"></div>
+                <button type="button" onclick="togglePreview()" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600" title="Toggle Preview">
+                    👁️ Preview
                 </button>
+                <span class="ml-auto text-sm text-gray-500">Markdown supported</span>
             `;
             
-            // Create editable content area
-            const editableContent = document.createElement('div');
-            editableContent.contentEditable = true;
-            editableContent.className = 'p-4 min-h-96 focus:outline-none';
-            editableContent.style.minHeight = '400px';
-            editableContent.innerHTML = contentTextarea.value || '<p>Start writing your blog post...</p>';
+            // Create edit/preview container
+            const contentContainer = document.createElement('div');
+            contentContainer.className = 'relative';
             
-            // Replace textarea with editor
+            // Create new textarea for markdown
+            const markdownTextarea = document.createElement('textarea');
+            markdownTextarea.className = 'w-full p-4 font-mono text-sm border-0 resize-none focus:outline-none';
+            markdownTextarea.style.minHeight = '400px';
+            markdownTextarea.placeholder = 'Write your blog post in Markdown...\n\n**Bold** *Italic* [Link](url)\n\n## Heading 2\n### Heading 3\n\n- Bullet list\n1. Numbered list\n\n> Blockquote\n\n`inline code`\n\n```\ncode block\n```';
+            markdownTextarea.value = contentTextarea.value || '';
+            
+            // Create preview div
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'w-full p-4 prose prose-lg max-w-none hidden';
+            previewDiv.style.minHeight = '400px';
+            
+            // Add elements to containers
+            contentContainer.appendChild(markdownTextarea);
+            contentContainer.appendChild(previewDiv);
             editorContainer.appendChild(toolbar);
-            editorContainer.appendChild(editableContent);
+            editorContainer.appendChild(contentContainer);
+            
+            // Hide original textarea and insert new editor
             contentTextarea.style.display = 'none';
             contentTextarea.parentNode.insertBefore(editorContainer, contentTextarea);
             
-            // Sync content back to textarea
-            editableContent.addEventListener('input', function() {
-                contentTextarea.value = editableContent.innerHTML;
+            // Sync content back to original textarea
+            markdownTextarea.addEventListener('input', function() {
+                contentTextarea.value = markdownTextarea.value;
             });
             
             // Global functions for toolbar
-            window.formatText = function(command, value = null) {
-                editableContent.focus();
-                document.execCommand(command, false, value);
-                contentTextarea.value = editableContent.innerHTML;
+            window.insertMarkdown = function(before, after) {
+                const start = markdownTextarea.selectionStart;
+                const end = markdownTextarea.selectionEnd;
+                const selectedText = markdownTextarea.value.substring(start, end);
+                const replacement = before + selectedText + after;
+                
+                markdownTextarea.value = markdownTextarea.value.substring(0, start) + replacement + markdownTextarea.value.substring(end);
+                markdownTextarea.focus();
+                markdownTextarea.setSelectionRange(start + before.length, start + before.length + selectedText.length);
+                
+                contentTextarea.value = markdownTextarea.value;
             };
             
             window.insertLink = function() {
                 const url = prompt('Enter URL:');
+                const text = prompt('Enter link text:') || 'link';
                 if (url) {
-                    formatText('createLink', url);
+                    const link = `[${text}](${url})`;
+                    const start = markdownTextarea.selectionStart;
+                    markdownTextarea.value = markdownTextarea.value.substring(0, start) + link + markdownTextarea.value.substring(markdownTextarea.selectionEnd);
+                    markdownTextarea.focus();
+                    contentTextarea.value = markdownTextarea.value;
                 }
             };
             
-            let showingSource = false;
-            window.toggleSource = function() {
-                if (showingSource) {
-                    // Switch back to visual editor
-                    editableContent.innerHTML = contentTextarea.value;
-                    editableContent.contentEditable = true;
-                    editableContent.style.fontFamily = '';
-                    showingSource = false;
+            window.insertImage = function() {
+                const url = prompt('Enter image URL:');
+                const alt = prompt('Enter alt text:') || 'image';
+                if (url) {
+                    const img = `![${alt}](${url})`;
+                    const start = markdownTextarea.selectionStart;
+                    markdownTextarea.value = markdownTextarea.value.substring(0, start) + img + markdownTextarea.value.substring(markdownTextarea.selectionEnd);
+                    markdownTextarea.focus();
+                    contentTextarea.value = markdownTextarea.value;
+                }
+            };
+            
+            window.insertCodeBlock = function() {
+                const lang = prompt('Enter language (optional):') || '';
+                const code = '\n```' + lang + '\n\n```\n';
+                const start = markdownTextarea.selectionStart;
+                markdownTextarea.value = markdownTextarea.value.substring(0, start) + code + markdownTextarea.value.substring(markdownTextarea.selectionEnd);
+                markdownTextarea.focus();
+                markdownTextarea.setSelectionRange(start + 4 + lang.length, start + 4 + lang.length);
+                contentTextarea.value = markdownTextarea.value;
+            };
+            
+            let previewing = false;
+            window.togglePreview = function() {
+                if (previewing) {
+                    markdownTextarea.classList.remove('hidden');
+                    previewDiv.classList.add('hidden');
+                    previewing = false;
                 } else {
-                    // Switch to HTML source
-                    contentTextarea.value = editableContent.innerHTML;
-                    editableContent.textContent = contentTextarea.value;
-                    editableContent.contentEditable = true;
-                    editableContent.style.fontFamily = 'monospace';
-                    showingSource = true;
+                    // Parse markdown to HTML
+                    const htmlContent = marked.parse(markdownTextarea.value);
+                    previewDiv.innerHTML = htmlContent;
+                    markdownTextarea.classList.add('hidden');
+                    previewDiv.classList.remove('hidden');
+                    previewing = true;
                 }
             };
             
-            // Update textarea before form submission
+            // Update form submission to ensure content is saved
             const form = document.getElementById('blog-form');
             form.addEventListener('submit', function() {
-                if (!showingSource) {
-                    contentTextarea.value = editableContent.innerHTML;
-                } else {
-                    contentTextarea.value = editableContent.textContent;
-                }
+                contentTextarea.value = markdownTextarea.value;
             });
         });
 

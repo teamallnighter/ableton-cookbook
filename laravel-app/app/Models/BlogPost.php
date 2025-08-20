@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use League\CommonMark\CommonMarkConverter;
 
 class BlogPost extends Model
 {
@@ -192,5 +193,40 @@ class BlogPost extends Model
             ->latest('published_at')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Convert markdown content to HTML
+     */
+    public function getHtmlContentAttribute()
+    {
+        $converter = new CommonMarkConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+        
+        return $converter->convert($this->content ?: '');
+    }
+
+    /**
+     * Get a truncated version of the content as HTML
+     */
+    public function getHtmlExcerptAttribute()
+    {
+        if ($this->excerpt) {
+            $converter = new CommonMarkConverter([
+                'html_input' => 'strip',
+                'allow_unsafe_links' => false,
+            ]);
+            return $converter->convert($this->excerpt);
+        }
+        
+        // If no excerpt, truncate content
+        $truncated = Str::limit($this->content, 200);
+        $converter = new CommonMarkConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+        return $converter->convert($truncated);
     }
 }
