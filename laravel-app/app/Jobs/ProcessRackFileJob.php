@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -28,6 +29,10 @@ class ProcessRackFileJob implements ShouldQueue
 
     public function handle(): void
     {
+        // Set memory limit and timeout for large files
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+        
         try {
             Log::info("Starting processing for rack: {$this->rack->title} (ID: {$this->rack->id})");
             
@@ -39,61 +44,85 @@ class ProcessRackFileJob implements ShouldQueue
                 throw new \Exception("Rack file not found: {$fullPath}");
             }
             
-            // Perform analysis
-            $xml = AbletonRackAnalyzer::decompressAndParseAbletonFile($fullPath);
-            if (!$xml) {
-                throw new \Exception('Failed to parse ADG file');
+            // Check file size before processing
+            $fileSizeBytes = filesize($fullPath);
+            if ($fileSizeBytes > 50 * 1024 * 1024) { // 50MB limit
+                throw new \Exception('File too large for processing');
             }
             
-            $typeInfo = AbletonRackAnalyzer::detectRackTypeAndDevice($xml);
-            $rackInfo = AbletonRackAnalyzer::parseChainsAndDevices($xml, $this->rack->original_filename);
-            $versionInfo = AbletonRackAnalyzer::extractAbletonVersionInfo($xml);
-            
-            // Calculate counts
-            $chainCount = count($rackInfo['chains'] ?? []);
-            $deviceCount = $this->countDevices($rackInfo['chains'] ?? []);
-            $category = $this->detectCategory($rackInfo['chains'] ?? []);
-            
-            // Detect edition requirement
-            $editionDetector = new AbletonEditionDetector();
-            $abletonEdition = $editionDetector->detectRequiredEdition($rackInfo['chains'] ?? []);
-            
-            // Update rack with analysis results
-            $this->rack->update([
-                'rack_type' => $typeInfo[0] ?? 'AudioEffectGroupDevice',
-                'category' => $category,
-                'device_count' => $deviceCount,
-                'chain_count' => $chainCount,
-                'ableton_version' => $versionInfo['ableton_version'] ?? null,
-                'ableton_edition' => $abletonEdition,
-                'macro_controls' => $rackInfo['macro_controls'] ?? [],
-                'devices' => $this->flattenDevices($rackInfo['chains'] ?? []),
-                'chains' => $rackInfo['chains'] ?? [],
-                'version_details' => $versionInfo,
-                'parsing_errors' => $rackInfo['parsing_errors'] ?? [],
-                'parsing_warnings' => $rackInfo['parsing_warnings'] ?? [],
-                'status' => 'pending', // Auto-approve for now
-                'published_at' => now()
-            ]);
-            
-            // Clear related caches
-            Cache::forget("rack_structure_{$this->rack->id}");
-            Cache::forget('rack_categories');
-            Cache::forget('featured_racks_10');
-            Cache::forget('popular_racks_10');
+            // Process rack data in transaction for consistency
+            DB::transaction(function() use ($fullPath) {
+                $this->processRackData($fullPath);
+                $this->clearRelatedCaches();
+            });
             
             Log::info("Successfully processed rack: {$this->rack->title} (ID: {$this->rack->id})");
             
         } catch (\Exception $e) {
-            Log::error("Failed to process rack {$this->rack->id}: " . $e->getMessage());
-            
-            $this->rack->update([
-                'status' => 'failed',
-                'processing_error' => $e->getMessage()
-            ]);
-            
+            $this->handleProcessingError($e);
             throw $e;
+        } finally {
+            // Reset memory limit
+            ini_restore('memory_limit');
         }
+    }
+
+    private function processRackData(string $fullPath): void
+    {
+        // Perform analysis
+        $xml = AbletonRackAnalyzer::decompressAndParseAbletonFile($fullPath);
+        if (!$xml) {
+            throw new \Exception('Failed to parse ADG file');
+        }
+        
+        $typeInfo = AbletonRackAnalyzer::detectRackTypeAndDevice($xml);
+        $rackInfo = AbletonRackAnalyzer::parseChainsAndDevices($xml, $this->rack->original_filename);
+        $versionInfo = AbletonRackAnalyzer::extractAbletonVersionInfo($xml);
+        
+        // Calculate counts
+        $chainCount = count($rackInfo['chains'] ?? []);
+        $deviceCount = $this->countDevices($rackInfo['chains'] ?? []);
+        $category = $this->detectCategory($rackInfo['chains'] ?? []);
+        
+        // Detect edition requirement
+        $editionDetector = new AbletonEditionDetector();
+        $abletonEdition = $editionDetector->detectRequiredEdition($rackInfo['chains'] ?? []);
+        
+        // Update rack with analysis results
+        $this->rack->update([
+            'rack_type' => $typeInfo[0] ?? 'AudioEffectGroupDevice',
+            'category' => $category,
+            'device_count' => $deviceCount,
+            'chain_count' => $chainCount,
+            'ableton_version' => $versionInfo['ableton_version'] ?? null,
+            'ableton_edition' => $abletonEdition,
+            'macro_controls' => $rackInfo['macro_controls'] ?? [],
+            'devices' => $this->flattenDevices($rackInfo['chains'] ?? []),
+            'chains' => $rackInfo['chains'] ?? [],
+            'version_details' => $versionInfo,
+            'parsing_errors' => $rackInfo['parsing_errors'] ?? [],
+            'parsing_warnings' => $rackInfo['parsing_warnings'] ?? [],
+            'status' => 'pending', // Auto-approve for now
+            'published_at' => now()
+        ]);
+    }
+
+    private function clearRelatedCaches(): void
+    {
+        Cache::forget("rack_structure_{$this->rack->id}");
+        Cache::forget('rack_categories');
+        Cache::forget('featured_racks_10');
+        Cache::forget('popular_racks_10');
+    }
+
+    private function handleProcessingError(\Exception $e): void
+    {
+        Log::error("Failed to process rack {$this->rack->id}: " . $e->getMessage());
+        
+        $this->rack->update([
+            'status' => 'failed',
+            'processing_error' => $e->getMessage()
+        ]);
     }
     
     private function countDevices($chains): int

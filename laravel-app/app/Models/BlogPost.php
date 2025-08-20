@@ -1,0 +1,167 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+class BlogPost extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'blog_category_id',
+        'title',
+        'slug',
+        'excerpt',
+        'content',
+        'featured_image_path',
+        'published_at',
+        'featured',
+        'is_active',
+        'meta',
+        'views_count',
+    ];
+
+    protected $casts = [
+        'published_at' => 'datetime',
+        'featured' => 'boolean',
+        'is_active' => 'boolean',
+        'meta' => 'array',
+        'views_count' => 'integer',
+    ];
+
+    /**
+     * Get the author of the post
+     */
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the category of the post
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(BlogCategory::class, 'blog_category_id');
+    }
+
+    /**
+     * Scope for published posts
+     */
+    public function scopePublished($query)
+    {
+        return $query->where('is_active', true)
+                    ->whereNotNull('published_at')
+                    ->where('published_at', '<=', now());
+    }
+
+    /**
+     * Scope for featured posts
+     */
+    public function scopeFeatured($query)
+    {
+        return $query->where('featured', true);
+    }
+
+    /**
+     * Scope for active posts
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Generate slug from title
+     */
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($post) {
+            if (empty($post->slug)) {
+                $post->slug = Str::slug($post->title);
+                
+                // Ensure unique slug
+                $originalSlug = $post->slug;
+                $count = 1;
+                while (static::where('slug', $post->slug)->exists()) {
+                    $post->slug = $originalSlug . '-' . $count;
+                    $count++;
+                }
+            }
+        });
+
+        static::updating(function ($post) {
+            if ($post->isDirty('title') && $post->slug === Str::slug($post->getOriginal('title'))) {
+                $post->slug = Str::slug($post->title);
+                
+                // Ensure unique slug
+                $originalSlug = $post->slug;
+                $count = 1;
+                while (static::where('slug', $post->slug)->where('id', '!=', $post->id)->exists()) {
+                    $post->slug = $originalSlug . '-' . $count;
+                    $count++;
+                }
+            }
+        });
+    }
+
+    /**
+     * Get the featured image URL
+     */
+    public function getFeaturedImageUrlAttribute()
+    {
+        if ($this->featured_image_path) {
+            return Storage::url($this->featured_image_path);
+        }
+        return null;
+    }
+
+    /**
+     * Check if post is published
+     */
+    public function getIsPublishedAttribute()
+    {
+        return $this->is_active && 
+               $this->published_at !== null && 
+               $this->published_at->isPast();
+    }
+
+    /**
+     * Get reading time estimate
+     */
+    public function getReadingTimeAttribute()
+    {
+        $words = str_word_count(strip_tags($this->content));
+        $minutes = ceil($words / 200); // Average reading speed
+        return $minutes;
+    }
+
+    /**
+     * Increment view count
+     */
+    public function incrementViews()
+    {
+        $this->increment('views_count');
+    }
+
+    /**
+     * Get related posts
+     */
+    public function getRelatedPosts($limit = 3)
+    {
+        return static::published()
+            ->where('id', '!=', $this->id)
+            ->where('blog_category_id', $this->blog_category_id)
+            ->latest('published_at')
+            ->limit($limit)
+            ->get();
+    }
+}

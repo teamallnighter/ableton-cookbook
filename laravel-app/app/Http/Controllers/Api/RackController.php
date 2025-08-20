@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreRackRequest;
+use App\Http\Requests\UpdateRackRequest;
+use App\Jobs\IncrementRackViewsJob;
 use App\Models\Rack;
 use App\Services\RackProcessingService;
 use Illuminate\Http\JsonResponse;
@@ -193,16 +196,9 @@ class RackController extends Controller
      *     )
      * )
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreRackRequest $request): JsonResponse
     {
-        $request->validate([
-            'file' => 'required|file|max:50000|mimes:adg',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'tags' => 'nullable|array|max:10',
-            'tags.*' => 'string|max:50',
-            'is_public' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         // Check for duplicate
         $fileHash = hash_file('sha256', $request->file('file')->path());
@@ -261,8 +257,17 @@ class RackController extends Controller
      */
     public function show(Rack $rack): JsonResponse
     {
+        // Check if rack is published or user owns it
+        if (!$rack->is_public || $rack->status !== 'approved') {
+            if (!auth()->check() || $rack->user_id !== auth()->id()) {
+                abort(404);
+            }
+        }
+
         $rack->load(['user:id,name,profile_photo_path,created_at', 'tags', 'comments.user:id,name,profile_photo_path']);
-        $rack->increment('views_count');
+        
+        // Queue view increment to avoid blocking response
+        IncrementRackViewsJob::dispatch($rack->id);
         
         return response()->json($rack);
     }
@@ -298,8 +303,8 @@ class RackController extends Controller
         $racks = Rack::published()
             ->with(['user:id,name,profile_photo_path', 'tags'])
             ->where('created_at', '>=', now()->subWeeks(2))
-            ->orderByDesc('downloads_count')
-            ->orderByDesc('average_rating')
+            ->selectRaw('*, (downloads_count * 0.7 + average_rating * ratings_count * 0.3) as trending_score')
+            ->orderByDesc('trending_score')
             ->limit($limit)
             ->get();
 
@@ -388,18 +393,11 @@ class RackController extends Controller
      *     )
      * )
      */
-    public function update(Request $request, Rack $rack): JsonResponse
+    public function update(UpdateRackRequest $request, Rack $rack): JsonResponse
     {
         Gate::authorize('update', $rack);
 
-        $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'tags' => 'nullable|array|max:10',
-            'tags.*' => 'string|max:50',
-            'is_public' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $rack->update($request->only(['title', 'description', 'is_public']));
         
         if ($request->has('tags')) {

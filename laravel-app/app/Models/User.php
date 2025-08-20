@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -193,16 +194,25 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getStatistics(): array
     {
-        return [
-            'racks_count' => $this->racks()->where('status', 'approved')->count(),
-            'followers_count' => $this->followers()->count(),
-            'following_count' => $this->followings()->count(),
-            'total_downloads' => $this->racks()->sum('downloads_count'),
-            'average_rating' => $this->racks()
-                ->where('status', 'approved')
-                ->where('ratings_count', '>', 0)
-                ->avg('average_rating'),
-        ];
+        return Cache::remember("user_stats_{$this->id}", 3600, function() {
+            $racksQuery = $this->racks()->where('status', 'approved');
+            
+            return [
+                'racks_count' => $racksQuery->count(),
+                'followers_count' => $this->followers()->count(),
+                'following_count' => $this->followings()->count(),
+                'total_downloads' => $racksQuery->sum('downloads_count'),
+                'average_rating' => $racksQuery->where('ratings_count', '>', 0)->avg('average_rating'),
+            ];
+        });
+    }
+
+    /**
+     * Clear user statistics cache
+     */
+    public function clearStatisticsCache(): void
+    {
+        Cache::forget("user_stats_{$this->id}");
     }
 
     /**

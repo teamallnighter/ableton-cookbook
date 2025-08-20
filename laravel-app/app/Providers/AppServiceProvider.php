@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Services\SeoService;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\URL;
 
@@ -28,6 +30,20 @@ class AppServiceProvider extends ServiceProvider
         // Force HTTPS in production
         if (app()->environment('production')) {
             URL::forceScheme('https');
+        }
+
+        // Database query logging for performance monitoring
+        if (app()->environment('local', 'staging')) {
+            DB::listen(function ($query) {
+                if ($query->time > 100) { // Log slow queries > 100ms
+                    Log::warning('Slow Query Detected', [
+                        'sql' => $query->sql,
+                        'bindings' => $query->bindings,
+                        'time' => $query->time . 'ms',
+                        'connection' => $query->connectionName,
+                    ]);
+                }
+            });
         }
 
         // Share SEO service with all views

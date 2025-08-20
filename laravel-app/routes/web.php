@@ -14,7 +14,13 @@ Route::get('/health', function () {
 
 Route::get('/', function () {
     try {
-        return view('racks');
+        $recentBlogPosts = \App\Models\BlogPost::with(['author', 'category'])
+            ->published()
+            ->latest('published_at')
+            ->take(3)
+            ->get();
+            
+        return view('racks', compact('recentBlogPosts'));
     } catch (\Exception $e) {
         return response()->json([
             'error' => 'View loading failed',
@@ -70,6 +76,44 @@ Route::middleware([
     Route::get('/demos/rack-tree-horizontal', function () {
         return view('demos.rack-tree-horizontal');
     })->name('demos.rack-tree-horizontal');
+});
+
+// Blog Routes (Public)
+Route::prefix('blog')->name('blog.')->group(function () {
+    Route::get('/', [App\Http\Controllers\BlogController::class, 'index'])->name('index');
+    Route::get('/search', [App\Http\Controllers\BlogController::class, 'search'])->name('search');
+    Route::get('/category/{slug}', [App\Http\Controllers\BlogController::class, 'category'])->name('category');
+    Route::get('/rss', [App\Http\Controllers\BlogController::class, 'rss'])->name('rss');
+    Route::get('/sitemap.xml', [App\Http\Controllers\BlogController::class, 'sitemap'])->name('sitemap');
+    Route::get('/{slug}', [App\Http\Controllers\BlogController::class, 'show'])->name('show');
+});
+
+// Blog Admin Routes (Require authentication and admin role)
+Route::middleware(['auth', 'admin'])->prefix('admin/blog')->name('admin.blog.')->group(function () {
+    // Blog Posts
+    Route::get('/', [App\Http\Controllers\Admin\BlogAdminController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Admin\BlogAdminController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Admin\BlogAdminController::class, 'store'])->name('store');
+    Route::get('/{post}', [App\Http\Controllers\Admin\BlogAdminController::class, 'show'])->name('show');
+    Route::get('/{post}/edit', [App\Http\Controllers\Admin\BlogAdminController::class, 'edit'])->name('edit');
+    Route::put('/{post}', [App\Http\Controllers\Admin\BlogAdminController::class, 'update'])->name('update');
+    Route::delete('/{post}', [App\Http\Controllers\Admin\BlogAdminController::class, 'destroy'])->name('destroy');
+    
+    // AJAX Routes
+    Route::post('/upload-image', [App\Http\Controllers\Admin\BlogAdminController::class, 'uploadImage'])->name('upload-image');
+    Route::post('/{post}/toggle-featured', [App\Http\Controllers\Admin\BlogAdminController::class, 'toggleFeatured'])->name('toggle-featured');
+    Route::post('/{post}/toggle-active', [App\Http\Controllers\Admin\BlogAdminController::class, 'toggleActive'])->name('toggle-active');
+
+    // Blog Categories
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\BlogCategoryController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Admin\BlogCategoryController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Admin\BlogCategoryController::class, 'store'])->name('store');
+        Route::get('/{category}/edit', [App\Http\Controllers\Admin\BlogCategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [App\Http\Controllers\Admin\BlogCategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [App\Http\Controllers\Admin\BlogCategoryController::class, 'destroy'])->name('destroy');
+        Route::post('/{category}/toggle-active', [App\Http\Controllers\Admin\BlogCategoryController::class, 'toggleActive'])->name('toggle-active');
+    });
 });
 
 // SEO Routes

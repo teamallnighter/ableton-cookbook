@@ -12,8 +12,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// Public routes
-Route::prefix('v1')->group(function () {
+// Public routes with rate limiting
+Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
     // Racks - Public endpoints
     Route::get('/racks', [RackController::class, 'index']);
     Route::get('/racks/trending', [RackController::class, 'trending']);
@@ -27,13 +27,13 @@ Route::prefix('v1')->group(function () {
     Route::get('/users/{user}/following', [UserController::class, 'following']);
 });
 
-// Authenticated routes
-Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
-    // Racks - Authenticated actions
-    Route::post('/racks', [RackController::class, 'store']);
+// Authenticated routes with stricter rate limiting
+Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
+    // Racks - Authenticated actions with specific limits
+    Route::post('/racks', [RackController::class, 'store'])->middleware('throttle:5,1'); // 5 uploads per minute
     Route::put('/racks/{rack}', [RackController::class, 'update']);
     Route::delete('/racks/{rack}', [RackController::class, 'destroy']);
-    Route::post('/racks/{rack}/download', [RackController::class, 'download']);
+    Route::post('/racks/{rack}/download', [RackController::class, 'download'])->middleware('throttle:30,1'); // 30 downloads per minute
     Route::post('/racks/{rack}/like', [RackController::class, 'toggleLike']);
     
     // Rack Ratings
