@@ -82,6 +82,14 @@ class BlogPost extends Model
     }
 
     /**
+     * Get the newsletter for this post
+     */
+    public function newsletter()
+    {
+        return $this->hasOne(Newsletter::class);
+    }
+
+    /**
      * Scope for published posts
      */
     public function scopePublished($query)

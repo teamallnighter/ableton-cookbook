@@ -151,11 +151,32 @@ Route::prefix('issues')->name('issues.')->group(function () {
     });
 });
 
-// Admin issue management routes
-Route::middleware(['auth', 'admin'])->prefix('admin/issues')->name('admin.issues.')->group(function () {
-    Route::get('/', [App\Http\Controllers\IssueController::class, 'adminIndex'])->name('index');
-    Route::get('/{issue}', [App\Http\Controllers\IssueController::class, 'adminShow'])->name('show');
-    Route::patch('/{issue}', [App\Http\Controllers\IssueController::class, 'update'])->name('update');
+// Admin dashboard and management routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Main admin dashboard
+    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    
+    // Issue management routes
+    Route::prefix('issues')->name('issues.')->group(function () {
+        Route::get('/', [App\Http\Controllers\IssueController::class, 'adminIndex'])->name('index');
+        Route::get('/{issue}', [App\Http\Controllers\IssueController::class, 'adminShow'])->name('show');
+        Route::patch('/{issue}', [App\Http\Controllers\IssueController::class, 'update'])->name('update');
+    });
+
+    // Newsletter management routes
+    Route::prefix('newsletter')->name('newsletter.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Admin\NewsletterController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Admin\NewsletterController::class, 'store'])->name('store');
+        Route::get('/{newsletter}', [App\Http\Controllers\Admin\NewsletterController::class, 'show'])->name('show');
+        Route::get('/{newsletter}/edit', [App\Http\Controllers\Admin\NewsletterController::class, 'edit'])->name('edit');
+        Route::put('/{newsletter}', [App\Http\Controllers\Admin\NewsletterController::class, 'update'])->name('update');
+        Route::get('/{newsletter}/preview', [App\Http\Controllers\Admin\NewsletterController::class, 'preview'])->name('preview');
+        Route::post('/{newsletter}/test', [App\Http\Controllers\Admin\NewsletterController::class, 'sendTest'])->name('test');
+        Route::post('/{newsletter}/send', [App\Http\Controllers\Admin\NewsletterController::class, 'send'])->name('send');
+        Route::delete('/{newsletter}', [App\Http\Controllers\Admin\NewsletterController::class, 'destroy'])->name('destroy');
+        Route::post('/blog/{blogPost}', [App\Http\Controllers\Admin\NewsletterController::class, 'createFromBlog'])->name('create-from-blog');
+    });
 });
 
 // Quick report routes for specific racks
