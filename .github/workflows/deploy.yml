@@ -43,6 +43,10 @@ jobs:
       working-directory: ./laravel-app
       run: |
         if [ -f "phpunit.xml" ] || [ -f "phpunit.xml.dist" ]; then
+          # Generate app key for testing
+          cp .env.example .env
+          php artisan key:generate
+          # Run tests
           ./vendor/bin/phpunit
         else
           echo "No tests found, skipping..."

@@ -1,7 +1,7 @@
 # 🎵 Ableton Cookbook
 
 A community-driven platform for sharing and discovering Ableton Live racks, techniques, and creative resources.
-
+[![Deploy to Production](https://github.com/teamallnighter/ableton-cookbook/actions/workflows/deploy.yml/badge.svg)](https://github.com/teamallnighter/ableton-cookbook/actions/workflows/deploy.yml)
 ![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat&logo=laravel)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat&logo=php)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css)
