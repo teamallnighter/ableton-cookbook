@@ -6,6 +6,8 @@ A community-driven platform for sharing and discovering Ableton Live racks, tech
 ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat&logo=php)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css)
 ![Livewire](https://img.shields.io/badge/Livewire-3.x-4E56A6?style=flat&logo=livewire)
+![Swagger](https://img.shields.io/badge/OpenAPI-3.0-6BA539?style=flat&logo=swagger)
+![Postman](https://img.shields.io/badge/Postman-Collection-FF6C37?style=flat&logo=postman)
 
 ## 🌟 Features
 
@@ -21,6 +23,21 @@ A community-driven platform for sharing and discovering Ableton Live racks, tech
 - **User Profiles**: Customizable profiles with social media links and bio
 - **Follow System**: Follow other users and get notified of new uploads
 - **Activity Feed**: Stay updated with community activity
+
+### 📝 Blog System
+- **Content Management**: Full-featured blog system with rich text editing
+- **WYSIWYG Editor**: TinyMCE integration with drag & drop image uploads
+- **Category Management**: Organize posts with color-coded categories
+- **SEO Optimized**: SEO-friendly URLs, meta tags, and structured data
+- **Homepage Integration**: Recent blog posts featured on the main page
+- **Admin Interface**: Complete admin panel for content management
+
+### 🚀 API Documentation
+- **Comprehensive REST API**: Full API for all platform features
+- **Interactive Documentation**: Swagger UI available at `/api/docs`
+- **Postman Collection**: Ready-to-use Postman collections and environments
+- **Authentication Support**: Both session and token-based authentication
+- **Developer Resources**: Complete API testing suite and examples
 
 ### 📧 Email System
 - **Professional Email Templates**: Custom-branded verification and notification emails
@@ -132,12 +149,74 @@ TXT selector._domainkey "v=DKIM1; k=rsa; p=YOUR_PUBLIC_KEY"
 php artisan email:test your-test-email@example.com
 ```
 
+## 📝 Blog System
+
+The application includes a comprehensive blog system for sharing insights, tutorials, and updates with the community.
+
+### Features
+- **Rich Text Editor**: TinyMCE WYSIWYG editor with image upload support
+- **Category Management**: Create and organize blog posts with color-coded categories
+- **SEO Optimization**: Automatic meta tags, structured data, and SEO-friendly URLs
+- **Homepage Integration**: Recent blog posts automatically displayed on the homepage
+- **Admin Panel**: Full admin interface at `/admin/blog` for content management
+
+### Usage
+1. **Admin Access**: Navigate to `/admin/blog` (requires admin role)
+2. **Create Categories**: Set up blog categories with custom colors and descriptions
+3. **Write Posts**: Use the rich text editor to create engaging blog content
+4. **Publish**: Posts appear on `/blog` and the homepage when published
+
+## 🚀 API Documentation
+
+The platform provides a comprehensive REST API for developers and third-party integrations.
+
+### Quick Access
+- **Interactive Docs**: Visit `/api/docs` for Swagger UI
+- **OpenAPI Spec**: JSON specification at `/api-docs.json`
+- **Postman Collection**: Import from `/postman/` directory
+
+### Postman Setup
+1. **Import Collections**:
+   ```bash
+   # Main API collection
+   postman/Ableton-Cookbook-API.postman_collection.json
+   
+   # Test suite
+   postman/API-Tests.postman_collection.json
+   ```
+
+2. **Import Environments**:
+   ```bash
+   # Development
+   postman/Development.postman_environment.json
+   
+   # Production  
+   postman/Production.postman_environment.json
+   ```
+
+3. **Run Tests**:
+   ```bash
+   newman run postman/API-Tests.postman_collection.json \
+     -e postman/Development.postman_environment.json
+   ```
+
+### API Features
+- **Complete Coverage**: All platform features accessible via API
+- **Authentication**: Support for both session and bearer token auth
+- **Filtering & Pagination**: Advanced query capabilities
+- **File Uploads**: Support for rack files and images
+- **Rate Limiting**: Built-in rate limiting for API protection
+- **Comprehensive Testing**: Automated test suite included
+
 ## 🔧 Development
 
 ### Key Commands
 ```bash
 # Run tests
 php artisan test
+
+# Generate API documentation
+php artisan l5-swagger:generate
 
 # Generate sitemap
 php artisan sitemap:generate
@@ -147,6 +226,9 @@ php artisan seo:optimize
 
 # Clear caches
 php artisan optimize:clear
+
+# Test email configuration
+php artisan email:test your-email@example.com
 ```
 
 ### Project Structure
@@ -155,16 +237,25 @@ laravel-app/
 ├── app/
 │   ├── Console/Commands/     # Custom Artisan commands
 │   ├── Http/Controllers/     # Application controllers
-│   ├── Models/              # Eloquent models
+│   │   ├── Admin/           # Blog admin controllers
+│   │   └── Api/            # API controllers with OpenAPI docs
+│   ├── Models/              # Eloquent models (Rack, User, BlogPost, etc.)
 │   ├── Notifications/       # Email notifications
 │   └── Services/           # Business logic services
 ├── database/
 │   ├── migrations/         # Database migrations
 │   └── seeders/           # Database seeders
+├── postman/               # API testing collections
+│   ├── *.postman_collection.json
+│   ├── *.postman_environment.json
+│   └── README.md          # API documentation
 ├── resources/
-│   ├── views/             # Blade templates
+│   ├── views/
+│   │   ├── admin/blog/     # Blog admin templates
+│   │   ├── blog/          # Public blog templates
+│   │   └── api/           # API documentation views
 │   └── js/               # Frontend assets
-└── routes/               # Application routes
+└── routes/               # Application routes (web, api)
 ```
 
 ## 🌐 Live Demo
@@ -172,6 +263,20 @@ laravel-app/
 Visit [ableton.recipes](https://ableton.recipes) to see the application in action.
 
 ## 📊 Key Features Implementation
+
+### Blog System Architecture
+- **Models**: BlogPost and BlogCategory with Eloquent relationships
+- **Admin Interface**: Complete CRUD operations with role-based access
+- **WYSIWYG Editor**: TinyMCE integration with drag & drop image uploads
+- **SEO Integration**: Automatic meta tags and structured data generation
+- **Homepage Integration**: Recent blog posts dynamically displayed
+
+### API Development
+- **OpenAPI 3.0**: Complete API documentation with Swagger UI
+- **Resource Controllers**: RESTful API endpoints for all major features
+- **Authentication**: Dual support for session and Sanctum token auth
+- **Testing Suite**: Comprehensive Postman collections with automated tests
+- **Schema Validation**: Request validation with detailed error responses
 
 ### Registration System
 - **Username Field**: Separate username from display name
