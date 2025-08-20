@@ -1,0 +1,75 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: laravel-app/package-lock.json
+        
+    - name: Install PHP dependencies
+      working-directory: ./laravel-app
+      run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      
+    - name: Install Node dependencies
+      working-directory: ./laravel-app
+      run: npm ci
+      
+    - name: Build assets
+      working-directory: ./laravel-app
+      run: npm run build
+      
+    - name: Run tests (if they exist)
+      working-directory: ./laravel-app
+      run: |
+        if [ -f "phpunit.xml" ] || [ -f "phpunit.xml.dist" ]; then
+          php artisan test
+        else
+          echo "No tests found, skipping..."
+        fi
+      
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /var/www/ableton-cookbook
+          
+          # Pull latest changes
+          git pull origin main
+          
+          # Run the safe deployment script
+          sudo bash laravel-app/deployment/production-deploy-safe.sh
+          
+          echo "🎉 Deployment completed successfully!"
+          
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Deployment successful!"
+        else
+          echo "❌ Deployment failed!"
+        fi
