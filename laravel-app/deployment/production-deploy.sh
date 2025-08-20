@@ -51,7 +51,14 @@ git pull origin main
 
 print_status "Phase 3: Dependencies & Environment"
 
+# Set composer to allow running as superuser
+export COMPOSER_ALLOW_SUPERUSER=1
+
 # Install/Update PHP dependencies
+# First install with dev dependencies to ensure all packages are present
+composer install --optimize-autoloader --no-interaction
+
+# Then remove dev dependencies for production
 composer install --no-dev --optimize-autoloader --no-interaction
 
 # Copy and configure environment file
