@@ -52,7 +52,7 @@ git pull origin main
 print_status "Phase 3: Dependencies & Environment"
 
 # Install/Update PHP dependencies
-composer install --no-dev --optimize-autoloader
+composer install --no-dev --optimize-autoloader --no-interaction
 
 # Copy and configure environment file
 if [ ! -f .env ]; then
