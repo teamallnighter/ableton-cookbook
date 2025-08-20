@@ -43,12 +43,7 @@ jobs:
       working-directory: ./laravel-app
       run: |
         if [ -f "phpunit.xml" ] || [ -f "phpunit.xml.dist" ]; then
-          # Try artisan test first, fall back to phpunit
-          if php artisan list | grep -q "test"; then
-            php artisan test
-          else
-            ./vendor/bin/phpunit
-          fi
+          ./vendor/bin/phpunit
         else
           echo "No tests found, skipping..."
         fi
