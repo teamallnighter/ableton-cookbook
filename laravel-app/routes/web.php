@@ -61,6 +61,15 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // Demo Routes
+    Route::get('/demos/rack-tree-vertical', function () {
+        return view('demos.rack-tree-vertical');
+    })->name('demos.rack-tree-vertical');
+
+    Route::get('/demos/rack-tree-horizontal', function () {
+        return view('demos.rack-tree-horizontal');
+    })->name('demos.rack-tree-horizontal');
 });
 
 // SEO Routes
@@ -108,3 +117,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin/issues')->name('admin.issues
 // Quick report routes for specific racks
 Route::get('/racks/{rack}/report', [App\Http\Controllers\IssueController::class, 'create'])
     ->name('racks.report');
+
+// Temporary public demo routes for testing
+Route::get('/public-demos/rack-tree-vertical', function () {
+    return view('demos.rack-tree-vertical');
+})->name('public-demos.rack-tree-vertical');
+
+Route::get('/public-demos/rack-tree-horizontal', function () {
+    return view('demos.rack-tree-horizontal');
+})->name('public-demos.rack-tree-horizontal');
+

@@ -155,29 +155,7 @@
                             </p>
                         </div>
                         
-                        <!-- Compact Actions -->
-                        <div class="flex items-center gap-1">
-                            @auth
-                                <button 
-                                    wire:click="toggleFavorite({{ $rack->id }})"
-                                    onclick="event.stopPropagation();"
-                                    class="p-1 hover:scale-110 transition-transform"
-                                    title="{{ $rack->is_favorited_by_user ? 'Remove from favorites' : 'Add to favorites' }}"
-                                >
-                                    <svg class="w-5 h-5 favorite-btn {{ $rack->is_favorited_by_user ? 'active' : '' }}" fill="{{ $rack->is_favorited_by_user ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                                    </svg>
-                                </button>
-                            @endauth
-                            
-                            <!-- Rating -->
-                            <div class="flex items-center gap-1">
-                                <svg class="w-4 h-4 star-btn {{ $rack->average_rating > 0 ? 'active' : '' }}" fill="{{ $rack->average_rating > 0 ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
-                                <span class="text-sm font-medium text-black">{{ number_format($rack->average_rating, 1) }}</span>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 
@@ -206,16 +184,79 @@
                         <div class="flex flex-wrap gap-2">
                             <!-- Ableton Edition -->
                             @if($rack->ableton_edition)
-                                <span class="{{ $rack->ableton_edition === 'suite' ? 'edition-suite' : ($rack->ableton_edition === 'standard' ? 'edition-standard' : 'edition-intro') }}">
-                                    {{ ucfirst($rack->ableton_edition) }}
-                                </span>
+                                <i class="fa-kit fa-circle-ableton" style="color: {{ $rack->ableton_edition === 'suite' ? '#f97316' : ($rack->ableton_edition === 'standard' ? '#3b82f6' : '#6b7280') }}; font-size: 18px;" title="Live {{ ucfirst($rack->ableton_edition) }}"></i>
                             @endif
                             
-                            <!-- Category -->
+                            {{-- Rack Type --}}
+                            @if($rack->rack_type)
+                                @if($rack->rack_type === 'InstrumentGroupDevice')
+                                    <i class="fa-duotone fa-thin fa-piano-keyboard" style="font-size: 18px;" title="Instrument"></i>
+                                @elseif($rack->rack_type === 'AudioEffectGroupDevice')
+                                    <i class="fa-thin fa-dial-med" style="font-size: 18px;" title="Audio Effect"></i>
+                                @elseif($rack->rack_type === 'MidiEffectGroupDevice')
+                                    <i class="fa-thin fa-file-midi" style="font-size: 18px;" title="MIDI Effect"></i>
+                                @endif
+                            @endif
+                            
+                            <!-- Category Icon -->
                             @if($rack->category)
-                                <span class="badge-category">
-                                    {{ $rack->category_display }}
-                                </span>
+                                @if($rack->category === 'dynamics')
+                                    <i class="fa-solid fa-wave-square" style="font-size: 18px;" title="Dynamics"></i>
+                                @elseif($rack->category === 'time-based')
+                                    <i class="fa-solid fa-clock" style="font-size: 18px;" title="Time Based"></i>
+                                @elseif($rack->category === 'modulation')
+                                    <i class="fa-solid fa-wave-sine" style="font-size: 18px;" title="Modulation"></i>
+                                @elseif($rack->category === 'spectral')
+                                    <i class="fa-solid fa-chart-line" style="font-size: 18px;" title="Spectral"></i>
+                                @elseif($rack->category === 'filters')
+                                    <i class="fa-solid fa-filter" style="font-size: 18px;" title="Filters"></i>
+                                @elseif($rack->category === 'creative-effects')
+                                    <i class="fa-solid fa-sparkles" style="font-size: 18px;" title="Creative Effects"></i>
+                                @elseif($rack->category === 'utility')
+                                    <i class="fa-solid fa-wrench" style="font-size: 18px;" title="Utility"></i>
+                                @elseif($rack->category === 'mixing')
+                                    <i class="fa-solid fa-sliders" style="font-size: 18px;" title="Mixing"></i>
+                                @elseif($rack->category === 'distortion')
+                                    <i class="fa-solid fa-bolt" style="font-size: 18px;" title="Distortion"></i>
+                                @elseif($rack->category === 'drums')
+                                    <i class="fa-solid fa-drum" style="font-size: 18px;" title="Drums"></i>
+                                @elseif($rack->category === 'samplers')
+                                    <i class="fa-solid fa-compact-disc" style="font-size: 18px;" title="Samplers"></i>
+                                @elseif($rack->category === 'synths')
+                                    <i class="fa-solid fa-sine-wave" style="font-size: 18px;" title="Synths"></i>
+                                @elseif($rack->category === 'bass')
+                                    <i class="fa-solid fa-guitar" style="font-size: 18px;" title="Bass"></i>
+                                @elseif($rack->category === 'fx')
+                                    <i class="fa-solid fa-magic-wand-sparkles" style="font-size: 18px;" title="FX"></i>
+                                @elseif($rack->category === 'arpeggiators-sequencers')
+                                    <i class="fa-solid fa-repeat" style="font-size: 18px;" title="Arpeggiators & Sequencers"></i>
+                                @elseif($rack->category === 'music-theory')
+                                    <i class="fa-solid fa-music" style="font-size: 18px;" title="Music Theory"></i>
+                                @elseif($rack->category === 'other')
+                                    <i class="fa-solid fa-ellipsis" style="font-size: 18px;" title="Other"></i>
+                                @else
+                                    <i class="fa-solid fa-tag" style="font-size: 18px;" title="{{ ucfirst(str_replace('-', ' ', $rack->category)) }}"></i>
+                                @endif
+                            @endif
+                            
+                            <!-- Heart/Favorite -->
+                            @auth
+                                <button 
+                                    wire:click="toggleFavorite({{ $rack->id }})"
+                                    onclick="event.stopPropagation();"
+                                    class="hover:scale-110 transition-transform"
+                                    title="{{ $rack->is_favorited_by_user ? 'Remove from favorites' : 'Add to favorites' }}"
+                                >
+                                    <i class="fa-{{ $rack->is_favorited_by_user ? 'solid' : 'regular' }} fa-heart" style="font-size: 18px; color: {{ $rack->is_favorited_by_user ? '#e11d48' : 'currentColor' }};" title="{{ $rack->is_favorited_by_user ? 'Remove from favorites' : 'Add to favorites' }}"></i>
+                                </button>
+                            @endauth
+                            
+                            <!-- Rating -->
+                            @if($rack->average_rating > 0)
+                                <div class="flex items-center gap-1">
+                                    <i class="fa-solid fa-star" style="font-size: 18px; color: #fbbf24;" title="Rating: {{ number_format($rack->average_rating, 1) }} stars"></i>
+                                    <span class="text-sm font-medium text-gray-700">{{ number_format($rack->average_rating, 1) }}</span>
+                                </div>
                             @endif
                         </div>
                     </div>
