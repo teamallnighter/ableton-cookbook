@@ -272,17 +272,58 @@
                         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                             <div class="p-6">
                                 <div class="flex flex-col space-y-3">
+                                    @if(!$post->is_published)
+                                        <!-- Publish Now Button (for drafts) -->
+                                        <button type="submit" 
+                                                name="action" 
+                                                value="publish_now"
+                                                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                                            🚀 Publish Now
+                                        </button>
+                                    @endif
+                                    
+                                    <!-- Update Post Button -->
                                     <button type="submit" 
+                                            name="action" 
+                                            value="update"
                                             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
-                                        Update Post
+                                        {{ $post->is_published ? 'Update Published Post' : 'Update Post' }}
                                     </button>
                                     
-                                    <button type="button"
-                                            onclick="document.getElementById('published_at').value = ''; document.getElementById('blog-form').submit();"
+                                    <!-- Save as Draft Button -->
+                                    <button type="submit"
+                                            name="action" 
+                                            value="save_draft"
                                             class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
-                                        Save as Draft
+                                        {{ $post->is_published ? 'Convert to Draft' : 'Save as Draft' }}
                                     </button>
                                 </div>
+                                
+                                @if($post->is_published)
+                                    <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <span class="text-sm text-green-800 font-medium">Published</span>
+                                        </div>
+                                        <p class="text-xs text-green-600 mt-1">
+                                            Published {{ $post->published_at->diffForHumans() }}
+                                        </p>
+                                    </div>
+                                @else
+                                    <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <span class="text-sm text-yellow-800 font-medium">Draft</span>
+                                        </div>
+                                        <p class="text-xs text-yellow-600 mt-1">
+                                            Not published yet
+                                        </p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -292,47 +333,107 @@
     </div>
 
     @push('scripts')
-    <!-- TinyMCE WYSIWYG Editor -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- Simple Rich Text Editor using execCommand -->
     <script>
-        // Initialize TinyMCE with the same config as create form
-        tinymce.init({
-            selector: '#content',
-            height: 500,
-            menubar: false,
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'preview', 'help', 'wordcount'
-            ],
-            toolbar: 'undo redo | blocks | ' +
-                'bold italic forecolor | alignleft aligncenter ' +
-                'alignright alignjustify | bullist numlist outdent indent | ' +
-                'removeformat | help',
-            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }',
-            images_upload_handler: function (blobInfo, success, failure) {
-                const formData = new FormData();
-                formData.append('image', blobInfo.blob(), blobInfo.filename());
-                
-                fetch('{{ route("admin.blog.upload-image") }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        success(data.url);
-                    } else {
-                        failure('Image upload failed');
-                    }
-                })
-                .catch(() => {
-                    failure('Image upload failed');
-                });
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentTextarea = document.getElementById('content');
+            
+            // Create editor container
+            const editorContainer = document.createElement('div');
+            editorContainer.className = 'border border-gray-300 rounded-md';
+            
+            // Create toolbar
+            const toolbar = document.createElement('div');
+            toolbar.className = 'border-b border-gray-300 p-2 bg-gray-50 flex flex-wrap gap-1';
+            toolbar.innerHTML = `
+                <button type="button" onclick="formatText('bold')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Bold">
+                    <strong>B</strong>
+                </button>
+                <button type="button" onclick="formatText('italic')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Italic">
+                    <em>I</em>
+                </button>
+                <button type="button" onclick="formatText('underline')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Underline">
+                    <u>U</u>
+                </button>
+                <div class="border-l mx-1"></div>
+                <button type="button" onclick="formatText('insertUnorderedList')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Bullet List">
+                    • List
+                </button>
+                <button type="button" onclick="formatText('insertOrderedList')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Numbered List">
+                    1. List
+                </button>
+                <div class="border-l mx-1"></div>
+                <button type="button" onclick="insertLink()" class="px-2 py-1 border rounded hover:bg-gray-200" title="Insert Link">
+                    🔗 Link
+                </button>
+                <button type="button" onclick="formatText('removeFormat')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Remove Formatting">
+                    Clear
+                </button>
+                <div class="border-l mx-1"></div>
+                <button type="button" onclick="toggleSource()" class="px-2 py-1 border rounded hover:bg-gray-200" title="View Source">
+                    &lt;/&gt; HTML
+                </button>
+            `;
+            
+            // Create editable content area
+            const editableContent = document.createElement('div');
+            editableContent.contentEditable = true;
+            editableContent.className = 'p-4 min-h-96 focus:outline-none';
+            editableContent.style.minHeight = '400px';
+            editableContent.innerHTML = contentTextarea.value || '<p>Start writing your blog post...</p>';
+            
+            // Replace textarea with editor
+            editorContainer.appendChild(toolbar);
+            editorContainer.appendChild(editableContent);
+            contentTextarea.style.display = 'none';
+            contentTextarea.parentNode.insertBefore(editorContainer, contentTextarea);
+            
+            // Sync content back to textarea
+            editableContent.addEventListener('input', function() {
+                contentTextarea.value = editableContent.innerHTML;
+            });
+            
+            // Global functions for toolbar
+            window.formatText = function(command, value = null) {
+                editableContent.focus();
+                document.execCommand(command, false, value);
+                contentTextarea.value = editableContent.innerHTML;
+            };
+            
+            window.insertLink = function() {
+                const url = prompt('Enter URL:');
+                if (url) {
+                    formatText('createLink', url);
+                }
+            };
+            
+            let showingSource = false;
+            window.toggleSource = function() {
+                if (showingSource) {
+                    // Switch back to visual editor
+                    editableContent.innerHTML = contentTextarea.value;
+                    editableContent.contentEditable = true;
+                    editableContent.style.fontFamily = '';
+                    showingSource = false;
+                } else {
+                    // Switch to HTML source
+                    contentTextarea.value = editableContent.innerHTML;
+                    editableContent.textContent = contentTextarea.value;
+                    editableContent.contentEditable = true;
+                    editableContent.style.fontFamily = 'monospace';
+                    showingSource = true;
+                }
+            };
+            
+            // Update textarea before form submission
+            const form = document.getElementById('blog-form');
+            form.addEventListener('submit', function() {
+                if (!showingSource) {
+                    contentTextarea.value = editableContent.innerHTML;
+                } else {
+                    contentTextarea.value = editableContent.textContent;
+                }
+            });
         });
 
         // Same drag and drop functionality as create form

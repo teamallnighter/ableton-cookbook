@@ -76,7 +76,19 @@ class BlogAdminController extends Controller
             'is_active' => 'boolean',
             'meta_title' => 'nullable|string|max:60',
             'meta_description' => 'nullable|string|max:160',
+            'action' => 'nullable|string|in:save_draft,publish_now,update',
         ]);
+
+        // Handle different actions
+        $action = $request->input('action', 'update');
+        
+        if ($action === 'save_draft') {
+            $validated['published_at'] = null;
+            $validated['is_active'] = false;
+        } elseif ($action === 'publish_now') {
+            $validated['published_at'] = now();
+            $validated['is_active'] = true;
+        }
 
         // Handle featured image upload
         if ($request->hasFile('featured_image')) {
@@ -94,12 +106,18 @@ class BlogAdminController extends Controller
         ];
 
         // Remove meta fields from main data
-        unset($validated['meta_title'], $validated['meta_description']);
+        unset($validated['meta_title'], $validated['meta_description'], $validated['action']);
 
         $post = BlogPost::create($validated);
 
+        $message = match($action) {
+            'save_draft' => 'Blog post saved as draft!',
+            'publish_now' => 'Blog post published successfully!',
+            default => 'Blog post created successfully!'
+        };
+
         return redirect()->route('admin.blog.index')
-            ->with('success', 'Blog post created successfully!');
+            ->with('success', $message);
     }
 
     /**
@@ -136,7 +154,19 @@ class BlogAdminController extends Controller
             'is_active' => 'boolean',
             'meta_title' => 'nullable|string|max:60',
             'meta_description' => 'nullable|string|max:160',
+            'action' => 'nullable|string|in:save_draft,publish_now,update',
         ]);
+
+        // Handle different actions
+        $action = $request->input('action', 'update');
+        
+        if ($action === 'save_draft') {
+            $validated['published_at'] = null;
+            $validated['is_active'] = false;
+        } elseif ($action === 'publish_now') {
+            $validated['published_at'] = now();
+            $validated['is_active'] = true;
+        }
 
         // Handle featured image upload
         if ($request->hasFile('featured_image')) {
@@ -156,12 +186,18 @@ class BlogAdminController extends Controller
         ];
 
         // Remove meta fields from main data
-        unset($validated['meta_title'], $validated['meta_description']);
+        unset($validated['meta_title'], $validated['meta_description'], $validated['action']);
 
         $post->update($validated);
 
+        $message = match($action) {
+            'save_draft' => 'Blog post saved as draft!',
+            'publish_now' => 'Blog post published successfully!',
+            default => 'Blog post updated successfully!'
+        };
+
         return redirect()->route('admin.blog.index')
-            ->with('success', 'Blog post updated successfully!');
+            ->with('success', $message);
     }
 
     /**

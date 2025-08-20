@@ -217,16 +217,41 @@
                         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                             <div class="p-6">
                                 <div class="flex flex-col space-y-3">
+                                    <!-- Publish Now Button -->
                                     <button type="submit" 
-                                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
-                                        Create Post
+                                            name="action" 
+                                            value="publish_now"
+                                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                                        🚀 Publish Now
                                     </button>
                                     
-                                    <button type="button"
-                                            onclick="document.getElementById('published_at').value = ''; document.getElementById('blog-form').submit();"
+                                    <!-- Create as Draft Button -->
+                                    <button type="submit" 
+                                            name="action" 
+                                            value="save_draft"
                                             class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
-                                        Save as Draft
+                                        📝 Save as Draft
                                     </button>
+                                    
+                                    <!-- Schedule for Later (uses custom publish date) -->
+                                    <button type="submit" 
+                                            name="action" 
+                                            value="update"
+                                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                                        📅 Create Post
+                                    </button>
+                                </div>
+                                
+                                <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span class="text-sm text-blue-800 font-medium">Tip</span>
+                                    </div>
+                                    <p class="text-xs text-blue-600 mt-1">
+                                        Use "Publish Now" for immediate publishing, "Save as Draft" to work on it later, or set a publish date above and click "Create Post" to schedule.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -237,47 +262,107 @@
     </div>
 
     @push('scripts')
-    <!-- TinyMCE WYSIWYG Editor -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- Simple Rich Text Editor using execCommand -->
     <script>
-        // Initialize TinyMCE
-        tinymce.init({
-            selector: '#content',
-            height: 500,
-            menubar: false,
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'preview', 'help', 'wordcount'
-            ],
-            toolbar: 'undo redo | blocks | ' +
-                'bold italic forecolor | alignleft aligncenter ' +
-                'alignright alignjustify | bullist numlist outdent indent | ' +
-                'removeformat | help',
-            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }',
-            images_upload_handler: function (blobInfo, success, failure) {
-                const formData = new FormData();
-                formData.append('image', blobInfo.blob(), blobInfo.filename());
-                
-                fetch('{{ route("admin.blog.upload-image") }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        success(data.url);
-                    } else {
-                        failure('Image upload failed');
-                    }
-                })
-                .catch(() => {
-                    failure('Image upload failed');
-                });
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentTextarea = document.getElementById('content');
+            
+            // Create editor container
+            const editorContainer = document.createElement('div');
+            editorContainer.className = 'border border-gray-300 rounded-md';
+            
+            // Create toolbar
+            const toolbar = document.createElement('div');
+            toolbar.className = 'border-b border-gray-300 p-2 bg-gray-50 flex flex-wrap gap-1';
+            toolbar.innerHTML = `
+                <button type="button" onclick="formatText('bold')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Bold">
+                    <strong>B</strong>
+                </button>
+                <button type="button" onclick="formatText('italic')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Italic">
+                    <em>I</em>
+                </button>
+                <button type="button" onclick="formatText('underline')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Underline">
+                    <u>U</u>
+                </button>
+                <div class="border-l mx-1"></div>
+                <button type="button" onclick="formatText('insertUnorderedList')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Bullet List">
+                    • List
+                </button>
+                <button type="button" onclick="formatText('insertOrderedList')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Numbered List">
+                    1. List
+                </button>
+                <div class="border-l mx-1"></div>
+                <button type="button" onclick="insertLink()" class="px-2 py-1 border rounded hover:bg-gray-200" title="Insert Link">
+                    🔗 Link
+                </button>
+                <button type="button" onclick="formatText('removeFormat')" class="px-2 py-1 border rounded hover:bg-gray-200" title="Remove Formatting">
+                    Clear
+                </button>
+                <div class="border-l mx-1"></div>
+                <button type="button" onclick="toggleSource()" class="px-2 py-1 border rounded hover:bg-gray-200" title="View Source">
+                    &lt;/&gt; HTML
+                </button>
+            `;
+            
+            // Create editable content area
+            const editableContent = document.createElement('div');
+            editableContent.contentEditable = true;
+            editableContent.className = 'p-4 min-h-96 focus:outline-none';
+            editableContent.style.minHeight = '400px';
+            editableContent.innerHTML = contentTextarea.value || '<p>Start writing your blog post...</p>';
+            
+            // Replace textarea with editor
+            editorContainer.appendChild(toolbar);
+            editorContainer.appendChild(editableContent);
+            contentTextarea.style.display = 'none';
+            contentTextarea.parentNode.insertBefore(editorContainer, contentTextarea);
+            
+            // Sync content back to textarea
+            editableContent.addEventListener('input', function() {
+                contentTextarea.value = editableContent.innerHTML;
+            });
+            
+            // Global functions for toolbar
+            window.formatText = function(command, value = null) {
+                editableContent.focus();
+                document.execCommand(command, false, value);
+                contentTextarea.value = editableContent.innerHTML;
+            };
+            
+            window.insertLink = function() {
+                const url = prompt('Enter URL:');
+                if (url) {
+                    formatText('createLink', url);
+                }
+            };
+            
+            let showingSource = false;
+            window.toggleSource = function() {
+                if (showingSource) {
+                    // Switch back to visual editor
+                    editableContent.innerHTML = contentTextarea.value;
+                    editableContent.contentEditable = true;
+                    editableContent.style.fontFamily = '';
+                    showingSource = false;
+                } else {
+                    // Switch to HTML source
+                    contentTextarea.value = editableContent.innerHTML;
+                    editableContent.textContent = contentTextarea.value;
+                    editableContent.contentEditable = true;
+                    editableContent.style.fontFamily = 'monospace';
+                    showingSource = true;
+                }
+            };
+            
+            // Update textarea before form submission
+            const form = document.getElementById('blog-form');
+            form.addEventListener('submit', function() {
+                if (!showingSource) {
+                    contentTextarea.value = editableContent.innerHTML;
+                } else {
+                    contentTextarea.value = editableContent.textContent;
+                }
+            });
         });
 
         // Drag and Drop Image Upload
