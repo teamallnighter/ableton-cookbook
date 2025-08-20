@@ -18,9 +18,15 @@ class StoreRackRequest extends FormRequest
                 'required',
                 'file',
                 'max:10240', // 10MB max
-                'mimes:adg',
                 'mimetypes:application/octet-stream',
                 function ($attribute, $value, $fail) {
+                    // Check file extension
+                    $extension = strtolower($value->getClientOriginalExtension());
+                    if ($extension !== 'adg') {
+                        $fail('Please upload a valid Ableton Device Group (.adg) file.');
+                        return;
+                    }
+                    
                     // Additional file signature verification
                     $handle = fopen($value->getPathname(), 'rb');
                     if (!$handle) {

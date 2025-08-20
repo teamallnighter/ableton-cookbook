@@ -40,6 +40,7 @@ class RackProcessingService
                 'file_hash' => $fileInfo['hash'],
                 'file_size' => $fileInfo['size'],
                 'original_filename' => $file->getClientOriginalName(),
+                'rack_type' => 'AudioEffectGroupDevice', // Default, will be updated after analysis
                 'status' => 'processing',
                 'is_public' => $metadata['is_public'] ?? true,
             ]);
