@@ -1,5 +1,24 @@
 <?php
 
+/**
+ * @OA\Schema(
+ *     schema="BlogCategory",
+ *     type="object",
+ *     title="BlogCategory",
+ *     description="Blog category model",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="name", type="string", example="Production Tips"),
+ *     @OA\Property(property="slug", type="string", example="production-tips"),
+ *     @OA\Property(property="description", type="string", nullable=true, example="Tips and tricks for music production"),
+ *     @OA\Property(property="color", type="string", example="#3B82F6"),
+ *     @OA\Property(property="sort_order", type="integer", example=0),
+ *     @OA\Property(property="is_active", type="boolean", example=true),
+ *     @OA\Property(property="posts_count", type="integer", example=5),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
+ * )
+ */
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;

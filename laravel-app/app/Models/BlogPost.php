@@ -1,5 +1,34 @@
 <?php
 
+/**
+ * @OA\Schema(
+ *     schema="BlogPost",
+ *     type="object",
+ *     title="BlogPost",
+ *     description="Blog post model",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="title", type="string", example="Advanced Ableton Live Techniques"),
+ *     @OA\Property(property="slug", type="string", example="advanced-ableton-live-techniques"),
+ *     @OA\Property(property="excerpt", type="string", example="Learn advanced techniques to take your Ableton Live production to the next level"),
+ *     @OA\Property(property="content", type="string", example="Full blog post content here..."),
+ *     @OA\Property(property="featured_image_path", type="string", nullable=true),
+ *     @OA\Property(property="featured", type="boolean", example=true),
+ *     @OA\Property(property="is_active", type="boolean", example=true),
+ *     @OA\Property(property="views_count", type="integer", example=250),
+ *     @OA\Property(property="published_at", type="string", format="date-time"),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time"),
+ *     @OA\Property(
+ *         property="author",
+ *         ref="#/components/schemas/User"
+ *     ),
+ *     @OA\Property(
+ *         property="category",
+ *         ref="#/components/schemas/BlogCategory"
+ *     )
+ * )
+ */
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;

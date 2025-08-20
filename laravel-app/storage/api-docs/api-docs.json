@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "https://ableton.recipes",
+            "url": "http://localhost:8000",
             "description": "Ableton Cookbook API Server"
         }
     ],
@@ -557,10 +557,129 @@
                     }
                 ]
             }
+        },
+        "/api/v1/users/{user}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user profile",
+                "description": "Retrieve detailed user profile information including follower counts",
+                "operationId": "getUserProfile",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                },
+                                                "followers_count": {
+                                                    "type": "integer",
+                                                    "example": 42
+                                                },
+                                                "following_count": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                }
+            }
+        },
+        "/api/v1/users/{user}/follow": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Follow a user",
+                "description": "Follow another user to see their content in your feed",
+                "operationId": "followUser",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "User ID to follow",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User followed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User followed successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication required"
+                    },
+                    "403": {
+                        "description": "Cannot follow yourself"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
         "securitySchemes": {
+            "session": {
+                "type": "apiKey",
+                "description": "Laravel session authentication",
+                "name": "laravel_session",
+                "in": "cookie"
+            },
             "sanctum": {
                 "type": "http",
                 "description": "Laravel Sanctum token authentication. Use format: Bearer {your-token}",
@@ -573,6 +692,10 @@
         {
             "name": "Racks",
             "description": "API Endpoints for managing Ableton Live racks"
+        },
+        {
+            "name": "Users",
+            "description": "API Endpoints for user profiles and social features"
         }
     ],
     "security": [

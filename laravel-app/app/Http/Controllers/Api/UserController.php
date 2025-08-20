@@ -11,8 +11,47 @@ use App\Models\UserFollow;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * @OA\Tag(
+ *     name="Users",
+ *     description="API Endpoints for user profiles and social features"
+ * )
+ */
 class UserController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/v1/users/{user}",
+     *     summary="Get user profile",
+     *     description="Retrieve detailed user profile information including follower counts",
+     *     operationId="getUserProfile",
+     *     tags={"Users"},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User profile retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="John Doe"),
+     *                 @OA\Property(property="email", type="string", example="john@example.com"),
+     *                 @OA\Property(property="followers_count", type="integer", example=42),
+     *                 @OA\Property(property="following_count", type="integer", example=15)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     )
+     * )
+     */
     public function show(User $user)
     {
         $user->load(['followers', 'following']);
@@ -51,6 +90,38 @@ class UserController extends Controller
         return UserResource::collection($following);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/users/{user}/follow",
+     *     summary="Follow a user",
+     *     description="Follow another user to see their content in your feed",
+     *     operationId="followUser",
+     *     tags={"Users"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         description="User ID to follow",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User followed successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User followed successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Authentication required"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Cannot follow yourself"
+     *     )
+     * )
+     */
     public function follow(User $user): JsonResponse
     {
         if (!auth()->check()) {
