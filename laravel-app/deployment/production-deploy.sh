@@ -133,6 +133,11 @@ php artisan config:cache
 php artisan view:cache
 php artisan route:cache
 
+# Generate API documentation with correct server URLs
+print_status "Generating API documentation..."
+php artisan l5-swagger:generate
+php fix-api-docs.php
+
 print_status "Phase 6: File Permissions"
 
 # Set proper permissions
@@ -174,11 +179,20 @@ else
     print_warning "CSS assets may not be loading (HTTP $ASSET_STATUS)"
 fi
 
+# Check if API documentation is accessible
+API_DOCS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$DOMAIN/api/docs)
+if [ $API_DOCS_STATUS -eq 200 ]; then
+    print_status "API documentation is accessible at /api/docs"
+else
+    print_warning "API documentation may not be accessible (HTTP $API_DOCS_STATUS)"
+fi
+
 echo ""
 print_status "🎉 Deployment Complete!"
 echo -e "${GREEN}Site: https://$DOMAIN${NC}"
 echo -e "${GREEN}Blog: https://$DOMAIN/blog${NC}"
 echo -e "${GREEN}Admin: https://$DOMAIN/admin/blog${NC}"
+echo -e "${GREEN}API Docs: https://$DOMAIN/api/docs${NC}"
 echo ""
 print_warning "Don't forget to:"
 echo "1. Update .env with proper database credentials"
