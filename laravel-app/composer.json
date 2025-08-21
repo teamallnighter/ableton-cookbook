@@ -9,6 +9,7 @@
         "php": "^8.2",
         "cybercog/laravel-love": "^10.1",
         "darkaonline/l5-swagger": "^9.0",
+        "dedoc/scramble": "^0.12.30",
         "laravel/framework": "^12.0",
         "laravel/jetstream": "^5.3",
         "laravel/pail": "^1.2.2",
