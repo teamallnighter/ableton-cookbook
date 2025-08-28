@@ -361,12 +361,10 @@
                                 </svg>
                             </button>
                             <button 
-                                @click="console.log('Tree view button clicked, current viewMode:', viewMode); viewMode = 'tree'; console.log('New viewMode:', viewMode); if (!treeViewLoaded) { treeViewLoaded = true; console.log('Loading tree view...'); }"
-                                @touchend.prevent="viewMode = 'tree'; if (!treeViewLoaded) { treeViewLoaded = true; $nextTick(() => { const treeEl = $el.parentElement.parentElement.querySelector('[x-data*=\"treeViewData\"]'); if (treeEl && treeEl.__x) { treeEl.__x.$data.init(); } }); }"
+                                @click="viewMode = 'tree'; if (!treeViewLoaded) { treeViewLoaded = true; }"
                                 :class="viewMode === 'tree' ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                                class="px-3 py-1 text-sm rounded transition-colors touch-manipulation"
+                                class="px-3 py-1 text-sm rounded transition-colors"
                                 title="Tree View"
-                                style="touch-action: manipulation;"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -413,7 +411,7 @@
                                                 @foreach(array_slice($chain['devices'], 0, 3) as $device)
                                                     <div class="flex items-center gap-2 text-xs text-gray-700">
                                                         <div class="w-1 h-1 rounded-full bg-gray-400"></div>
-                                                        {{ $device['name'] ?? 'Unknown Device' }}
+                                                        {{ $device['display_name'] ?? $device['name'] ?? $device['standard_name'] ?? 'Unknown Device' }}
                                                     </div>
                                                 @endforeach
                                                 @if(count($chain['devices']) > 3)
@@ -438,36 +436,39 @@
                          x-transition:enter="transition ease-out duration-300" 
                          x-transition:enter-start="opacity-0 transform scale-95" 
                          x-transition:enter-end="opacity-100 transform scale-100"
-                         x-init="console.log('Tree view div showing, treeViewLoaded:', treeViewLoaded)"
                          @touchstart.passive
                          @touchend.passive
                          tabindex="0"
                          role="tree"
                          aria-label="Rack device structure">
                         @if(!empty($rackData['chains']))
-                            <!-- Simple Tree View Test -->
-                            <div class="p-4 border-2 border-green-500 bg-green-50">
-                                <h4 class="font-bold text-green-800 mb-2">🌳 Tree View Working!</h4>
-                                <p class="text-sm text-gray-700 mb-2">
-                                    ViewMode: <span x-text="viewMode" class="font-mono bg-gray-200 px-1 rounded"></span>
-                                </p>
-                                <p class="text-sm text-gray-700 mb-2">
-                                    Tree Loaded: <span x-text="treeViewLoaded" class="font-mono bg-gray-200 px-1 rounded"></span>
-                                </p>
-                                
-                                <div class="mt-4">
-                                    <h5 class="font-semibold mb-2">Rack Chains:</h5>
-                                    @foreach($rackData['chains'] as $chainIndex => $chain)
-                                        <div class="ml-2 p-2 border border-gray-300 rounded mb-2">
-                                            <div class="font-medium">{{ $chain['name'] ?? "Chain " . ($chainIndex + 1) }}</div>
+                            <div class="tree-structure">
+                                @foreach($rackData['chains'] as $chainIndex => $chain)
+                                    <div class="chain-branch mb-3" x-data="{ expanded: true }">
+                                        <div class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded" @click="expanded = !expanded">
+                                            <svg class="w-4 h-4 mr-2 transition-transform" :class="expanded ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                            <span class="font-semibold text-sm">{{ $chain['name'] ?? "Chain " . ($chainIndex + 1) }}</span>
+                                            <span class="ml-auto text-xs text-gray-500">{{ count($chain['devices'] ?? []) }} devices</span>
+                                        </div>
+                                        
+                                        <div x-show="expanded" x-transition class="ml-6 mt-1">
                                             @if(!empty($chain['devices']))
-                                                <div class="ml-4 mt-1 text-sm text-gray-600">
-                                                    Devices: {{ count($chain['devices']) }}
-                                                </div>
+                                                @foreach($chain['devices'] as $device)
+                                                    <div class="device-leaf flex items-center py-1 px-2 text-sm hover:bg-gray-50 rounded">
+                                                        <svg class="w-3 h-3 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                            <circle cx="10" cy="10" r="3"/>
+                                                        </svg>
+                                                        <span class="text-gray-700">{{ $device['display_name'] ?? $device['name'] ?? $device['standard_name'] ?? 'Unknown Device' }}</span>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="text-xs text-gray-500 italic px-2">No devices</div>
                                             @endif
                                         </div>
-                                    @endforeach
-                                </div>
+                                    </div>
+                                @endforeach
                             </div>
                         @else
                             <div class="text-center text-gray-500 text-sm py-6">
