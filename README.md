@@ -2,7 +2,7 @@
 
 A community-driven platform for sharing and discovering Ableton Live racks, techniques, and creative resources.
 [![Deploy to Production](https://github.com/teamallnighter/ableton-cookbook/actions/workflows/deploy.yml/badge.svg)](https://github.com/teamallnighter/ableton-cookbook/actions/workflows/deploy.yml)
-![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat&logo=laravel)
+![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat&logo=laravel)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat&logo=php)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css)
 ![Livewire](https://img.shields.io/badge/Livewire-3.x-4E56A6?style=flat&logo=livewire)
@@ -14,6 +14,8 @@ A community-driven platform for sharing and discovering Ableton Live racks, tech
 ### 🎛️ Rack Management
 - **Upload & Share**: Share your custom Ableton Live racks with the community
 - **Smart Analysis**: Automatic rack analysis including device detection and Ableton version compatibility
+- **Specialized Drum Analysis**: Advanced drum rack analyzer with MIDI pad mapping and performance insights
+- **Interactive Visualization**: 4x4 drum pad grid with device categorization and complexity analysis
 - **Categories & Tags**: Organize racks by genre, style, and device types
 - **Rating System**: Community-driven rating and review system
 - **Favorites**: Save and organize your favorite racks
@@ -33,10 +35,11 @@ A community-driven platform for sharing and discovering Ableton Live racks, tech
 - **Admin Interface**: Complete admin panel for content management
 
 ### 🚀 API Documentation
-- **Comprehensive REST API**: Full API for all platform features
-- **Interactive Documentation**: Swagger UI available at `/api/docs`
+- **Comprehensive REST API**: Full API for all platform features including specialized drum rack endpoints
+- **Interactive Documentation**: Swagger UI available at `/api/docs` and modern docs at `/docs/api`
+- **Drum Rack API**: Dedicated endpoints for drum rack analysis, validation, and batch processing
 - **Postman Collection**: Ready-to-use Postman collections and environments
-- **Authentication Support**: Both session and token-based authentication
+- **Authentication Support**: Both session and token-based authentication with Laravel Sanctum
 - **Developer Resources**: Complete API testing suite and examples
 
 ### 📧 Email System
@@ -46,10 +49,12 @@ A community-driven platform for sharing and discovering Ableton Live racks, tech
 - **Notification System**: Configurable email notifications for various events
 
 ### 🔍 Discovery Features
-- **Advanced Search**: Filter by device, genre, Ableton version, and more
-- **Browse by Category**: Organized browsing experience
+- **Advanced Search**: Filter by device, genre, Ableton version, drum type, and more
+- **Intelligent Routing**: Automatic detection between drum and general racks for optimized display
+- **Browse by Category**: Organized browsing experience with drum-specific categorization
 - **Trending Racks**: Discover popular and recently uploaded content
-- **Recommendations**: Personalized rack suggestions
+- **Performance Analysis**: Filter by complexity scores and optimization recommendations
+- **Recommendations**: Personalized rack suggestions based on usage patterns
 
 ### 🛡️ Security & Performance
 - **Two-Factor Authentication**: Optional 2FA for enhanced account security
@@ -62,8 +67,9 @@ A community-driven platform for sharing and discovering Ableton Live racks, tech
 ### Prerequisites
 - PHP 8.2+
 - Composer
-- Node.js & NPM
-- MySQL/MariaDB
+- Node.js 20+ & NPM
+- MySQL 8.0+ (for JSON column support)
+- Redis (recommended for caching and queues)
 - Web server (Apache/Nginx)
 
 ### Installation
@@ -212,23 +218,29 @@ The platform provides a comprehensive REST API for developers and third-party in
 
 ### Key Commands
 ```bash
-# Run tests
-php artisan test
+# Development environment
+composer dev                        # Start serve + queue + logs + vite concurrently
 
-# Generate API documentation
-php artisan l5-swagger:generate
+# Testing
+php artisan test                     # All tests
+php artisan test --filter=RackApiTest  # Specific test class
+./vendor/bin/phpunit --testsuite=Feature  # Feature tests only
+./vendor/bin/phpunit --testsuite=Unit     # Unit tests only
 
-# Generate sitemap
-php artisan sitemap:generate
+# API documentation
+php artisan l5-swagger:generate      # Generate legacy OpenAPI docs
+# Modern docs auto-generate at /docs/api using Scramble
 
-# Optimize SEO
-php artisan seo:optimize
+# Rack-specific commands  
+php artisan rack:reanalyze          # Reprocess existing racks with updated analyzer
 
-# Clear caches
-php artisan optimize:clear
+# SEO and optimization
+php artisan sitemap:generate        # Generate SEO sitemaps
+php artisan seo:optimize            # Batch SEO optimizations
 
-# Test email configuration
-php artisan email:test your-email@example.com
+# System maintenance
+php artisan optimize:clear          # Clear all caches
+php artisan email:test your-email@example.com  # Test email configuration
 ```
 
 ### Project Structure
@@ -241,7 +253,9 @@ laravel-app/
 │   │   └── Api/            # API controllers with OpenAPI docs
 │   ├── Models/              # Eloquent models (Rack, User, BlogPost, etc.)
 │   ├── Notifications/       # Email notifications
-│   └── Services/           # Business logic services
+│   ├── Services/           # Business logic services
+│   │   ├── AbletonDrumRackAnalyzer/  # Specialized drum rack analysis
+│   │   └── DrumRackAnalyzerService.php  # Laravel service wrapper
 ├── database/
 │   ├── migrations/         # Database migrations
 │   └── seeders/           # Database seeders
@@ -253,8 +267,10 @@ laravel-app/
 │   ├── views/
 │   │   ├── admin/blog/     # Blog admin templates
 │   │   ├── blog/          # Public blog templates
+│   │   ├── components/    # Reusable Blade components (including drum rack visualizer)
 │   │   └── api/           # API documentation views
-│   └── js/               # Frontend assets
+│   ├── css/              # Stylesheets (including drum-rack.css)
+│   └── js/               # Frontend assets (Alpine.js, interactions)
 └── routes/               # Application routes (web, api)
 ```
 
@@ -263,6 +279,37 @@ laravel-app/
 Visit [ableton.recipes](https://ableton.recipes) to see the application in action.
 
 🚀 **Automated Deployment**: Now featuring GitHub Actions CI/CD for seamless deployments!
+
+## 🥁 Drum Rack Analyzer - Advanced Features
+
+The platform includes a specialized **Ableton Drum Rack Analyzer** that provides deep insights into drum rack structures, performance characteristics, and optimization opportunities.
+
+### 🎵 Drum-Specific Analysis
+- **MIDI Pad Mapping**: Visual representation of 24 standard drum positions (C1=36 Kick, D1=38 Snare, etc.)
+- **Device Categorization**: Automatic classification of 50+ drum devices including DS series, synthesizers, and samplers
+- **Performance Analysis**: Complexity scoring (0-100) with optimization recommendations
+- **Chain Structure**: Detailed visualization of device chains within each drum pad
+
+### 🎛️ Interactive Drum Visualization
+- **4x4 Drum Pad Grid**: Interactive layout matching Ableton Live's standard configuration
+- **Device Type Icons**: Visual indicators for synthesizers (🎹), samplers (📀), and effects (⚙️)
+- **Responsive Design**: Adapts from 4x4 desktop grid to 2x2 mobile layout
+- **Performance Indicators**: Color-coded complexity and resource usage warnings
+
+### 📊 Analysis Capabilities
+- **Automatic Detection**: Intelligent routing between drum and general rack analyzers
+- **Batch Processing**: Support for analyzing multiple drum racks simultaneously
+- **Performance Metrics**: CPU usage analysis and optimization suggestions  
+- **Educational Features**: MIDI note education and drum programming insights
+
+### 🔌 Drum Rack API Endpoints
+| Method | Endpoint | Purpose | Rate Limit |
+|--------|----------|---------|-----------|
+| GET | `/api/v1/drum-racks/info` | Analyzer information | 60/min |
+| POST | `/api/v1/drum-racks/analyze` | Single file analysis | 60/min |
+| POST | `/api/v1/drum-racks/analyze-batch` | Batch processing | 10/min |
+| POST | `/api/v1/drum-racks/validate` | File validation | 120/min |
+| POST | `/api/v1/drum-racks/detect` | Drum rack detection | 120/min |
 
 ## 📊 Key Features Implementation
 

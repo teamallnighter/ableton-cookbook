@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Rack;
 use App\Models\User;
 use App\Services\AbletonRackAnalyzer\AbletonRackAnalyzer;
+use App\Services\DrumRackAnalyzerService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,10 +15,12 @@ use Exception;
 class RackProcessingService
 {
     protected AbletonRackAnalyzer $analyzer;
+    protected DrumRackAnalyzerService $drumAnalyzer;
 
-    public function __construct()
+    public function __construct(DrumRackAnalyzerService $drumAnalyzer)
     {
         $this->analyzer = new AbletonRackAnalyzer();
+        $this->drumAnalyzer = $drumAnalyzer;
     }
 
     /**
@@ -47,30 +50,62 @@ class RackProcessingService
             
             // 3. Process the rack file with analyzer
             try {
-                $analysisResult = $this->analyzeRackFile($fileInfo['full_path']);
+                // First check if it's a drum rack
+                $isDrumRack = $this->drumAnalyzer->isDrumRack($fileInfo['full_path']);
                 
-                if ($analysisResult) {
-                    // Update rack with analysis results
-                    $rack->update([
-                        'rack_type' => $analysisResult['rack_type'] ?? null,
-                        'device_count' => count($analysisResult['chains'][0]['devices'] ?? []),
-                        'chain_count' => count($analysisResult['chains'] ?? []),
-                        'ableton_version' => $analysisResult['ableton_version'] ?? null,
-                        'macro_controls' => $analysisResult['macro_controls'] ?? [],
-                        'devices' => $analysisResult['chains'] ?? [],
-                        'chains' => $analysisResult['chains'] ?? [],
-                        'version_details' => $analysisResult['version_details'] ?? [],
-                        'parsing_errors' => $analysisResult['parsing_errors'] ?? [],
-                        'parsing_warnings' => $analysisResult['parsing_warnings'] ?? [],
-                        'status' => empty($analysisResult['parsing_errors']) ? 'approved' : 'pending',
-                        'published_at' => empty($analysisResult['parsing_errors']) ? now() : null,
-                    ]);
+                if ($isDrumRack) {
+                    // Use specialized drum rack analyzer
+                    $analysisResult = $this->analyzeDrumRackFile($fileInfo['full_path']);
                     
-                    // Process tags if provided
-                    if (!empty($metadata['tags'])) {
-                        $this->attachTags($rack, $metadata['tags']);
+                    if ($analysisResult) {
+                        // Update rack with drum rack analysis results
+                        $rack->update([
+                            'rack_type' => 'drum_rack',
+                            'category' => 'drums',
+                            'device_count' => $this->countDrumRackDevices($analysisResult),
+                            'chain_count' => count($analysisResult['drum_chains'] ?? []),
+                            'ableton_version' => $analysisResult['ableton_version'] ?? null,
+                            'macro_controls' => $analysisResult['macro_controls'] ?? [],
+                            'devices' => $this->convertDrumChainsToDevices($analysisResult['drum_chains'] ?? []),
+                            'chains' => $this->convertDrumChainsToChains($analysisResult['drum_chains'] ?? []),
+                            'version_details' => $analysisResult['version_details'] ?? [],
+                            'parsing_errors' => $analysisResult['parsing_errors'] ?? [],
+                            'parsing_warnings' => $analysisResult['parsing_warnings'] ?? [],
+                            'status' => empty($analysisResult['parsing_errors']) ? 'approved' : 'pending',
+                            'published_at' => empty($analysisResult['parsing_errors']) ? now() : null,
+                        ]);
+                        
+                        // Auto-tag drum racks
+                        $this->attachTags($rack, ['drums', 'percussion', 'rhythm']);
+                    }
+                } else {
+                    // Use general rack analyzer
+                    $analysisResult = $this->analyzeRackFile($fileInfo['full_path']);
+                    
+                    if ($analysisResult) {
+                        // Update rack with analysis results
+                        $rack->update([
+                            'rack_type' => $analysisResult['rack_type'] ?? null,
+                            'device_count' => count($analysisResult['chains'][0]['devices'] ?? []),
+                            'chain_count' => count($analysisResult['chains'] ?? []),
+                            'ableton_version' => $analysisResult['ableton_version'] ?? null,
+                            'macro_controls' => $analysisResult['macro_controls'] ?? [],
+                            'devices' => $analysisResult['chains'] ?? [],
+                            'chains' => $analysisResult['chains'] ?? [],
+                            'version_details' => $analysisResult['version_details'] ?? [],
+                            'parsing_errors' => $analysisResult['parsing_errors'] ?? [],
+                            'parsing_warnings' => $analysisResult['parsing_warnings'] ?? [],
+                            'status' => empty($analysisResult['parsing_errors']) ? 'approved' : 'pending',
+                            'published_at' => empty($analysisResult['parsing_errors']) ? now() : null,
+                        ]);
                     }
                 }
+                
+                // Process additional tags if provided
+                if (!empty($metadata['tags'])) {
+                    $this->attachTags($rack, $metadata['tags']);
+                }
+                
             } catch (Exception $e) {
                 $rack->update([
                     'status' => 'failed',
@@ -96,6 +131,76 @@ class RackProcessingService
         }
         
         return AbletonRackAnalyzer::parseChainsAndDevices($xml, $filePath);
+    }
+
+    /**
+     * Analyze a drum rack file using DrumRackAnalyzerService
+     */
+    protected function analyzeDrumRackFile(string $filePath): ?array
+    {
+        $result = $this->drumAnalyzer->analyzeDrumRack($filePath, [
+            'include_performance' => true,
+            'verbose' => false
+        ]);
+        
+        return $result['success'] ? $result['data'] : null;
+    }
+
+    /**
+     * Count total devices in drum rack chains
+     */
+    protected function countDrumRackDevices(array $drumRackData): int
+    {
+        $count = 0;
+        foreach ($drumRackData['drum_chains'] ?? [] as $chain) {
+            $count += count($chain['devices'] ?? []);
+        }
+        return $count;
+    }
+
+    /**
+     * Convert drum chains to standard devices format for backward compatibility
+     */
+    protected function convertDrumChainsToDevices(array $drumChains): array
+    {
+        $devices = [];
+        foreach ($drumChains as $chain) {
+            foreach ($chain['devices'] ?? [] as $device) {
+                $devices[] = [
+                    'type' => $device['type'] ?? 'Unknown',
+                    'name' => $device['name'] ?? 'Unknown Device',
+                    'standard_name' => $device['standard_name'] ?? '',
+                    'is_on' => $device['is_on'] ?? true,
+                    'drum_context' => $device['drum_context'] ?? []
+                ];
+            }
+        }
+        return $devices;
+    }
+
+    /**
+     * Convert drum chains to standard chains format for backward compatibility
+     */
+    protected function convertDrumChainsToChains(array $drumChains): array
+    {
+        $chains = [];
+        foreach ($drumChains as $chain) {
+            $chains[] = [
+                'name' => $chain['name'] ?? 'Drum Chain',
+                'devices' => $chain['devices'] ?? [],
+                'is_soloed' => $chain['is_soloed'] ?? false,
+                'chain_index' => $chain['chain_index'] ?? 0,
+                'annotations' => [
+                    'tags' => $chain['drum_annotations']['tags'] ?? [],
+                    'purpose' => $chain['drum_annotations']['drum_type'] ?? null,
+                    'key_range' => $chain['drum_annotations']['key_range'] ?? null,
+                    'description' => $chain['drum_annotations']['description'] ?? null,
+                    'velocity_range' => $chain['drum_annotations']['velocity_range'] ?? null,
+                    'midi_note' => $chain['drum_annotations']['midi_note'] ?? null,
+                ]
+            ];
+        }
+        return $chains;
     }
 
     /**

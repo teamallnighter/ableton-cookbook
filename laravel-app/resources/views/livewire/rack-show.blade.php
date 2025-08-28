@@ -340,13 +340,20 @@
         <!-- Right Column: Rack Visualization -->
         <div class="xl:col-span-1 order-1 xl:order-2">
             <div class="sticky top-8">
-                <!-- View Mode Switcher -->
-                <div class="card card-body mb-6" 
-                     x-data="{ 
-                        viewMode: 'card', 
-                        treeViewLoaded: false
-                     }"
-                     x-init="$el._alpineInstance = $data">
+                @if($this->isDrumRack())
+                    {{-- Drum Rack Specific Visualization --}}
+                    <div class="card card-body mb-6">
+                        <x-drum-rack-visualizer :drumRackData="$this->getDrumRackData()" />
+                    </div>
+                @else
+                    {{-- General Rack Visualization --}}
+                    <!-- View Mode Switcher -->
+                    <div class="card card-body mb-6" 
+                         x-data="{ 
+                            viewMode: 'card', 
+                            treeViewLoaded: false
+                         }"
+                         x-init="$el._alpineInstance = $data">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-black">Rack Structure</h3>
                         <div class="flex items-center gap-2">
@@ -408,17 +415,12 @@
                                         </div>
                                         @if(!empty($chain['devices']))
                                             <div class="space-y-1">
-                                                @foreach(array_slice($chain['devices'], 0, 3) as $device)
+                                                @foreach($chain['devices'] as $device)
                                                     <div class="flex items-center gap-2 text-xs text-gray-700">
                                                         <div class="w-1 h-1 rounded-full bg-gray-400"></div>
                                                         {{ $device['display_name'] ?? $device['name'] ?? $device['standard_name'] ?? 'Unknown Device' }}
                                                     </div>
                                                 @endforeach
-                                                @if(count($chain['devices']) > 3)
-                                                    <div class="text-xs text-gray-500 italic">
-                                                        +{{ count($chain['devices']) - 3 }} more devices
-                                                    </div>
-                                                @endif
                                             </div>
                                         @endif
                                     </div>
@@ -446,14 +448,21 @@
                                 @foreach($rackData['chains'] as $chainIndex => $chain)
                                     <div class="chain-branch mb-3" x-data="{ expanded: true }">
                                         <div class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded" @click="expanded = !expanded">
-                                            <svg class="w-4 h-4 mr-2 transition-transform" :class="expanded ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out" :class="expanded ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                             </svg>
                                             <span class="font-semibold text-sm">{{ $chain['name'] ?? "Chain " . ($chainIndex + 1) }}</span>
                                             <span class="ml-auto text-xs text-gray-500">{{ count($chain['devices'] ?? []) }} devices</span>
                                         </div>
                                         
-                                        <div x-show="expanded" x-transition class="ml-6 mt-1">
+                                        <div x-show="expanded" 
+                                             x-transition:enter="transition ease-out duration-500"
+                                             x-transition:enter-start="opacity-0 max-h-0"
+                                             x-transition:enter-end="opacity-100 max-h-screen"
+                                             x-transition:leave="transition ease-in duration-500"
+                                             x-transition:leave-start="opacity-100 max-h-screen"
+                                             x-transition:leave-end="opacity-0 max-h-0"
+                                             class="ml-6 mt-1 overflow-hidden">
                                             @if(!empty($chain['devices']))
                                                 @foreach($chain['devices'] as $device)
                                                     <div class="device-leaf flex items-center py-1 px-2 text-sm hover:bg-gray-50 rounded">
@@ -476,7 +485,8 @@
                             </div>
                         @endif
                     </div>
-                </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

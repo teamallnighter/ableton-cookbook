@@ -7,6 +7,7 @@ use App\Models\RackRating;
 use App\Models\RackFavorite;
 use App\Models\RackReport;
 use App\Jobs\IncrementRackViewsJob;
+use App\Services\DrumRackAnalyzerService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +17,7 @@ class RackShow extends Component
 {
     public Rack $rack;
     public $rackData;
+    public $drumRackData;
     public $userRating = 0;
     public $hoveredStar = 0;
     public $isFavorited = false;
@@ -406,6 +408,182 @@ class RackShow extends Component
             }
         }
         return $devices;
+    }
+
+    /**
+     * Check if this rack is a drum rack
+     */
+    public function isDrumRack()
+    {
+        // Check if already determined from stored data
+        if (isset($this->rack->rack_type) && $this->rack->rack_type === 'drum_rack') {
+            return true;
+        }
+
+        // Check for drum rack indicators in the data
+        if ($this->rack->category === 'drums' || $this->rack->category === '3') {
+            return true;
+        }
+
+        // Check rack type field
+        if (in_array($this->rack->rack_type, ['DrumRack', 'DrumGroupDevice'])) {
+            return true;
+        }
+
+        // Check if file contains drum rack by analyzing it
+        if (Storage::disk('private')->exists($this->rack->file_path)) {
+            try {
+                $drumAnalyzer = app(DrumRackAnalyzerService::class);
+                $filePath = Storage::disk('private')->path($this->rack->file_path);
+                return $drumAnalyzer->isDrumRack($filePath);
+            } catch (\Exception $e) {
+                // Fall back to false if analysis fails
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get drum rack specific data for visualization
+     */
+    public function getDrumRackData()
+    {
+        if (!$this->isDrumRack()) {
+            return null;
+        }
+
+        // Cache drum rack analysis to avoid repeated heavy operations
+        if (!$this->drumRackData) {
+            $this->drumRackData = Cache::remember(
+                "drum_rack_data_{$this->rack->id}",
+                3600, // Cache for 1 hour
+                function() {
+                    try {
+                        if (Storage::disk('private')->exists($this->rack->file_path)) {
+                            $drumAnalyzer = app(DrumRackAnalyzerService::class);
+                            $filePath = Storage::disk('private')->path($this->rack->file_path);
+                            
+                            $result = $drumAnalyzer->analyzeDrumRack($filePath, [
+                                'include_performance' => true,
+                                'verbose' => false
+                            ]);
+
+                            if ($result['success']) {
+                                return $result['data'];
+                            }
+                        }
+
+                        // Fallback: try to convert general rack data to drum format
+                        return $this->convertGeneralRackToDrumFormat();
+
+                    } catch (\Exception $e) {
+                        // Log error but don't break the UI
+                        \Log::warning("Failed to analyze drum rack {$this->rack->id}: " . $e->getMessage());
+                        return $this->convertGeneralRackToDrumFormat();
+                    }
+                }
+            );
+        }
+
+        return $this->drumRackData;
+    }
+
+    /**
+     * Convert general rack data to drum rack format for visualization
+     */
+    private function convertGeneralRackToDrumFormat()
+    {
+        $rackData = $this->rackData ?? ['chains' => []];
+        
+        return [
+            'drum_rack_name' => $this->rack->title,
+            'rack_type' => 'drum_rack',
+            'ableton_version' => $this->rack->ableton_version,
+            'drum_chains' => $this->convertChainsTodrumChains($rackData['chains'] ?? []),
+            'drum_statistics' => $this->calculateDrumStatistics($rackData['chains'] ?? []),
+            'macro_controls' => $this->rack->macro_controls ?? [],
+            'performance_analysis' => null, // Not available without proper analysis
+            'parsing_warnings' => [],
+            'parsing_errors' => []
+        ];
+    }
+
+    /**
+     * Convert general chains to drum chain format
+     */
+    private function convertChainsTodrumChains($chains)
+    {
+        $drumChains = [];
+        
+        foreach ($chains as $index => $chain) {
+            $drumChains[] = [
+                'name' => $chain['name'] ?? "Pad " . ($index + 1),
+                'devices' => array_map(function($device) {
+                    return [
+                        'type' => $device['type'] ?? 'Unknown',
+                        'name' => $device['display_name'] ?? $device['name'] ?? 'Unknown Device',
+                        'standard_name' => $device['standard_name'] ?? '',
+                        'is_on' => $device['is_on'] ?? true,
+                        'drum_context' => [
+                            'is_drum_synthesizer' => false,
+                            'is_sampler' => in_array($device['type'] ?? '', ['Sampler', 'Simpler', 'Impulse']),
+                            'is_drum_effect' => false
+                        ]
+                    ];
+                }, $chain['devices'] ?? []),
+                'is_soloed' => $chain['is_soloed'] ?? false,
+                'chain_index' => $index,
+                'drum_annotations' => [
+                    'description' => null,
+                    'drum_type' => null,
+                    'key_range' => null,
+                    'velocity_range' => null,
+                    'midi_note' => 36 + $index, // Default MIDI mapping starting from C1
+                    'pad_name' => $chain['name'] ?? "Pad " . ($index + 1),
+                    'tags' => []
+                ]
+            ];
+        }
+        
+        return $drumChains;
+    }
+
+    /**
+     * Calculate basic drum statistics from chain data
+     */
+    private function calculateDrumStatistics($chains)
+    {
+        $totalPads = count($chains);
+        $activePads = 0;
+        $chainedPads = 0;
+        $sampleBasedPads = 0;
+        
+        foreach ($chains as $chain) {
+            $devices = $chain['devices'] ?? [];
+            if (!empty($devices)) {
+                $activePads++;
+                if (count($devices) > 1) {
+                    $chainedPads++;
+                }
+                
+                foreach ($devices as $device) {
+                    if (in_array($device['type'] ?? '', ['Sampler', 'Simpler', 'Impulse'])) {
+                        $sampleBasedPads++;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return [
+            'total_pads' => $totalPads,
+            'active_pads' => $activePads,
+            'chained_pads' => $chainedPads,
+            'sample_based_pads' => $sampleBasedPads,
+            'synthesized_pads' => $activePads - $sampleBasedPads
+        ];
     }
 
     public function render()

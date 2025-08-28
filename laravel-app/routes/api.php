@@ -6,6 +6,7 @@
   use App\Http\Controllers\Api\CommentController;
   use App\Http\Controllers\Api\CollectionController;
   use App\Http\Controllers\Api\AuthController;
+  use App\Http\Controllers\DrumRackAnalyzerController;
   use Illuminate\Http\Request;
   use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,9 @@
       Route::get('/racks/featured', [RackController::class, 'featured']);
       Route::get('/racks/{rack}', [RackController::class, 'show']);
       Route::get('/racks/{rack}/how-to', [RackController::class, 'getHowTo']);
+
+      // Drum Rack Analyzer - Public info endpoint
+      Route::get('/drum-racks/info', [DrumRackAnalyzerController::class, 'info']);
 
       // Users - Public profiles
       Route::get('/users/{user}', [UserController::class, 'show']);
@@ -108,5 +112,13 @@
   [CollectionController::class, 'addRack']);
       Route::delete('/collections/{collection}/racks/{rack}',
   [CollectionController::class, 'removeRack']);
+
+      // Drum Rack Analyzer - Authenticated endpoints
+      Route::prefix('drum-racks')->group(function () {
+          Route::post('/analyze', [DrumRackAnalyzerController::class, 'analyze'])->middleware('throttle:60,1');
+          Route::post('/analyze-batch', [DrumRackAnalyzerController::class, 'analyzeBatch'])->middleware('throttle:10,1');
+          Route::post('/validate', [DrumRackAnalyzerController::class, 'validate']);
+          Route::post('/detect', [DrumRackAnalyzerController::class, 'detect']);
+      });
   });
 
