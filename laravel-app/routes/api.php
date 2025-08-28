@@ -29,6 +29,7 @@
       Route::get('/racks/trending', [RackController::class, 'trending']);
       Route::get('/racks/featured', [RackController::class, 'featured']);
       Route::get('/racks/{rack}', [RackController::class, 'show']);
+      Route::get('/racks/{rack}/how-to', [RackController::class, 'getHowTo']);
 
       // Users - Public profiles
       Route::get('/users/{user}', [UserController::class, 'show']);
@@ -47,10 +48,23 @@
   'store'])->middleware('throttle:5,1');
       Route::put('/racks/{rack}', [RackController::class, 'update']);
       Route::delete('/racks/{rack}', [RackController::class, 'destroy']);
+      
+      // Phase 3 Infrastructure API Endpoints
+      Route::prefix('infrastructure')->controller(App\Http\Controllers\Api\InfrastructureController::class)->group(function () {
+          Route::get('/feature-flags', 'getFeatureFlags');
+          Route::get('/health', 'getSystemHealth');
+          Route::get('/security', 'getSecurityMetrics');
+          Route::get('/dashboard', 'getDashboardMetrics');
+          Route::get('/accessibility', 'getAccessibilityMetrics');
+      });
       Route::post('/racks/{rack}/download', [RackController::class,
   'download'])->middleware('throttle:30,1');
       Route::post('/racks/{rack}/like', [RackController::class,
   'toggleLike']);
+
+      // How-to articles with auto-save throttling
+      Route::put('/racks/{rack}/how-to', [RackController::class, 'updateHowTo'])->middleware('throttle:30,1');
+      Route::delete('/racks/{rack}/how-to', [RackController::class, 'deleteHowTo']);
 
       // Rack Ratings
       Route::post('/racks/{rack}/rate', [RackRatingController::class,

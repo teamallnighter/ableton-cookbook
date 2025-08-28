@@ -144,9 +144,9 @@ class UserProfile extends Component
                 ')
                 ->first();
                 
-            $totalFavorites = RackFavorite::whereHas('rack', function ($query) {
-                $query->where('user_id', $this->user->id);
-            })->count();
+            $totalFavorites = RackFavorite::join('racks', 'rack_favorites.rack_id', '=', 'racks.id')
+                ->where('racks.user_id', $this->user->id)
+                ->count();
             
             return [
                 'total_uploads' => $rackStats->total_uploads ?: 0,

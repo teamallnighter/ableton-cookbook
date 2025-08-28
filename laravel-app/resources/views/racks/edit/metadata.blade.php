@@ -197,6 +197,28 @@
                     @enderror
                 </div>
 
+                <!-- How-to Guide -->
+                <div class="mb-6">
+                    <label for="how_to_article" class="block text-sm font-medium mb-2 text-black">
+                        How-to Guide
+                    </label>
+                    <x-markdown-editor 
+                        name="how_to_article" 
+                        :value="old('how_to_article', $rack->how_to_article ?? '')"
+                        placeholder="Explain how to use this rack, what it does, and any special techniques... Use Markdown for formatting!"
+                        :rows="12"
+                        :maxlength="100000"
+                        :showToolbar="true"
+                        :showPreview="true"
+                        :showImageUpload="false"
+                        class="border border-gray-300"
+                    />
+                    <p class="mt-1 text-xs text-gray-500">Maximum 100,000 characters. Markdown formatting supported. This will help other producers understand how to use your rack effectively.</p>
+                    @error('how_to_article')
+                        <p class="mt-2 text-sm text-vibrant-red font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Visibility -->
                 <div class="mb-6">
                     <div class="flex items-center space-x-3">

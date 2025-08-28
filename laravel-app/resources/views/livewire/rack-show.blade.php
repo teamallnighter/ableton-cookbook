@@ -1,4 +1,8 @@
-<div class="max-w-6xl mx-auto px-6 py-8">
+<div>
+    <!-- Skip link for keyboard navigation -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <main id="main-content" class="max-w-6xl mx-auto px-6 py-8" role="main" aria-labelledby="page-title">
     <!-- Breadcrumb -->
     <div class="mb-8">
         <nav class="flex" aria-label="Breadcrumb">
@@ -222,9 +226,11 @@
                 </div>
                 
                 <!-- Compact Rating System -->
-                <div class="flex items-center gap-3">
-                    <span class="text-sm font-medium text-black">Rate:</span>
-                    <div class="flex items-center gap-1" x-data="{ showStars: false, hoveredStar: 0 }">
+                <div class="flex items-center gap-3" role="group" aria-labelledby="rating-label">
+                    <span id="rating-label" class="text-sm font-medium text-black">Rate this rack:</span>
+                    <div class="flex items-center gap-1" 
+                         x-data="safeAlpineComponent({ showStars: false, hoveredStar: 0 }, 'rating-system')"
+                         x-init="$el._alpineInstance = $data">
                         @auth
                             <div 
                                 @mouseenter="showStars = true" 
@@ -281,461 +287,197 @@
                 <div class="text-sm text-gray-600">
                     File size: {{ number_format($rack->file_size / 1024, 1) }} KB
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 
-    <!-- Technical Details -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        <!-- Rack Structure Tree View -->
-        <div class="lg:col-span-2">
-            <div class="card card-body">
-                <h2 class="text-2xl font-bold mb-8 flex items-center gap-3 text-ableton-light">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                    </svg>
-                    {{ $rack->title }}
-                </h2>
-                
-                <!-- Chain View Container -->
-                <div class="" x-data="{ expandedChains: {}, expandAll: false }">
-                    <!-- Expand/Collapse All Button -->
-                    <div class="flex justify-between items-center mb-6">
-                        <div class="text-sm text-ableton-light/70">
-                            Click on chain headers to expand and see device details
+    <!-- Two-Column Content Layout -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <!-- Left Column: How-To Article -->
+        <div class="xl:col-span-2 order-2 xl:order-1">
+            @if($rack->how_to_article)
+                <div class="card card-body">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-black">How to Use This Rack</h2>
+                        <div class="text-sm text-gray-500">
+                            @if($rack->how_to_updated_at)
+                                Updated {{ $rack->how_to_updated_at->diffForHumans() }}
+                            @endif
                         </div>
-                        <button 
-                            @click="expandAll = !expandAll; Object.keys(expandedChains).forEach(key => expandedChains[key] = expandAll)"
-                            class="btn-secondary text-sm flex items-center gap-2"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-                            </svg>
-                            <span x-text="expandAll ? 'Collapse All' : 'Expand All'"></span>
-                        </button>
+                    </div>
+                    
+                    <div class="prose prose-lg max-w-none">
+                        {!! $rack->html_how_to !!}
+                    </div>
+                    
+                    @if($rack->how_to_preview && strlen($rack->how_to_article) > strlen($rack->how_to_preview))
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-sm text-gray-600 italic">
+                                📖 {{ $rack->reading_time_how_to }} min read
+                            </p>
+                        </div>
+                    @endif
+                </div>
+            @else
+                <!-- No How-To Article -->
+                <div class="card card-body text-center py-12">
+                    <div class="max-w-md mx-auto">
+                        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No How-To Guide Available</h3>
+                        <p class="text-gray-600 mb-4">This rack doesn't have a detailed how-to guide yet. The device structure is still available on the right.</p>
+                        @if(auth()->check() && auth()->id() === $rack->user_id)
+                            <a href="{{ route('racks.edit', $rack) }}" class="btn btn-primary">
+                                Add How-To Guide
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <!-- Right Column: Rack Visualization -->
+        <div class="xl:col-span-1 order-1 xl:order-2">
+            <div class="sticky top-8">
+                <!-- View Mode Switcher -->
+                <div class="card card-body mb-6" 
+                     x-data="{ 
+                        viewMode: 'card', 
+                        treeViewLoaded: false
+                     }"
+                     x-init="$el._alpineInstance = $data">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-black">Rack Structure</h3>
+                        <div class="flex items-center gap-2">
+                            <button 
+                                @click="viewMode = 'card'" 
+                                :class="viewMode === 'card' ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                class="px-3 py-1 text-sm rounded transition-colors"
+                                title="Card View"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-4H5m14 8H5m14 4H5"/>
+                                </svg>
+                            </button>
+                            <button 
+                                @click="console.log('Tree view button clicked, current viewMode:', viewMode); viewMode = 'tree'; console.log('New viewMode:', viewMode); if (!treeViewLoaded) { treeViewLoaded = true; console.log('Loading tree view...'); }"
+                                @touchend.prevent="viewMode = 'tree'; if (!treeViewLoaded) { treeViewLoaded = true; $nextTick(() => { const treeEl = $el.parentElement.parentElement.querySelector('[x-data*=\"treeViewData\"]'); if (treeEl && treeEl.__x) { treeEl.__x.$data.init(); } }); }"
+                                :class="viewMode === 'tree' ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                class="px-3 py-1 text-sm rounded transition-colors touch-manipulation"
+                                title="Tree View"
+                                style="touch-action: manipulation;"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Root Rack Node -->
-                    <div class="mb-8">
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-black">{{ $rack->device_count }}</div>
+                            <div class="text-xs text-gray-600">Devices</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-black">{{ $rack->chain_count }}</div>
+                            <div class="text-xs text-gray-600">Chains</div>
+                        </div>
+                    </div>
 
-                        <!-- Clean Chain Layout -->
+                    <!-- Card View -->
+                    <div class="card-view" 
+                         x-show="viewMode === 'card'" 
+                         x-transition:enter="transition ease-out duration-300" 
+                         x-transition:enter-start="opacity-0 transform scale-95" 
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         >
                         @if(!empty($rackData['chains']))
-                            <div class="space-y-6 mt-8">
+                            <div class="space-y-3">
                                 @foreach($rackData['chains'] as $chainIndex => $chain)
-                                    <div class="border-2 border-black rounded-lg overflow-hidden" x-data="{ expanded: false, init() { this.$watch('expandAll', value => this.expanded = value) } }">
-                                        <!-- Chain Header -->
-                                        <div 
-                                            class="bg-white p-4 cursor-pointer hover:bg-gray-50 transition-all border-b-2 border-black"
-                                            @click="expanded = !expanded"
-                                        >
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-4">
-                                                    <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-vibrant-purple">
-                                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                                                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                                                        </svg>
-                                                    </div>
-                                                    <div>
-                                                        <h3 class="font-semibold text-black">
-                                                            @if(isset($rack->chain_annotations[$chainIndex]['custom_name']) && !empty($rack->chain_annotations[$chainIndex]['custom_name']))
-                                                                {{ $rack->chain_annotations[$chainIndex]['custom_name'] }}
-                                                                <span class="text-sm font-normal text-gray-600 ml-2">(Chain {{ $chainIndex + 1 }})</span>
-                                                            @else
-                                                                Chain {{ $chainIndex + 1 }}
-                                                            @endif
-                                                        </h3>
-                                                        <p class="text-sm text-gray-600">
-                                                            {{ count($chain['devices']) }} {{ Str::plural('device', count($chain['devices'])) }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <!-- Expand Icon -->
-                                                <svg 
-                                                    class="w-5 h-5 text-black transform transition-transform duration-200" 
-                                                    :class="expanded ? 'rotate-90' : ''"
-                                                    fill="none" 
-                                                    stroke="currentColor" 
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                                </svg>
+                                    <div class="bg-gray-50 rounded-lg p-3">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div class="w-3 h-3 rounded-full bg-vibrant-purple"></div>
+                                            <div class="text-sm font-medium text-black">
+                                                @if(isset($rack->chain_annotations[$chainIndex]['custom_name']) && !empty($rack->chain_annotations[$chainIndex]['custom_name']))
+                                                    {{ $rack->chain_annotations[$chainIndex]['custom_name'] }}
+                                                @else
+                                                    Chain {{ $chainIndex + 1 }}
+                                                @endif
                                             </div>
-                                            
-                                            <!-- Chain Annotation Note -->
-                                            @if(isset($rack->chain_annotations[$chainIndex]['note']) && !empty($rack->chain_annotations[$chainIndex]['note']))
-                                                <div class="mt-4 p-3 bg-gray-100 rounded-lg border border-gray-300">
-                                                    <div class="text-sm text-gray-700">
-                                                        <span class="font-medium text-black">{{ $rack->user->name }} says:</span> 
-                                                        {{ $rack->chain_annotations[$chainIndex]['note'] }}
+                                        </div>
+                                        @if(!empty($chain['devices']))
+                                            <div class="space-y-1">
+                                                @foreach(array_slice($chain['devices'], 0, 3) as $device)
+                                                    <div class="flex items-center gap-2 text-xs text-gray-700">
+                                                        <div class="w-1 h-1 rounded-full bg-gray-400"></div>
+                                                        {{ $device['name'] ?? 'Unknown Device' }}
                                                     </div>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        
-                                        <!-- Chain Content -->
-                                        <div x-show="expanded" x-collapse class="bg-gray-50 border-t-2 border-black">
-                                            @if(!empty($chain['nested_chains']) || !empty($chain['devices']))
-                                                <!-- Tree Structure -->
-                                                    {{-- Render nested chains first --}}
-                                                    @if(!empty($chain['nested_chains']))
-                                                        @foreach($chain['nested_chains'] as $nestedChainIndex => $nestedChain)
-                                                            <div class="border-2 border-vibrant-cyan rounded-lg overflow-hidden mb-4" x-data="{ nestedExpanded: false }">
-                                                                <!-- Nested Chain Header -->
-                                                                <div class="bg-vibrant-cyan/10 p-4 cursor-pointer hover:bg-vibrant-cyan/20 transition-all border-b-2 border-vibrant-cyan" @click="nestedExpanded = !nestedExpanded">
-                                                                    <div class="flex items-center justify-between">
-                                                                        <div class="flex items-center gap-4">
-                                                                            <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-vibrant-cyan">
-                                                                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                                                    <path d="M7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/>
-                                                                                </svg>
-                                                                            </div>
-                                                                            <div>
-                                                                                <h3 class="text-lg font-bold text-black">
-                                                                                    {{ $nestedChain['name'] ?? 'Nested Chain ' . ($nestedChainIndex + 1) }}
-                                                                                </h3>
-                                                                                <p class="text-sm text-gray-600">
-                                                                                    {{ count($nestedChain['devices'] ?? []) }} {{ Str::plural('device', count($nestedChain['devices'] ?? [])) }}
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
-                                                                        <!-- Expand Icon -->
-                                                                        <svg class="w-5 h-5 text-black transform transition-transform duration-200" :class="nestedExpanded ? 'rotate-90' : ''" fill="none" stroke="currentColor">
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                                                        </svg>
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                                <!-- Nested Chain Devices -->
-                                                                <div x-show="nestedExpanded" x-collapse class="bg-white border-t-2 border-vibrant-cyan">
-                                                                    @if(!empty($nestedChain['devices']))
-                                                                        <div class="p-4 space-y-3">
-                                                                            @foreach($nestedChain['devices'] as $nestedDevice)
-                                                                                <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-3 hover:shadow-md transition-shadow">
-                                                                                    <div class="flex items-center gap-3">
-                                                                                        <svg class="w-5 h-5 text-vibrant-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                                                                            <circle cx="12" cy="12" r="3"/>
-                                                                                            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-                                                                                        </svg>
-                                                                                        <div class="flex-1">
-                                                                                            <div class="flex items-center gap-2 flex-wrap">
-                                                                                                <span class="font-medium text-black">{{ $nestedDevice['display_name'] ?? $nestedDevice['name'] }}</span>
-                                                                                                @if(isset($nestedDevice['type']))
-                                                                                                    <span class="text-xs text-gray-600">{{ $nestedDevice['type'] }}</span>
-                                                                                                @endif
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            @endforeach
-                                                                        </div>
-                                                                    @else
-                                                                        <div class="text-center text-gray-500 text-sm py-6">Empty nested chain</div>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    @endif
-                                                    
-                                                    {{-- Then render regular devices --}}
-                                                    @if(!empty($chain['devices']))
-
-                                                <div class="p-6 space-y-4">
-                                                    @foreach($chain['devices'] as $deviceIndex => $device)
-                                                        <div class="relative">
-                                                            <!-- Tree Line -->
-                                                            <div class="flex items-start">
-                                                                <!-- Tree connector -->
-                                                                <div class="flex-shrink-0 w-8 h-8 relative">
-                                                                    <!-- Vertical line (except for last item) -->
-                                                                    @if($deviceIndex < count($chain['devices']) - 1)
-                                                                        <div class="absolute left-3 top-8 w-px h-6 bg-ableton-light/30"></div>
-                                                                    @endif
-                                                                    <!-- Horizontal line -->
-                                                                    <div class="absolute top-3 left-3 w-4 h-px bg-ableton-light/30"></div>
-                                                                    <!-- Corner -->
-                                                                    <div class="absolute top-3 left-3 w-px h-5 bg-ableton-light/30"></div>
-                                                                    <!-- Node -->
-                                                                    <div class="absolute top-2 left-2 w-2 h-2 bg-ableton-accent rounded-full"></div>
-                                                                </div>
-                                                                
-                                                                <!-- Device Content -->
-                                                                <div class="flex-1 min-w-0 ml-2">
-                                                                    <div class="bg-white border-2 border-black rounded-lg p-4 hover:shadow-lg transition-shadow">
-                                                                        <div class="flex items-center gap-3">
-                                                                            <!-- Device Icon -->
-                                                                            @if(isset($device['chains']) && !empty($device['chains']))
-                                                                                <!-- Nested rack icon - simple black -->
-                                                                                <svg class="device-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                                                                    <rect x="2" y="4" width="20" height="16" rx="2"/>
-                                                                                    <path d="M7 8h10M7 12h4M7 16h6"/>
-                                                                                </svg>
-                                                                            @else
-                                                                                <!-- Regular device icon - simple black -->
-                                                                                <svg class="device-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                                                                    <circle cx="12" cy="12" r="3"/>
-                                                                                    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-                                                                                </svg>
-                                                                            @endif
-                                                                            
-                                                                            <!-- Device Details -->
-                                                                            <div class="flex-1 min-w-0">
-                                                                                <div class="font-medium text-black">
-                                                                                    {{ $device['name'] ?? 'Unknown Device' }}
-                                                                                </div>
-                                                                                <div class="flex flex-wrap gap-2 mt-1">
-                                                                                    @if(isset($device['preset']) && $device['preset'])
-                                                                                        <span class="text-xs px-2 py-1 rounded bg-vibrant-red text-white">
-                                                                                            {{ $device['preset'] }}
-                                                                                        </span>
-                                                                                    @endif
-                                                                                    @if(isset($device['chains']) && !empty($device['chains']))
-                                                                                        <span class="text-xs px-2 py-1 rounded bg-vibrant-cyan text-white">
-                                                                                            {{ count($device['chains']) }} nested chains
-                                                                                        </span>
-                                                                                    @endif
-                                                                                    @if(isset($device['type']))
-                                                                                        <span class="text-xs text-gray-600">
-                                                                                            {{ $device['type'] }}
-                                                                                        </span>
-                                                                                    @endif
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    
-                                                                    <!-- Nested devices (recursive tree) -->
-                                                                    @if(isset($device['chains']) && !empty($device['chains']))
-                                                                        <div class="ml-6 mt-4 space-y-3">
-                                                                            @foreach($device['chains'] as $nestedChainIndex => $nestedChain)
-                                                                                <div class="border-l-2 border-ableton-light/20 pl-4">
-                                                                                    <div class="text-sm font-medium text-ableton-light/80 mb-2">
-                                                                                        Nested Chain {{ $nestedChainIndex + 1 }}
-                                                                                    </div>
-                                                                                    @if(!empty($nestedChain['devices']))
-                                                                                        <div class="space-y-2">
-                                                                                            @foreach($nestedChain['devices'] as $nestedDeviceIndex => $nestedDevice)
-                                                                                                <div class="flex items-start">
-                                                                                                    <!-- Nested tree connector -->
-                                                                                                    <div class="flex-shrink-0 w-6 h-6 relative">
-                                                                                                        @if($nestedDeviceIndex < count($nestedChain['devices']) - 1)
-                                                                                                            <div class="absolute left-2 top-6 w-px h-4 bg-ableton-light/20"></div>
-                                                                                                        @endif
-                                                                                                        <div class="absolute top-2 left-2 w-3 h-px bg-ableton-light/20"></div>
-                                                                                                        <div class="absolute top-2 left-2 w-px h-4 bg-ableton-light/20"></div>
-                                                                                                        <div class="absolute top-1.5 left-1.5 w-1.5 h-1.5 bg-ableton-accent rounded-full"></div>
-                                                                                                    </div>
-                                                                                                    
-                                                                                                    <!-- Nested device -->
-                                                                                                    <div class="flex-1 bg-ableton-light/5 border border-ableton-light/10 rounded p-3">
-                                                                                                        <div class="flex items-center gap-2">
-                                                                                                            <div class="w-4 h-4 rounded bg-ableton-success flex items-center justify-center">
-                                                                                                                <div class="w-1.5 h-1.5 rounded-full bg-ableton-black"></div>
-                                                                                                            </div>
-                                                                                                            <span class="text-sm text-ableton-light">
-                                                                                                                {{ $nestedDevice['name'] ?? 'Unknown' }}
-                                                                                                            </span>
-                                                                                                            @if(isset($nestedDevice['preset']) && $nestedDevice['preset'])
-                                                                                                                <span class="text-xs px-1.5 py-0.5 rounded bg-ableton-danger text-ableton-black ml-auto">
-                                                                                                                    {{ $nestedDevice['preset'] }}
-                                                                                                                </span>
-                                                                                                            @endif
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            @endforeach
-                                                                                        </div>
-                                                                                    @else
-                                                                                        <div class="text-xs text-ableton-light/50 italic">Empty chain</div>
-                                                                                    @endif
-                                                                                </div>
-                                                                            @endforeach
-                                                                        </div>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <div class="text-center text-ableton-light/60 text-sm py-6">
-                                                    No devices in this chain
-                                                    @endif {{-- End regular devices --}}
-                                                </div>
-                                            @endif
-                                        </div>
+                                                @endforeach
+                                                @if(count($chain['devices']) > 3)
+                                                    <div class="text-xs text-gray-500 italic">
+                                                        +{{ count($chain['devices']) - 3 }} more devices
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
+                            </div>
+                        @else
+                            <div class="text-center text-gray-500 text-sm py-6" role="status" aria-live="polite">
+                                <p>No device structure available for this rack</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Tree View -->
+                    <div x-show="viewMode === 'tree'" 
+                         x-transition:enter="transition ease-out duration-300" 
+                         x-transition:enter-start="opacity-0 transform scale-95" 
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         x-init="console.log('Tree view div showing, treeViewLoaded:', treeViewLoaded)"
+                         @touchstart.passive
+                         @touchend.passive
+                         tabindex="0"
+                         role="tree"
+                         aria-label="Rack device structure">
+                        @if(!empty($rackData['chains']))
+                            <!-- Simple Tree View Test -->
+                            <div class="p-4 border-2 border-green-500 bg-green-50">
+                                <h4 class="font-bold text-green-800 mb-2">🌳 Tree View Working!</h4>
+                                <p class="text-sm text-gray-700 mb-2">
+                                    ViewMode: <span x-text="viewMode" class="font-mono bg-gray-200 px-1 rounded"></span>
+                                </p>
+                                <p class="text-sm text-gray-700 mb-2">
+                                    Tree Loaded: <span x-text="treeViewLoaded" class="font-mono bg-gray-200 px-1 rounded"></span>
+                                </p>
+                                
+                                <div class="mt-4">
+                                    <h5 class="font-semibold mb-2">Rack Chains:</h5>
+                                    @foreach($rackData['chains'] as $chainIndex => $chain)
+                                        <div class="ml-2 p-2 border border-gray-300 rounded mb-2">
+                                            <div class="font-medium">{{ $chain['name'] ?? "Chain " . ($chainIndex + 1) }}</div>
+                                            @if(!empty($chain['devices']))
+                                                <div class="ml-4 mt-1 text-sm text-gray-600">
+                                                    Devices: {{ count($chain['devices']) }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-center text-gray-500 text-sm py-6">
+                                <p>No device structure available for this rack</p>
                             </div>
                         @endif
                     </div>
                 </div>
-
-                <!-- Empty State -->
-                @if(empty($rackData['chains']))
-                    <div class="text-center py-12 text-ableton-light/60">
-                        <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                        </svg>
-                        <p class="text-sm">No device structure available</p>
-                        <p class="text-xs mt-1">This rack may not have been fully analyzed</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Metadata Sidebar -->
-        <div class="space-y-6">
-            <!-- Technical Info -->
-            <div class="card card-body">
-                <h3 class="font-bold mb-4 text-ableton-light">Technical Details</h3>
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-ableton-light/60">Ableton Version:</span>
-                        <span class="text-ableton-light font-medium">{{ $rack->ableton_version ?: 'Unknown' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-ableton-light/60">File Size:</span>
-                        <span class="text-ableton-light font-medium">{{ number_format($rack->file_size / 1024, 1) }} KB</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-ableton-light/60">Published:</span>
-                        <span class="text-ableton-light font-medium">
-                            {{ $rack->published_at ? $rack->published_at->format('M d, Y') : 'Pending' }}
-                        </span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-ableton-light/60">Status:</span>
-                        <span class="badge-success">
-                            {{ ucfirst($rack->status) }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="card card-body">
-                <h3 class="font-bold mb-4 text-ableton-light">Activity</h3>
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-ableton-light/60">Last viewed:</span>
-                        <span class="text-ableton-light font-medium">{{ $rack->updated_at->diffForHumans() }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-ableton-light/60">Comments:</span>
-                        <span class="text-ableton-light font-medium">{{ $rack->comments_count }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-ableton-light/60">Likes:</span>
-                        <span class="text-ableton-light font-medium">{{ $rack->likes_count }}</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
-
-    <!-- Report Modal -->
-    @if($showReportModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-75">
-            <div class="max-w-md w-full card card-body">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold text-ableton-light">Report Issue</h3>
-                    <button wire:click="closeReportModal" class="text-ableton-light/60 hover:text-ableton-light">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <form wire:submit.prevent="submitReport">
-                    <!-- Issue Type -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium mb-2 text-ableton-light">
-                            What's wrong with this rack?
-                        </label>
-                        <select 
-                            wire:model="reportIssueType" 
-                            class="input-field"
-                        >
-                            <option value="">Select an issue...</option>
-                            @foreach(\App\Models\RackReport::getIssueTypes() as $key => $label)
-                                <option value="{{ $key }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('reportIssueType') 
-                            <span class="text-sm mt-1 block text-ableton-danger">{{ $message }}</span> 
-                        @enderror
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium mb-2 text-ableton-light">
-                            Please describe the issue
-                        </label>
-                        <textarea 
-                            wire:model="reportDescription" 
-                            rows="4"
-                            placeholder="Please provide details about the problem you encountered..."
-                            class="input-field"
-                        ></textarea>
-                        @error('reportDescription') 
-                            <span class="text-sm mt-1 block text-ableton-danger">{{ $message }}</span> 
-                        @enderror
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex gap-3">
-                        <button 
-                            type="button"
-                            wire:click="closeReportModal"
-                            class="btn-secondary flex-1"
-                        >
-                            Cancel
-                        </button>
-                        <button 
-                            type="submit"
-                            class="btn-danger flex-1"
-                        >
-                            Submit Report
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    @endif
-
-    <!-- Flash Messages -->
-    @if(session()->has('success'))
-        <div class="card card-body bg-ableton-success text-ableton-black mb-4">
-            {{ session('success') }}
-        </div>
-    @endif
-    
-    @if(session()->has('error'))
-        <div class="card card-body bg-ableton-danger text-ableton-black mb-4">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    {{-- Internal Linking for SEO --}}
-    <x-internal-links :rack="$rack" />
-    
-    {{-- Additional SEO content --}}
-    <div class="sr-only">
-        <h2>How to Use This {{ ucfirst($rack->rack_type) }} Rack</h2>
-        <p>To use this {{ $rack->rack_type }} rack in Ableton Live:</p>
-        <ol>
-            <li>Download the .adg file</li>
-            <li>Open Ableton Live {{ $rack->ableton_version ?? '9+' }}</li>
-            <li>Drag the file into your Live Set</li>
-            <li>Start creating music with this {{ $rack->category_display }} rack</li>
-        </ol>
-        
-        <h3>About the Creator</h3>
-        <p>{{ $rack->user->name }} is a talented music producer sharing quality Ableton Live content. Discover more racks and follow their work on Ableton Cookbook.</p>
-        
-        <h3>Similar Music Production Content</h3>
-        <p>If you enjoyed this {{ $rack->rack_type }} rack, explore more {{ $rack->category_display }} content, browse racks by {{ $rack->user->name }}, or discover other {{ $rack->rack_type }} racks in our community.</p>
-    </div>
+    </main>
 </div>

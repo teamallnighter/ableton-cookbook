@@ -12,6 +12,15 @@
 
 /* Clean, Simple Design System */
 @layer components {
+    /* Skip Link for Accessibility */
+    .skip-link {
+        @apply fixed top-[-100px] left-4 z-50 px-4 py-2 bg-black text-white font-medium text-sm rounded shadow-lg transition-all duration-200;
+    }
+    
+    .skip-link:focus {
+        @apply top-4;
+    }
+    
     /* Primary Button */
     .btn-primary {
         @apply px-4 py-2 bg-white text-black font-medium text-sm rounded border-2 border-black hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2;

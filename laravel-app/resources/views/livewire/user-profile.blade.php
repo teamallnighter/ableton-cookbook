@@ -1,5 +1,6 @@
-<!-- Profile Header -->
-<div class="card p-6 mb-8">
+<div>
+    <!-- Profile Header -->
+    <div class="card p-6 mb-8">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <!-- User Info -->
         <div class="flex items-center gap-4">
@@ -393,4 +394,5 @@
     
     <h3>Join the Community</h3>
     <p>Discover more Ableton Live racks, connect with music producers, and share your own creations on Ableton Cookbook. Whether you're looking for instrument racks, audio effect racks, or MIDI racks, our community has everything you need for your music production workflow.</p>
+</div>
 </div>

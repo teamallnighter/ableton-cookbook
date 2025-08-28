@@ -106,6 +106,31 @@
                     @enderror
                 </div>
 
+                <!-- Terms of Service Agreement -->
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-start">
+                        <input type="checkbox" 
+                               id="tosAcceptance" 
+                               name="tos_acceptance" 
+                               class="mt-1 h-4 w-4 text-vibrant-purple focus:ring-vibrant-purple border-gray-300 rounded"
+                               required>
+                        <label for="tosAcceptance" class="ml-3 text-sm text-gray-700">
+                            I agree to the 
+                            <a href="{{ route('legal.terms') }}" 
+                               target="_blank" 
+                               class="text-vibrant-purple hover:underline font-medium">Terms of Service</a>
+                            and 
+                            <a href="{{ route('legal.privacy') }}" 
+                               target="_blank" 
+                               class="text-vibrant-purple hover:underline font-medium">Privacy Policy</a>.
+                            I confirm that I have the right to upload and share this content, and that it does not infringe on any third-party intellectual property rights.
+                        </label>
+                    </div>
+                    @error('tos_acceptance')
+                        <p class="mt-2 text-sm text-red-600 ml-7">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Upload Button -->
                 <div class="flex justify-center">
                     <button type="submit" 

@@ -114,13 +114,15 @@
                 $query->published()->whereIn('category', $userCategories);
             })
             ->where('id', '!=', $user->id)
-            ->withCount(['racks' => function($query) {
-                $query->published();
+            ->with(['racks' => function($query) {
+                $query->published()->limit(1);
             }])
-            ->having('racks_count', '>', 0)
             ->inRandomOrder()
             ->limit($limit)
-            ->get();
+            ->get()
+            ->filter(function($producer) {
+                return $producer->racks->count() > 0;
+            });
     @endphp
     
     @if($similarProducers->count() > 0)

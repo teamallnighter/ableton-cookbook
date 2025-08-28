@@ -173,7 +173,8 @@ class RackEditController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
             'category' => 'nullable|string|max:50',
-            'tags' => 'nullable|string|max:500'
+            'tags' => 'nullable|string|max:500',
+            'how_to_article' => 'nullable|string|max:100000'
         ]);
 
         // Update rack
@@ -181,7 +182,9 @@ class RackEditController extends Controller
             'title' => $request->title,
             'slug' => Str::slug($request->title),
             'description' => $request->description,
-            'category' => $request->category
+            'category' => $request->category,
+            'how_to_article' => $request->how_to_article,
+            'how_to_updated_at' => $request->how_to_article ? now() : null
         ]);
 
         // Update tags
