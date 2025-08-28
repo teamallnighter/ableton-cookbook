@@ -188,6 +188,29 @@
                         </p>
                     </div>
 
+                    <!-- How-to Guide -->
+                    <div class="mb-6">
+                        <label for="how_to_article" class="block text-sm font-medium mb-2" style="color: #BBBBBB;">
+                            How-to Guide
+                        </label>
+                        <div class="bg-gray-800 rounded-lg border border-gray-600">
+                            <x-markdown-editor 
+                                name="how_to_article" 
+                                :value="old('how_to_article', $rack->how_to_article ?? '')"
+                                placeholder="Explain how to use this rack, what it does, and any special techniques... Use Markdown for formatting!"
+                                :rows="12"
+                                :maxlength="100000"
+                                :showToolbar="true"
+                                :showPreview="true"
+                                :showImageUpload="false"
+                                class="bg-gray-800 text-gray-200"
+                            />
+                        </div>
+                        <p class="text-xs mt-1" style="color: #6C6C6C;">
+                            Maximum 100,000 characters. Markdown formatting supported. This will help other producers understand how to use your rack effectively.
+                        </p>
+                    </div>
+
                     <!-- Chain Annotations -->
                     @if($rack->chains && count($rack->chains) > 0)
                         <div class="mb-6">

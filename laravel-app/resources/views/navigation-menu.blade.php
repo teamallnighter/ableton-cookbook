@@ -6,9 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center space-x-3 hover:opacity-90 transition-opacity">
-                        <div class="w-8 h-8 bg-vibrant-purple rounded flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">AC</span>
-                        </div>
+                        <x-application-logo class="w-8 h-8 text-black" />
                         <span class="text-black font-bold hidden sm:block">Ableton Cookbook</span>
                     </a>
                 </div>
@@ -26,6 +24,10 @@
                     <a href="{{ route('racks.upload') }}" 
                        class="link {{ request()->routeIs('racks.upload') ? 'font-bold' : '' }}">
                         Upload
+                    </a>
+                    <a href="{{ route('about') }}" 
+                       class="link {{ request()->routeIs('about') ? 'font-bold' : '' }}">
+                        About
                     </a>
                 </div>
             </div>
@@ -148,6 +150,10 @@
             <a href="{{ route('racks.upload') }}" 
                class="block px-3 py-2 text-base font-medium rounded-md transition-colors {{ request()->routeIs('racks.upload') ? 'bg-vibrant-purple text-white' : 'text-black hover:bg-gray-100' }}">
                 Upload
+            </a>
+            <a href="{{ route('about') }}" 
+               class="block px-3 py-2 text-base font-medium rounded-md transition-colors {{ request()->routeIs('about') ? 'bg-vibrant-purple text-white' : 'text-black hover:bg-gray-100' }}">
+                About
             </a>
         </div>
 

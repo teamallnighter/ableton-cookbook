@@ -29,6 +29,19 @@ class DashboardController extends Controller
         $topPerformers = $this->getTopPerformers();
         $issues = $this->getIssueStats();
 
+        // Check if we should use the enhanced view
+        $useEnhancedView = request()->get('enhanced', false) || auth()->user()->hasFeatureFlag('enhanced_admin_dashboard');
+
+        if ($useEnhancedView) {
+            return view('admin.dashboard.enhanced-main', compact(
+                'stats',
+                'charts', 
+                'recentActivity',
+                'topPerformers',
+                'issues'
+            ));
+        }
+
         return view('admin.dashboard.index', compact(
             'stats',
             'charts', 

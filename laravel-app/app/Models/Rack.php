@@ -47,6 +47,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\MarkdownService;
 
 class Rack extends Model
 {
@@ -57,6 +58,8 @@ class Rack extends Model
         'user_id',
         'title',
         'description',
+        'how_to_article',
+        'how_to_updated_at',
         'slug',
         'file_path',
         'file_hash',
@@ -88,6 +91,9 @@ class Rack extends Model
         'likes_count',
         'is_public',
         'is_featured',
+        'version',
+        'last_auto_save',
+        'last_auto_save_session',
     ];
 
     protected $casts = [
@@ -99,9 +105,12 @@ class Rack extends Model
         'parsing_errors' => 'array',
         'parsing_warnings' => 'array',
         'published_at' => 'datetime',
+        'how_to_updated_at' => 'datetime',
+        'last_auto_save' => 'datetime',
         'is_public' => 'boolean',
         'is_featured' => 'boolean',
         'average_rating' => 'decimal:2',
+        'version' => 'integer',
     ];
 
     /**
@@ -282,5 +291,72 @@ class Rack extends Model
             $this->file_path,
             now()->addMinutes(5)
         );
+    }
+
+    /**
+     * Get HTML version of how-to article from markdown
+     */
+    public function getHtmlHowToAttribute(): ?string
+    {
+        if (empty($this->how_to_article)) {
+            return null;
+        }
+
+        return app(MarkdownService::class)->parseToHtml($this->how_to_article);
+    }
+
+    /**
+     * Get truncated preview of how-to article (plain text)
+     */
+    public function getHowToPreviewAttribute(int $length = 200): ?string
+    {
+        if (empty($this->how_to_article)) {
+            return null;
+        }
+
+        // Strip markdown formatting and get plain text
+        $plainText = app(MarkdownService::class)->stripMarkdown($this->how_to_article);
+        
+        return Str::limit($plainText, $length);
+    }
+
+    /**
+     * Check if rack has a how-to article
+     */
+    public function hasHowToArticle(): bool
+    {
+        return !empty($this->how_to_article);
+    }
+
+    /**
+     * Scope for racks with how-to articles
+     */
+    public function scopeWithHowTo($query)
+    {
+        return $query->whereNotNull('how_to_article')
+                    ->where('how_to_article', '!=', '');
+    }
+
+    /**
+     * Update how-to article timestamp
+     */
+    public function touchHowTo(): void
+    {
+        $this->how_to_updated_at = now();
+        $this->save();
+    }
+    
+    /**
+     * Get reading time estimate for how-to article
+     */
+    public function getReadingTimeHowToAttribute()
+    {
+        if (!$this->how_to_article) {
+            return 0;
+        }
+        
+        $words = str_word_count(strip_tags($this->how_to_article));
+        $minutes = ceil($words / 200); // Average reading speed
+        return $minutes;
     }
 }

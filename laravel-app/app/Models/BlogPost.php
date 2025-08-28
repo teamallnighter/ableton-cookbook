@@ -204,16 +204,28 @@ class BlogPost extends Model
     }
 
     /**
-     * Convert markdown content to HTML
+     * Convert content to HTML (handles both markdown and plain text)
      */
     public function getHtmlContentAttribute()
     {
-        $converter = new CommonMarkConverter([
-            'html_input' => 'strip',
-            'allow_unsafe_links' => false,
-        ]);
+        // Check if content contains HTML tags
+        if (preg_match('/<[^>]+>/', $this->content)) {
+            // Content appears to be HTML, return as-is
+            return $this->content;
+        }
         
-        return $converter->convert($this->content ?: '');
+        // Check if content contains markdown indicators
+        if (preg_match('/[#*_`\[\]!]/', $this->content)) {
+            // Content appears to be markdown, convert it
+            $converter = new CommonMarkConverter([
+                'html_input' => 'strip',
+                'allow_unsafe_links' => false,
+            ]);
+            return $converter->convert($this->content ?: '');
+        }
+        
+        // Plain text - convert line breaks to <br> tags
+        return nl2br(e($this->content ?: ''));
     }
 
     /**

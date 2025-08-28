@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ErrorCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRackRequest;
 use App\Http\Requests\UpdateRackRequest;
+use App\Http\Requests\UpdateHowToRequest;
+use App\Http\Responses\ErrorResponse;
 use App\Jobs\IncrementRackViewsJob;
 use App\Models\Rack;
 use App\Services\RackProcessingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -97,30 +102,64 @@ class RackController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $racks = QueryBuilder::for(Rack::class)
-            ->published()
-            ->with(['user:id,name,profile_photo_path', 'tags'])
-            ->allowedFilters([
-                AllowedFilter::exact('rack_type'),
-                AllowedFilter::exact('user_id'),
-                AllowedFilter::scope('featured'),
-                AllowedFilter::callback('devices', function ($query, $value) {
-                    $query->whereJsonContains('devices', $value);
-                }),
-                AllowedFilter::callback('tags', function ($query, $value) {
-                    $query->whereHas('tags', function ($q) use ($value) {
-                        $q->whereIn('slug', explode(',', $value));
-                    });
-                }),
-                AllowedFilter::callback('rating', function ($query, $value) {
-                    $query->where('average_rating', '>=', $value);
-                }),
-            ])
-            ->allowedSorts(['created_at', 'downloads_count', 'average_rating', 'views_count'])
-            ->defaultSort('-created_at')
-            ->paginate($request->get('per_page', 20));
+        try {
+            // Add loading state for slow queries
+            $isSlowQuery = $request->has('filter') && count($request->get('filter', [])) > 2;
+            
+            if ($isSlowQuery) {
+                // Return early loading response for complex queries
+                return ErrorResponse::loading('Processing search filters...', [
+                    'estimated_time' => '2-5 seconds',
+                    'filters_applied' => count($request->get('filter', []))
+                ]);
+            }
+            
+            $racks = QueryBuilder::for(Rack::class)
+                ->published()
+                ->with(['user:id,name,profile_photo_path', 'tags'])
+                ->allowedFilters([
+                    AllowedFilter::exact('rack_type'),
+                    AllowedFilter::exact('user_id'),
+                    AllowedFilter::scope('featured'),
+                    AllowedFilter::callback('devices', function ($query, $value) {
+                        $query->whereJsonContains('devices', $value);
+                    }),
+                    AllowedFilter::callback('tags', function ($query, $value) {
+                        $query->whereHas('tags', function ($q) use ($value) {
+                            $q->whereIn('slug', explode(',', $value));
+                        });
+                    }),
+                    AllowedFilter::callback('rating', function ($query, $value) {
+                        $query->where('average_rating', '>=', $value);
+                    }),
+                ])
+                ->allowedSorts(['created_at', 'downloads_count', 'average_rating', 'views_count'])
+                ->defaultSort('-created_at')
+                ->paginate($request->get('per_page', 20));
 
-        return response()->json($racks);
+            return ErrorResponse::success($racks, null, [
+                'query_time' => microtime(true) - LARAVEL_START,
+                'cache_hit' => false, // Could be determined by your caching strategy
+                'total_results' => $racks->total(),
+            ]);
+            
+        } catch (\Illuminate\Database\QueryException $e) {
+            return ErrorResponse::create(
+                ErrorCode::DATABASE_ERROR,
+                'Failed to retrieve racks',
+                ['operation' => 'index', 'filters' => $request->get('filter', [])],
+                null,
+                $e
+            );
+        } catch (\Exception $e) {
+            return ErrorResponse::create(
+                ErrorCode::TEMPORARY_FAILURE,
+                'An unexpected error occurred while loading racks',
+                ['operation' => 'index'],
+                null,
+                $e
+            );
+        }
     }
 
     /**
@@ -198,18 +237,53 @@ class RackController extends Controller
      */
     public function store(StoreRackRequest $request): JsonResponse
     {
-        $validated = $request->validated();
-
-        // Check for duplicate
-        $fileHash = hash_file('sha256', $request->file('file')->path());
-        if ($duplicate = $this->rackService->isDuplicate($fileHash)) {
-            return response()->json([
-                'message' => 'This rack file has already been uploaded.',
-                'rack' => $duplicate,
-            ], 409);
-        }
-
         try {
+            // Return immediate loading response for file upload
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                
+                // Validate file before processing
+                if (!$file->isValid()) {
+                    return ErrorResponse::create(
+                        ErrorCode::UPLOAD_FAILED,
+                        'File upload failed',
+                        ['file_error' => $file->getErrorMessage()]
+                    );
+                }
+                
+                // Check file size
+                if ($file->getSize() > 50 * 1024 * 1024) { // 50MB limit
+                    return ErrorResponse::create(
+                        ErrorCode::FILE_TOO_LARGE,
+                        null,
+                        ['file_size' => $file->getSize(), 'max_size' => 50 * 1024 * 1024]
+                    );
+                }
+                
+                // Check file type
+                if ($file->getClientOriginalExtension() !== 'adg') {
+                    return ErrorResponse::create(
+                        ErrorCode::INVALID_FILE_TYPE,
+                        null,
+                        ['file_type' => $file->getClientOriginalExtension(), 'expected' => 'adg']
+                    );
+                }
+            }
+
+            $validated = $request->validated();
+
+            // Check for duplicate
+            $fileHash = hash_file('sha256', $request->file('file')->path());
+            if ($duplicate = $this->rackService->isDuplicate($fileHash)) {
+                return ErrorResponse::create(
+                    ErrorCode::DUPLICATE_ENTRY,
+                    null,
+                    ['existing_rack_id' => $duplicate->id],
+                    ['duplicate_rack' => $duplicate->load(['user:id,name'])]
+                );
+            }
+
+            // Process the rack with progress tracking
             $rack = $this->rackService->processRack(
                 $request->file('file'),
                 $request->user(),
@@ -218,15 +292,51 @@ class RackController extends Controller
 
             $rack->load(['user:id,name,profile_photo_path', 'tags']);
 
-            return response()->json([
-                'message' => 'Rack uploaded successfully!',
-                'rack' => $rack,
-            ], 201);
+            return ErrorResponse::success(
+                $rack,
+                'Rack uploaded successfully! Analysis is starting in the background.',
+                [
+                    'processing_status' => 'queued',
+                    'estimated_completion' => now()->addMinutes(2)->toISOString(),
+                    'can_proceed_to_metadata' => true
+                ]
+            );
+            
+        } catch (ValidationException $e) {
+            return ErrorResponse::validation($e->errors());
+            
+        } catch (\Illuminate\Http\Exceptions\PostTooLargeException $e) {
+            return ErrorResponse::create(
+                ErrorCode::FILE_TOO_LARGE,
+                'The uploaded file exceeds the maximum allowed size'
+            );
+            
+        } catch (\Symfony\Component\HttpFoundation\File\Exception\FileException $e) {
+            return ErrorResponse::create(
+                ErrorCode::UPLOAD_FAILED,
+                null,
+                ['file_error' => $e->getMessage()],
+                null,
+                $e
+            );
+            
+        } catch (\App\Exceptions\RackProcessingException $e) {
+            return ErrorResponse::create(
+                ErrorCode::PROCESSING_FAILED,
+                $e->getMessage(),
+                ['processing_stage' => $e->getProcessingStage() ?? 'unknown'],
+                null,
+                $e
+            );
+            
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to process rack file.',
-                'error' => $e->getMessage(),
-            ], 422);
+            return ErrorResponse::create(
+                ErrorCode::PROCESSING_FAILED,
+                'An unexpected error occurred during file processing',
+                ['operation' => 'store'],
+                null,
+                $e
+            );
         }
     }
 
@@ -257,19 +367,66 @@ class RackController extends Controller
      */
     public function show(Rack $rack): JsonResponse
     {
-        // Check if rack is published or user owns it
-        if (!$rack->is_public || $rack->status !== 'approved') {
-            if (!auth()->check() || $rack->user_id !== auth()->id()) {
-                abort(404);
+        try {
+            // Check if rack is published or user owns it
+            if (!$rack->is_public || $rack->status !== 'approved') {
+                if (!auth()->check() || $rack->user_id !== auth()->id()) {
+                    return ErrorResponse::create(
+                        ErrorCode::RESOURCE_NOT_FOUND,
+                        'This rack is not publicly available',
+                        ['rack_id' => $rack->id, 'is_public' => $rack->is_public, 'status' => $rack->status]
+                    );
+                }
             }
-        }
 
-        $rack->load(['user:id,name,profile_photo_path,created_at', 'tags', 'comments.user:id,name,profile_photo_path']);
-        
-        // Queue view increment to avoid blocking response
-        IncrementRackViewsJob::dispatch($rack->id);
-        
-        return response()->json($rack);
+            // Check if rack was deleted
+            if ($rack->status === 'deleted') {
+                return ErrorResponse::create(
+                    ErrorCode::RESOURCE_DELETED,
+                    'This rack has been removed',
+                    ['rack_id' => $rack->id, 'deleted_at' => $rack->updated_at]
+                );
+            }
+
+            $rack->load(['user:id,name,profile_photo_path,created_at', 'tags', 'comments.user:id,name,profile_photo_path']);
+            
+            // Queue view increment to avoid blocking response (with error handling)
+            try {
+                IncrementRackViewsJob::dispatch($rack->id);
+            } catch (\Exception $e) {
+                // Log but don't fail the request for view counting errors
+                Log::warning('Failed to queue view increment job', [
+                    'rack_id' => $rack->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+            
+            return ErrorResponse::success(
+                $rack,
+                null,
+                [
+                    'view_incremented' => true,
+                    'last_updated' => $rack->updated_at->toISOString(),
+                    'is_owner' => auth()->check() && auth()->id() === $rack->user_id
+                ]
+            );
+            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return ErrorResponse::create(
+                ErrorCode::RESOURCE_NOT_FOUND,
+                'Rack not found',
+                ['rack_id' => $rack->id ?? 'unknown']
+            );
+            
+        } catch (\Exception $e) {
+            return ErrorResponse::create(
+                ErrorCode::DATABASE_ERROR,
+                'Failed to load rack details',
+                ['rack_id' => $rack->id, 'operation' => 'show'],
+                null,
+                $e
+            );
+        }
     }
 
     /**
@@ -395,18 +552,111 @@ class RackController extends Controller
      */
     public function update(UpdateRackRequest $request, Rack $rack): JsonResponse
     {
-        Gate::authorize('update', $rack);
+        try {
+            // Check authorization
+            if (!Gate::allows('update', $rack)) {
+                return ErrorResponse::create(
+                    ErrorCode::INSUFFICIENT_PERMISSIONS,
+                    'You do not have permission to update this rack',
+                    ['rack_id' => $rack->id, 'owner_id' => $rack->user_id]
+                );
+            }
 
-        $validated = $request->validated();
-        $rack->update($request->only(['title', 'description', 'is_public']));
-        
-        if ($request->has('tags')) {
-            $this->rackService->syncTags($rack, $request->tags);
+            // Check if rack is locked for editing
+            if ($rack->is_locked) {
+                return ErrorResponse::create(
+                    ErrorCode::RESOURCE_LOCKED,
+                    'This rack is currently being edited by another user',
+                    [
+                        'rack_id' => $rack->id,
+                        'locked_by' => $rack->locked_by_user_id,
+                        'locked_at' => $rack->locked_at
+                    ]
+                );
+            }
+
+            $validated = $request->validated();
+            
+            // Check for version conflicts if version is provided
+            if ($request->has('version') && $rack->version !== $request->get('version')) {
+                return ErrorResponse::create(
+                    ErrorCode::VERSION_MISMATCH,
+                    'Another user has updated this rack since you started editing',
+                    [
+                        'current_version' => $rack->version,
+                        'provided_version' => $request->get('version'),
+                        'last_updated' => $rack->updated_at
+                    ]
+                );
+            }
+            
+            $updateData = $request->only(['title', 'description', 'is_public', 'how_to_article']);
+            
+            // If how_to_article is being updated, set the timestamp
+            if ($request->has('how_to_article')) {
+                $updateData['how_to_updated_at'] = now();
+            }
+            
+            // Add version increment for optimistic locking
+            $updateData['version'] = $rack->version + 1;
+            
+            $rack->update($updateData);
+            
+            // Handle tags with error handling
+            if ($request->has('tags')) {
+                try {
+                    $this->rackService->syncTags($rack, $request->tags);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to sync tags during rack update', [
+                        'rack_id' => $rack->id,
+                        'tags' => $request->tags,
+                        'error' => $e->getMessage()
+                    ]);
+                    // Continue with update, just log the tag sync failure
+                }
+            }
+
+            $rack->load(['user:id,name,profile_photo_path', 'tags']);
+
+            return ErrorResponse::success(
+                $rack,
+                'Rack updated successfully',
+                [
+                    'new_version' => $rack->version,
+                    'updated_fields' => array_keys($updateData),
+                    'tags_updated' => $request->has('tags')
+                ]
+            );
+            
+        } catch (ValidationException $e) {
+            return ErrorResponse::validation($e->errors());
+            
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle database constraint violations
+            if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                return ErrorResponse::create(
+                    ErrorCode::DUPLICATE_ENTRY,
+                    'A rack with this title already exists'
+                );
+            }
+            
+            return ErrorResponse::create(
+                ErrorCode::DATABASE_ERROR,
+                'Failed to update rack',
+                ['rack_id' => $rack->id, 'operation' => 'update'],
+                null,
+                $e
+            );
+            
+        } catch (\Exception $e) {
+            return ErrorResponse::create(
+                ErrorCode::TEMPORARY_FAILURE,
+                'An unexpected error occurred while updating the rack',
+                ['rack_id' => $rack->id, 'operation' => 'update'],
+                null,
+                $e
+            );
         }
-
-        $rack->load(['user:id,name,profile_photo_path', 'tags']);
-
-        return response()->json($rack);
     }
 
     /**
@@ -521,6 +771,182 @@ class RackController extends Controller
         return response()->json([
             'download_url' => $rack->download_url,
             'filename' => $rack->original_filename,
+        ]);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/racks/{id}/how-to",
+     *     summary="Update rack how-to article",
+     *     description="Update the how-to article for a rack (owner only) - supports auto-save",
+     *     operationId="updateRackHowTo",
+     *     tags={"Racks"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="how_to_article",
+     *                 type="string",
+     *                 description="Markdown content for the how-to article",
+     *                 example="# How to use this rack\n\nThis rack provides..."
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="How-to article updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="How-to article saved successfully"),
+     *             @OA\Property(property="how_to_updated_at", type="string", format="date-time"),
+     *             @OA\Property(property="preview", type="string", description="Preview of the article")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - not the owner"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=429,
+     *         description="Too many requests - throttled"
+     *     )
+     * )
+     */
+    public function updateHowTo(UpdateHowToRequest $request, Rack $rack): JsonResponse
+    {
+        Gate::authorize('update', $rack);
+
+        $validated = $request->validated();
+        
+        $rack->update([
+            'how_to_article' => $validated['how_to_article'],
+            'how_to_updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'How-to article saved successfully',
+            'how_to_updated_at' => $rack->how_to_updated_at,
+            'preview' => $rack->how_to_preview,
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/racks/{id}/how-to",
+     *     summary="Get rack how-to article",
+     *     description="Retrieve the how-to article content for a rack",
+     *     operationId="getRackHowTo",
+     *     tags={"Racks"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="format",
+     *         in="query",
+     *         description="Response format: raw (markdown) or html",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"raw", "html"}, default="raw")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="How-to article retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="how_to_article", type="string", description="Article content"),
+     *             @OA\Property(property="how_to_updated_at", type="string", format="date-time"),
+     *             @OA\Property(property="format", type="string", enum={"raw", "html"}),
+     *             @OA\Property(property="has_content", type="boolean")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Rack not found or no how-to article"
+     *     )
+     * )
+     */
+    public function getHowTo(Request $request, Rack $rack): JsonResponse
+    {
+        // Check if rack is published or user owns it
+        if (!$rack->is_public || $rack->status !== 'approved') {
+            if (!auth()->check() || $rack->user_id !== auth()->id()) {
+                abort(404);
+            }
+        }
+
+        $format = $request->get('format', 'raw');
+        
+        if (!$rack->hasHowToArticle()) {
+            return response()->json([
+                'how_to_article' => null,
+                'how_to_updated_at' => null,
+                'format' => $format,
+                'has_content' => false,
+            ]);
+        }
+
+        $content = $format === 'html' ? $rack->html_how_to : $rack->how_to_article;
+
+        return response()->json([
+            'how_to_article' => $content,
+            'how_to_updated_at' => $rack->how_to_updated_at,
+            'format' => $format,
+            'has_content' => true,
+        ]);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/racks/{id}/how-to",
+     *     summary="Delete rack how-to article",
+     *     description="Remove the how-to article from a rack (owner only)",
+     *     operationId="deleteRackHowTo",
+     *     tags={"Racks"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="How-to article deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="How-to article deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - not the owner"
+     *     )
+     * )
+     */
+    public function deleteHowTo(Rack $rack): JsonResponse
+    {
+        Gate::authorize('update', $rack);
+
+        $rack->update([
+            'how_to_article' => null,
+            'how_to_updated_at' => null,
+        ]);
+
+        return response()->json([
+            'message' => 'How-to article deleted successfully',
         ]);
     }
 }

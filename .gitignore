@@ -230,3 +230,5 @@ supervisor-config.conf
 *.env.production*
 *.env.railway
 fly.toml
+
+QUICK_REFFERENCE.md

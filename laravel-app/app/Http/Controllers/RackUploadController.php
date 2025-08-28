@@ -26,6 +26,10 @@ class RackUploadController extends Controller
     {
         $request->validate([
             'rack_file' => 'required|file|adg_file|max:10240', // 10MB max
+            'tos_acceptance' => 'required|accepted',
+        ], [
+            'tos_acceptance.required' => 'You must accept the Terms of Service to upload content.',
+            'tos_acceptance.accepted' => 'You must accept the Terms of Service to upload content.',
         ]);
 
         try {
@@ -60,6 +64,7 @@ class RackUploadController extends Controller
                 'file_hash' => $hash,
                 'file_size' => $file->getSize(),
                 'original_filename' => $originalFilename,
+                'rack_type' => 'Unknown', // Default value, will be updated by job
                 'status' => 'processing', // Changed from 'pending' to indicate analysis in progress
                 'is_public' => true
             ]);
@@ -67,9 +72,9 @@ class RackUploadController extends Controller
             // Dispatch background processing
             ProcessRackFileJob::dispatch($rack);
             
-            // Redirect to analysis waiting page
-            return redirect()->route('racks.analysis', $rack)
-                ->with('success', 'File uploaded successfully! Analyzing your rack...');
+            // Redirect directly to metadata (parallel processing)
+            return redirect()->route('racks.metadata', $rack)
+                ->with('success', 'File uploaded successfully! You can enter metadata while we analyze your rack in the background.');
                 
         } catch (ValidationException $e) {
             throw $e;
@@ -124,5 +129,58 @@ class RackUploadController extends Controller
                 $rack->tags()->attach($tag->id);
             }
         }
+    }
+    
+    /**
+     * Handle security scan completion callback
+     */
+    public function handleSecurityScanResult(Request $request)
+    {
+        // This would be called by the virus scanning job upon completion
+        // to update the rack status and potentially trigger next steps
+        
+        $request->validate([
+            'rack_id' => 'required|exists:racks,id',
+            'scan_result' => 'required|array',
+            'is_clean' => 'required|boolean'
+        ]);
+        
+        $rack = Rack::findOrFail($request->rack_id);
+        $scanResult = $request->scan_result;
+        $isClean = $request->is_clean;
+        
+        Log::info('Processing security scan result', [
+            'rack_id' => $rack->id,
+            'is_clean' => $isClean,
+            'user_id' => $rack->user_id
+        ]);
+        
+        if ($isClean) {
+            // File is clean, proceed with rack analysis
+            $rack->update([
+                'status' => 'processing',
+                'processing_status' => 'analyzing',
+                'security_status' => ScanStatus::CLEAN->value
+            ]);
+            
+            // Now dispatch the rack processing job
+            ProcessRackFileJob::dispatch($rack);
+            
+        } else {
+            // File is infected, block processing
+            $rack->update([
+                'status' => 'security_blocked',
+                'processing_status' => 'virus_detected', 
+                'security_status' => ScanStatus::INFECTED->value
+            ]);
+            
+            Log::warning('Rack file blocked due to security threat', [
+                'rack_id' => $rack->id,
+                'scan_result' => $scanResult,
+                'user_id' => $rack->user_id
+            ]);
+        }
+        
+        return response()->json(['success' => true]);
     }
 }

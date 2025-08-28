@@ -27,6 +27,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <!-- Error Handler (Load Early) -->
+        <script src="{{ asset('js/error-handler.js') }}" defer></script>
 
         <!-- Styles -->
         @livewireStyles
@@ -75,6 +78,9 @@
 
                 {{ $slot }}
             </main>
+            
+            {{-- Footer --}}
+            <x-footer />
         </div>
 
         @stack('modals')
