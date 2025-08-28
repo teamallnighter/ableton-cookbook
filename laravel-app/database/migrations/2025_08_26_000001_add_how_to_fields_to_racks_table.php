@@ -12,11 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('racks', function (Blueprint $table) {
-            $table->longText('how_to_article')->nullable()->after('description');
-            $table->timestamp('how_to_updated_at')->nullable()->after('how_to_article');
+            if (!Schema::hasColumn('racks', 'how_to_article')) {
+                $table->longText('how_to_article')->nullable()->after('description');
+            }
+            if (!Schema::hasColumn('racks', 'how_to_updated_at')) {
+                $table->timestamp('how_to_updated_at')->nullable()->after('how_to_article');
+            }
             
-            // Add index for filtering racks with how-to articles
-            $table->index(['how_to_article'], 'racks_how_to_article_index');
+            // Note: We can't create an index on longText column 'how_to_article'
+            // This would cause an error. Commenting out for safety.
+            // $table->index(['how_to_article'], 'racks_how_to_article_index');
         });
     }
 

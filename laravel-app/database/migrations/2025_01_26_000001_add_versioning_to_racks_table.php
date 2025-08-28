@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,13 +12,20 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Add columns only if they don't exist
         Schema::table('racks', function (Blueprint $table) {
             // Optimistic locking version control
-            $table->integer('version')->default(1)->after('updated_at');
+            if (!Schema::hasColumn('racks', 'version')) {
+                $table->integer('version')->default(1)->after('updated_at');
+            }
             
             // Auto-save tracking
-            $table->timestamp('last_auto_save')->nullable()->after('version');
-            $table->string('last_auto_save_session', 100)->nullable()->after('last_auto_save');
+            if (!Schema::hasColumn('racks', 'last_auto_save')) {
+                $table->timestamp('last_auto_save')->nullable()->after('version');
+            }
+            if (!Schema::hasColumn('racks', 'last_auto_save_session')) {
+                $table->string('last_auto_save_session', 100)->nullable()->after('last_auto_save');
+            }
             
             // How-to article field (if not already present)
             if (!Schema::hasColumn('racks', 'how_to_article')) {
@@ -33,11 +41,19 @@ return new class extends Migration
             if (!Schema::hasColumn('racks', 'ableton_edition')) {
                 $table->string('ableton_edition', 20)->nullable()->after('ableton_version');
             }
-            
-            // Add indexes for performance optimization
-            $table->index('version');
-            $table->index('last_auto_save');
-            $table->index('category');
+        });
+        
+        // Add indexes only if they don't exist
+        $existingIndexes = collect(DB::select("SHOW INDEX FROM racks"))->pluck('Key_name')->unique()->toArray();
+        
+        Schema::table('racks', function (Blueprint $table) use ($existingIndexes) {
+            if (!in_array('racks_version_index', $existingIndexes)) {
+                $table->index('version');
+            }
+            if (!in_array('racks_last_auto_save_index', $existingIndexes)) {
+                $table->index('last_auto_save');
+            }
+            // Skip category index as it likely already exists from migration 2025_08_14_193154_add_category_to_racks_table
         });
     }
 
