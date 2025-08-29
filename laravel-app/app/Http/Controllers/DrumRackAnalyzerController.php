@@ -295,7 +295,7 @@ class DrumRackAnalyzerController extends Controller
      *     @OA\Response(response=422, description="Validation failed")
      * )
      */
-    public function validate(Request $request): JsonResponse
+    public function validateDrumRack(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'file' => 'required|file|max:102400'

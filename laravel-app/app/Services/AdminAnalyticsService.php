@@ -50,7 +50,7 @@ class AdminAnalyticsService
                 'racks' => [
                     'total' => Rack::count(),
                     'public' => Rack::where('is_public', true)->count(),
-                    'pending_review' => Rack::whereNull('approved_at')->count(),
+                    'pending_review' => Rack::where('status', 'pending')->count(),
                     'new_30d' => Rack::where('created_at', '>=', $thirtyDaysAgo)->count(),
                     'new_7d' => Rack::where('created_at', '>=', $sevenDaysAgo)->count(),
                     'processing_queue' => $this->getProcessingQueueCount(),
@@ -596,7 +596,7 @@ class AdminAnalyticsService
         return [
             'avg_rating' => round(RackRating::avg('rating'), 2),
             'completion_rate' => round((Rack::whereNotNull('how_to_article')->count() / max(Rack::count(), 1)) * 100, 2),
-            'moderated_content' => Rack::whereNotNull('approved_at')->count(),
+            'moderated_content' => Rack::where('status', 'approved')->count(),
         ];
     }
     
@@ -621,7 +621,7 @@ class AdminAnalyticsService
     private function getModerationMetrics(): array
     {
         return [
-            'pending_approval' => Rack::whereNull('approved_at')->count(),
+            'pending_approval' => Rack::where('status', 'pending')->count(),
             'reported_content' => Issue::whereIn('status', ['pending', 'in_review'])->count(),
             'auto_moderated' => 0, // Placeholder
         ];

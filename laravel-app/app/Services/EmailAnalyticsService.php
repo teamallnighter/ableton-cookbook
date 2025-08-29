@@ -301,9 +301,9 @@ class EmailAnalyticsService
         $totalUsers = User::count();
         
         return [
-            'newsletter_enabled' => round((User::where('newsletter_enabled', true)->count() / max($totalUsers, 1)) * 100, 2),
-            'notifications_enabled' => round((User::where('email_notifications', true)->count() / max($totalUsers, 1)) * 100, 2),
-            'marketing_enabled' => round((User::where('marketing_emails', true)->count() / max($totalUsers, 1)) * 100, 2),
+            'email_notifications_enabled' => round((User::where('email_notifications_enabled', true)->count() / max($totalUsers, 1)) * 100, 2),
+            'notifications_enabled' => round((User::where('email_notifications_enabled', true)->count() / max($totalUsers, 1)) * 100, 2),
+            'marketing_enabled' => round((User::where('email_notifications_enabled', true)->count() / max($totalUsers, 1)) * 100, 2),
             'frequency_preferences' => [
                 'daily' => 15,
                 'weekly' => 65,

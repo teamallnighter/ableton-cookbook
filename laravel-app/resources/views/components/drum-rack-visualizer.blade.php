@@ -264,46 +264,6 @@
          x-transition:enter-end="opacity-100 transform scale-100"
          class="space-y-4">
         
-        {{-- Complexity Score --}}
-        <div class="bg-white border rounded-lg p-4">
-            <div class="flex items-center justify-between mb-3">
-                <h4 class="font-medium">Complexity Analysis</h4>
-                <div class="flex items-center gap-2">
-                    <div class="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full transition-all duration-1000 ease-out
-                                    @if($drumRackData['performance_analysis']['complexity_score'] < 30) bg-green-500
-                                    @elseif($drumRackData['performance_analysis']['complexity_score'] < 70) bg-yellow-500
-                                    @else bg-red-500 @endif"
-                             style="width: {{ $drumRackData['performance_analysis']['complexity_score'] }}%">
-                        </div>
-                    </div>
-                    <span class="font-bold">{{ $drumRackData['performance_analysis']['complexity_score'] }}/100</span>
-                </div>
-            </div>
-            
-            {{-- Statistics Grid --}}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                @if(isset($drumRackData['drum_statistics']))
-                    <div>
-                        <div class="text-2xl font-bold text-green-600">{{ $drumRackData['drum_statistics']['active_pads'] }}</div>
-                        <div class="text-xs text-gray-600">Active Pads</div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-blue-600">{{ $drumRackData['drum_statistics']['sample_based_pads'] }}</div>
-                        <div class="text-xs text-gray-600">Sample-based</div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-purple-600">{{ $drumRackData['drum_statistics']['synthesized_pads'] }}</div>
-                        <div class="text-xs text-gray-600">Synthesized</div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-orange-600">{{ $drumRackData['drum_statistics']['chained_pads'] }}</div>
-                        <div class="text-xs text-gray-600">Multi-device</div>
-                    </div>
-                @endif
-            </div>
-        </div>
-        
         {{-- Recommendations --}}
         @if(!empty($drumRackData['performance_analysis']['recommendations']))
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">

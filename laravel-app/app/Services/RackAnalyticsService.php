@@ -38,16 +38,16 @@ class RackAnalyticsService
                     'public_racks' => Rack::where('is_public', true)->count(),
                     'private_racks' => Rack::where('is_public', false)->count(),
                     'racks_with_how_to' => Rack::whereNotNull('how_to_article')->count(),
-                    'approved_racks' => Rack::whereNotNull('approved_at')->count(),
-                    'pending_approval' => Rack::whereNull('approved_at')->count(),
+                    'approved_racks' => Rack::where('status', 'approved')->count(),
+                    'pending_approval' => Rack::where('status', 'pending')->count(),
                 ],
                 
                 'recent_activity' => [
                     'uploads_today' => Rack::whereDate('created_at', Carbon::today())->count(),
                     'uploads_7d' => Rack::where('created_at', '>=', $sevenDaysAgo)->count(),
                     'uploads_30d' => Rack::where('created_at', '>=', $thirtyDaysAgo)->count(),
-                    'approved_today' => Rack::whereDate('approved_at', Carbon::today())->count(),
-                    'approved_7d' => Rack::where('approved_at', '>=', $sevenDaysAgo)->count(),
+                    'approved_today' => Rack::where('status', 'approved')->whereDate('updated_at', Carbon::today())->count(),
+                    'approved_7d' => Rack::where('status', 'approved')->where('updated_at', '>=', $sevenDaysAgo)->count(),
                 ],
                 
                 'engagement' => [
@@ -86,9 +86,9 @@ class RackAnalyticsService
                 ->pluck('count', 'date');
             
             // Daily approvals
-            $dailyApprovals = Rack::selectRaw('DATE(approved_at) as date, COUNT(*) as count')
-                ->whereBetween('approved_at', [$startDate, $endDate])
-                ->whereNotNull('approved_at')
+            $dailyApprovals = Rack::selectRaw('DATE(updated_at) as date, COUNT(*) as count')
+                ->where('status', 'approved')->whereBetween('updated_at', [$startDate, $endDate])
+                ->where('status', 'approved')
                 ->groupBy('date')
                 ->pluck('count', 'date');
             
@@ -210,7 +210,7 @@ class RackAnalyticsService
             ->where('payload', 'LIKE', '%ProcessRackFileJob%')
             ->count();
         
-        $processingRacks = Rack::whereNull('processed_at')
+        $processingRacks = Rack::whereIn('status', ['pending', 'processing'])
             ->whereNotNull('file_path')
             ->count();
         
@@ -258,7 +258,7 @@ class RackAnalyticsService
         $startDate = Carbon::now()->subDays($days);
         $uploaded = Rack::where('created_at', '>=', $startDate)->count();
         $approved = Rack::where('created_at', '>=', $startDate)
-                       ->whereNotNull('approved_at')
+                       ->where('status', 'approved')
                        ->count();
         
         return $uploaded > 0 ? round(($approved / $uploaded) * 100, 2) : 0;
@@ -266,7 +266,7 @@ class RackAnalyticsService
     
     private function calculateProcessingEfficiency(): float
     {
-        $processed = Rack::whereNotNull('processed_at')->count();
+        $processed = Rack::where('status', 'approved')->count();
         $total = Rack::count();
         
         return $total > 0 ? round(($processed / $total) * 100, 2) : 0;
@@ -639,7 +639,7 @@ class RackAnalyticsService
     
     private function calculateProcessingSuccessRate(): float
     {
-        $processed = Rack::whereNotNull('processed_at')->count();
+        $processed = Rack::where('status', 'approved')->count();
         $total = Rack::whereNotNull('file_path')->count();
         
         return $total > 0 ? round(($processed / $total) * 100, 2) : 0;

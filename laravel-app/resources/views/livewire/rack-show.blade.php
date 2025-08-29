@@ -29,12 +29,12 @@
             <div class="flex-1">
                 <div class="flex items-start justify-between mb-4">
                     <div>
-                        <h1 class="text-4xl font-bold mb-4 text-black" itemprop="name">{{ $rack->title }}</h1>
+                        <h1 class="text-4xl font-bold mb-4 text-black break-words" itemprop="name">{{ $rack->title }}</h1>
                         <p class="text-lg text-gray-700">
                             by 
                             <a 
                                 href="{{ route('users.show', $rack->user) }}" 
-                                class="link"
+                                class="link break-words"
                             >
                                 {{ $rack->user->name }}
                             </a>
@@ -112,7 +112,7 @@
 
                 <!-- Description -->
                 <div class="mb-8">
-                    <div itemprop="description" class="text-lg leading-relaxed text-gray-800">{{ $rack->description }}</div>
+                    <div itemprop="description" class="text-lg leading-relaxed text-gray-800 break-words">{{ $rack->description }}</div>
                     
                     {{-- Keywords for SEO --}}
                     <div class="sr-only">
@@ -220,7 +220,7 @@
                     @else
                         <!-- Login prompt for non-authenticated users -->
                         <div class="text-sm text-gray-600 italic ml-2">
-                            <a href="{{ route('login') }}" class="link">Login</a> to interact
+                            <a href="{{ route('login') }}" class="link break-words">Login</a> to interact
                         </div>
                     @endauth
                 </div>
@@ -278,7 +278,7 @@
                             </div>
                         @else
                             <span class="text-sm text-gray-600 italic">
-                                <a href="{{ route('login') }}" class="link">Login</a> to rate
+                                <a href="{{ route('login') }}" class="link break-words">Login</a> to rate
                             </span>
                         @endauth
                     </div>
@@ -292,9 +292,9 @@
     </div>
 
     <!-- Two-Column Content Layout -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-5 gap-8">
         <!-- Left Column: How-To Article -->
-        <div class="xl:col-span-2 order-2 xl:order-1">
+        <div class="xl:col-span-3 order-2 xl:order-1">
             @if($rack->how_to_article)
                 <div class="card card-body">
                     <div class="flex items-center justify-between mb-6">
@@ -306,7 +306,7 @@
                         </div>
                     </div>
                     
-                    <div class="prose prose-lg max-w-none">
+                    <div class="prose prose-lg max-w-none break-words">
                         {!! $rack->html_how_to !!}
                     </div>
                     
@@ -338,7 +338,7 @@
         </div>
 
         <!-- Right Column: Rack Visualization -->
-        <div class="xl:col-span-1 order-1 xl:order-2">
+        <div class="xl:col-span-2 order-1 xl:order-2">
             <div class="sticky top-8">
                 @if($this->isDrumRack())
                     {{-- Drum Rack Specific Visualization --}}

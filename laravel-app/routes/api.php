@@ -117,7 +117,7 @@
       Route::prefix('drum-racks')->group(function () {
           Route::post('/analyze', [DrumRackAnalyzerController::class, 'analyze'])->middleware('throttle:60,1');
           Route::post('/analyze-batch', [DrumRackAnalyzerController::class, 'analyzeBatch'])->middleware('throttle:10,1');
-          Route::post('/validate', [DrumRackAnalyzerController::class, 'validate']);
+          Route::post('/validateDrumRack', [DrumRackAnalyzerController::class, 'validate']);
           Route::post('/detect', [DrumRackAnalyzerController::class, 'detect']);
       });
   });

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Event;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -48,6 +49,14 @@ class AppServiceProvider extends ServiceProvider
 
         // Share SEO service with all views
         View::share('seoService', app(SeoService::class));
+
+        // Track user logins
+        Event::listen(
+            \Illuminate\Auth\Events\Login::class,
+            function ($event) {
+                $event->user->update(['last_login_at' => now()]);
+            }
+        );
         
         // Add view composers for SEO data
         View::composer('*', function ($view) {
