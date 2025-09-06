@@ -7,10 +7,15 @@ use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
 use League\CommonMark\MarkdownConverter;
 use League\CommonMark\Output\RenderedContent;
+use App\Services\AbletonMarkdownExtension;
+use App\Services\MediaEmbedService;
+use App\Services\MarkdownCacheService;
 
 class MarkdownService
 {
     private MarkdownConverter $converter;
+    private MediaEmbedService $mediaEmbedService;
+    private MarkdownCacheService $cacheService;
     
     /**
      * Allowed HTML tags for sanitization
@@ -42,29 +47,36 @@ class MarkdownService
         'blockquote' => ['cite']
     ];
 
-    public function __construct()
-    {
+    public function __construct(
+        MediaEmbedService $mediaEmbedService = null,
+        MarkdownCacheService $cacheService = null
+    ) {
+        $this->mediaEmbedService = $mediaEmbedService ?? new MediaEmbedService();
+        $this->cacheService = $cacheService ?? new MarkdownCacheService();
         $this->converter = $this->createConverter();
     }
 
     /**
-     * Parse markdown to HTML with security measures and rich media support
+     * Parse markdown to HTML with security measures, rich media support, and caching
      */
-    public function parseToHtml(string $markdown): string
+    public function parseToHtml(string $markdown, array $options = []): string
     {
         if (empty($markdown)) {
             return '';
         }
 
-        // Pre-process for rich media embedding
-        $markdown = $this->processRichMedia($markdown);
+        // Use cache if enabled
+        return $this->cacheService->getOrGenerate($markdown, function($content) use ($options) {
+            // Pre-process for rich media embedding using MediaEmbedService
+            $processedMarkdown = $this->mediaEmbedService->processRichMedia($content);
 
-        // Parse markdown to HTML
-        $result = $this->converter->convert($markdown);
-        $html = (string) $result;
+            // Parse markdown to HTML
+            $result = $this->converter->convert($processedMarkdown);
+            $html = (string) $result;
 
-        // Additional security sanitization
-        return $this->sanitizeHtml($html);
+            // Additional security sanitization
+            return $this->sanitizeHtml($html);
+        }, $options);
     }
 
     /**
@@ -159,6 +171,14 @@ class MarkdownService
                     'attributes' => ['class' => 'table-responsive'],
                 ],
             ],
+            'ableton' => [
+                'enable_rack_embeds' => true,
+                'enable_device_refs' => true,
+                'enable_parameter_controls' => true,
+                'enable_audio_player' => true,
+                'cache_widgets' => true,
+                'widget_cache_ttl' => 3600,
+            ]
         ];
 
         // Create environment
@@ -169,6 +189,9 @@ class MarkdownService
         
         // Add GitHub Flavored Markdown for tables, strikethrough, etc.
         $environment->addExtension(new GithubFlavoredMarkdownExtension());
+        
+        // Add Ableton-specific markdown extensions
+        $environment->addExtension(new AbletonMarkdownExtension());
 
         return new MarkdownConverter($environment);
     }
@@ -553,5 +576,200 @@ class MarkdownService
         
         // Remove leading/trailing hyphens
         return trim($slug, '-');
+    }
+
+    /**
+     * Parse with full metadata (cached)
+     */
+    public function parseWithMetadata(string $markdown, array $options = []): array
+    {
+        if (empty($markdown)) {
+            return [
+                'html' => '',
+                'reading_time' => 0,
+                'word_count' => 0,
+                'headings' => [],
+                'plain_text' => '',
+            ];
+        }
+
+        // Check for cached metadata
+        $cachedMetadata = $this->cacheService->getMetadata($markdown, $options);
+        if ($cachedMetadata !== null) {
+            return $cachedMetadata;
+        }
+
+        // Generate HTML
+        $html = $this->parseToHtml($markdown, $options);
+        
+        // Calculate metadata
+        $plainText = $this->stripMarkdown($markdown);
+        $metadata = [
+            'html' => $html,
+            'reading_time' => $this->getReadingTime($markdown),
+            'word_count' => str_word_count($plainText),
+            'headings' => $this->extractHeadings($markdown),
+            'plain_text' => $plainText,
+            'character_count' => strlen($markdown),
+            'processed_at' => now()->toISOString(),
+        ];
+
+        // Cache metadata
+        $this->cacheService->cacheWithMetadata($markdown, $html, $metadata, $options);
+
+        return $metadata;
+    }
+
+    /**
+     * Batch process multiple markdown items (performance optimized)
+     */
+    public function batchProcess(array $markdownItems, array $options = []): array
+    {
+        $results = [];
+        $uncachedItems = [];
+
+        // First pass: check cache
+        foreach ($markdownItems as $index => $item) {
+            $markdown = is_array($item) ? $item['markdown'] : $item;
+            $itemOptions = is_array($item) ? array_merge($options, $item['options'] ?? []) : $options;
+
+            if ($this->cacheService->isCached($markdown, $itemOptions)) {
+                $results[$index] = [
+                    'html' => $this->parseToHtml($markdown, $itemOptions),
+                    'cached' => true,
+                ];
+            } else {
+                $uncachedItems[$index] = ['markdown' => $markdown, 'options' => $itemOptions];
+            }
+        }
+
+        // Second pass: process uncached items
+        foreach ($uncachedItems as $index => $item) {
+            $results[$index] = [
+                'html' => $this->parseToHtml($item['markdown'], $item['options']),
+                'cached' => false,
+            ];
+        }
+
+        // Sort results by original index
+        ksort($results);
+
+        return array_values($results);
+    }
+
+    /**
+     * Invalidate cache for specific content
+     */
+    public function invalidateCache(string $markdown, array $options = []): void
+    {
+        $this->cacheService->invalidate($markdown, $options);
+    }
+
+    /**
+     * Get cache statistics
+     */
+    public function getCacheStats(): array
+    {
+        return $this->cacheService->getStats();
+    }
+
+    /**
+     * Warm cache with frequently used content
+     */
+    public function warmCache(array $contentItems): int
+    {
+        return $this->cacheService->warmCache($contentItems);
+    }
+
+    /**
+     * Check if content needs reprocessing (for background jobs)
+     */
+    public function needsReprocessing(string $markdown, \DateTime $lastProcessed = null): bool
+    {
+        // If never processed, needs processing
+        if (!$lastProcessed) {
+            return true;
+        }
+
+        // If not cached, needs processing
+        if (!$this->cacheService->isCached($markdown)) {
+            return true;
+        }
+
+        // If last processed more than 24 hours ago and has dynamic content
+        $hasDynamicContent = (
+            strpos($markdown, '[[rack:') !== false ||
+            strpos($markdown, '{param:') !== false ||
+            strpos($markdown, ':::audio') !== false
+        );
+
+        if ($hasDynamicContent && $lastProcessed->diffInHours(now()) > 24) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Optimize markdown content for performance (remove excessive whitespace, etc.)
+     */
+    public function optimize(string $markdown): string
+    {
+        // Remove excessive blank lines (more than 2 consecutive)
+        $markdown = preg_replace('/\n{3,}/', "\n\n", $markdown);
+        
+        // Trim whitespace from lines
+        $lines = explode("\n", $markdown);
+        $lines = array_map('rtrim', $lines);
+        
+        // Remove trailing empty lines
+        while (count($lines) > 0 && empty(trim(end($lines)))) {
+            array_pop($lines);
+        }
+        
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Analyze markdown complexity for processing optimization
+     */
+    public function analyzeComplexity(string $markdown): array
+    {
+        return [
+            'length' => strlen($markdown),
+            'lines' => substr_count($markdown, "\n") + 1,
+            'words' => str_word_count($markdown),
+            'headings' => substr_count($markdown, '#'),
+            'links' => preg_match_all('/\[([^\]]*)\]\(([^)]*)\)/', $markdown),
+            'images' => preg_match_all('/!\[([^\]]*)\]\(([^)]*)\)/', $markdown),
+            'code_blocks' => substr_count($markdown, '```'),
+            'rack_embeds' => preg_match_all('/\[\[rack:([a-f0-9-]{36})\]\]/', $markdown),
+            'device_refs' => preg_match_all('/\{\{device:([^}]+)\}\}/', $markdown),
+            'parameter_controls' => preg_match_all('/\{param:([^}]+)\}/', $markdown),
+            'audio_players' => preg_match_all('/:::audio\[([^\]]+)\]\(([^)]+)\)/', $markdown),
+            'estimated_processing_time' => $this->estimateProcessingTime($markdown),
+        ];
+    }
+
+    /**
+     * Estimate processing time in milliseconds
+     */
+    private function estimateProcessingTime(string $markdown): int
+    {
+        $baseTime = 10; // Base 10ms
+        $length = strlen($markdown);
+        
+        // Add time based on length (1ms per 1000 characters)
+        $lengthTime = intval($length / 1000);
+        
+        // Add time for complex elements
+        $complexElements = (
+            preg_match_all('/\[\[rack:/', $markdown) * 5 + // 5ms per rack embed
+            preg_match_all('/:::audio/', $markdown) * 10 + // 10ms per audio player
+            preg_match_all('/```/', $markdown) * 2 + // 2ms per code block
+            preg_match_all('/\[([^\]]*)\]\(([^)]*)\)/', $markdown) * 1 // 1ms per link
+        );
+        
+        return $baseTime + $lengthTime + $complexElements;
     }
 }

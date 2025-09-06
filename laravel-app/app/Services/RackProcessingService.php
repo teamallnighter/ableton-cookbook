@@ -6,6 +6,7 @@ use App\Models\Rack;
 use App\Models\User;
 use App\Services\AbletonRackAnalyzer\AbletonRackAnalyzer;
 use App\Services\DrumRackAnalyzerService;
+use App\Services\D2DiagramService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -16,11 +17,13 @@ class RackProcessingService
 {
     protected AbletonRackAnalyzer $analyzer;
     protected DrumRackAnalyzerService $drumAnalyzer;
+    protected D2DiagramService $d2Service;
 
-    public function __construct(DrumRackAnalyzerService $drumAnalyzer)
+    public function __construct(DrumRackAnalyzerService $drumAnalyzer, D2DiagramService $d2Service)
     {
         $this->analyzer = new AbletonRackAnalyzer();
         $this->drumAnalyzer = $drumAnalyzer;
+        $this->d2Service = $d2Service;
     }
 
     /**
@@ -105,6 +108,9 @@ class RackProcessingService
                 if (!empty($metadata['tags'])) {
                     $this->attachTags($rack, $metadata['tags']);
                 }
+                
+                // Generate D2 diagrams for the analyzed rack
+                $this->generateRackDiagrams($rack, $analysisResult ?? [], $isDrumRack ?? false);
                 
             } catch (Exception $e) {
                 $rack->update([
@@ -270,6 +276,92 @@ class RackProcessingService
         return Rack::where('file_hash', $fileHash)
             ->where('status', '!=', 'failed')
             ->first();
+    }
+
+    /**
+     * Generate D2 diagrams for analyzed rack
+     */
+    protected function generateRackDiagrams(Rack $rack, array $analysisData, bool $isDrumRack): void
+    {
+        try {
+            // Prepare data for D2 transformation
+            $rackData = [
+                'uuid' => $rack->uuid,
+                'title' => $rack->title,
+                'rack_type' => $rack->rack_type,
+                'devices' => $rack->devices,
+                'chains' => $rack->chains,
+                'macro_controls' => $rack->macro_controls,
+                'analysis' => $analysisData
+            ];
+            
+            if ($isDrumRack) {
+                // Generate drum rack specific diagram
+                $this->d2Service->generateDrumRackDiagram($rackData, [
+                    'style' => 'sketch',
+                    'include_tooltips' => true,
+                    'show_performance' => true
+                ]);
+            } else {
+                // Generate general rack diagram  
+                $this->d2Service->generateRackDiagram($rackData, [
+                    'style' => 'technical',
+                    'include_tooltips' => true,
+                    'show_chains' => true
+                ]);
+            }
+            
+            \Log::info("Generated D2 diagrams for rack: {$rack->uuid}");
+            
+        } catch (Exception $e) {
+            \Log::error("Failed to generate D2 diagrams for rack {$rack->uuid}: " . $e->getMessage());
+            // Don't fail the entire rack processing if diagram generation fails
+        }
+    }
+    
+    /**
+     * Get D2 diagram for a rack
+     */
+    public function getRackDiagram(Rack $rack, string $style = 'sketch', string $format = 'svg'): ?string
+    {
+        try {
+            $rackData = [
+                'uuid' => $rack->uuid,
+                'title' => $rack->title,
+                'rack_type' => $rack->rack_type,
+                'devices' => $rack->devices,
+                'chains' => $rack->chains,
+                'macro_controls' => $rack->macro_controls
+            ];
+            
+            $isDrumRack = $rack->rack_type === 'drum_rack' || $rack->category === 'drums';
+            
+            if ($isDrumRack) {
+                return $this->d2Service->generateDrumRackDiagram($rackData, [
+                    'style' => $style,
+                    'format' => $format,
+                    'include_tooltips' => true
+                ]);
+            } else {
+                return $this->d2Service->generateRackDiagram($rackData, [
+                    'style' => $style, 
+                    'format' => $format,
+                    'include_tooltips' => true
+                ]);
+            }
+            
+        } catch (Exception $e) {
+            \Log::error("Failed to get D2 diagram for rack {$rack->uuid}: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Generate ASCII diagram for rack (perfect for README files)
+     */
+    public function getRackAsciiDiagram(Rack $rack): ?string
+    {
+        return $this->getRackDiagram($rack, 'minimal', 'ascii');
     }
 
     /**

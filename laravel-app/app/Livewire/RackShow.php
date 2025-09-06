@@ -8,6 +8,7 @@ use App\Models\RackFavorite;
 use App\Models\RackReport;
 use App\Jobs\IncrementRackViewsJob;
 use App\Services\DrumRackAnalyzerService;
+use App\Services\RackProcessingService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +22,11 @@ class RackShow extends Component
     public $userRating = 0;
     public $hoveredStar = 0;
     public $isFavorited = false;
+    
+    // D2 diagram properties
+    public $currentDiagramStyle = 'sketch';
+    public $availableStyles = ['sketch', 'technical', 'minimal', 'neon'];
+    public $diagramCache = [];
     
     // Report modal state
     public $showReportModal = false;
@@ -584,6 +590,74 @@ class RackShow extends Component
             'sample_based_pads' => $sampleBasedPads,
             'synthesized_pads' => $activePads - $sampleBasedPads
         ];
+    }
+
+    /**
+     * Switch D2 diagram style
+     */
+    public function switchDiagramStyle($style)
+    {
+        if (in_array($style, $this->availableStyles)) {
+            $this->currentDiagramStyle = $style;
+            // Clear cache to force regeneration with new style
+            $this->diagramCache = [];
+        }
+    }
+    
+    /**
+     * Get D2 diagram for current rack
+     */
+    public function getDiagramSvg()
+    {
+        // Check cache first
+        if (isset($this->diagramCache[$this->currentDiagramStyle])) {
+            return $this->diagramCache[$this->currentDiagramStyle];
+        }
+        
+        try {
+            $rackProcessor = app(RackProcessingService::class);
+            $diagram = $rackProcessor->getRackDiagram($this->rack, $this->currentDiagramStyle, 'svg');
+            
+            // Cache the result
+            $this->diagramCache[$this->currentDiagramStyle] = $diagram;
+            
+            return $diagram;
+        } catch (\Exception $e) {
+            \Log::error("Failed to get D2 diagram for rack {$this->rack->uuid}: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Get ASCII diagram for sharing
+     */
+    public function getAsciiDiagram()
+    {
+        try {
+            $rackProcessor = app(RackProcessingService::class);
+            return $rackProcessor->getRackAsciiDiagram($this->rack);
+        } catch (\Exception $e) {
+            \Log::error("Failed to get ASCII diagram for rack {$this->rack->uuid}: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Copy ASCII diagram to clipboard (JavaScript will handle this)
+     */
+    public function copyAsciiDiagram()
+    {
+        $this->dispatch('copy-to-clipboard', ['text' => $this->getAsciiDiagram()]);
+    }
+    
+    /**
+     * Check if rack should use drum rack visualization
+     */
+    public function isDrumRack(): bool
+    {
+        return $this->rack->rack_type === 'drum_rack' || 
+               $this->rack->category === 'drums' ||
+               ($this->drumRackData && count($this->drumRackData) > 0);
     }
 
     public function render()

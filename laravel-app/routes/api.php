@@ -7,6 +7,8 @@
   use App\Http\Controllers\Api\CollectionController;
   use App\Http\Controllers\Api\AuthController;
   use App\Http\Controllers\DrumRackAnalyzerController;
+  use App\Http\Controllers\Api\MarkdownPreviewController;
+  use App\Http\Controllers\Api\D2DiagramController;
   use Illuminate\Http\Request;
   use Illuminate\Support\Facades\Route;
 
@@ -34,6 +36,21 @@
 
       // Drum Rack Analyzer - Public info endpoint
       Route::get('/drum-racks/info', [DrumRackAnalyzerController::class, 'info']);
+
+      // D2 Diagrams - Public endpoints
+      Route::prefix('diagrams')->controller(D2DiagramController::class)->group(function () {
+          Route::get('/themes', 'getAvailableThemes');
+          Route::get('/themes/{theme}/preview', 'getThemePreview');
+          Route::get('/templates', 'getTemplates');
+          Route::get('/database-schema', 'generateDatabaseSchemaDiagram');
+      });
+
+      // Markdown Preview - Public endpoints with rate limiting
+      Route::prefix('markdown')->controller(MarkdownPreviewController::class)->group(function () {
+          Route::post('/preview', 'preview')->middleware('throttle:60,1'); // 60 previews per minute
+          Route::post('/validate', 'validate')->middleware('throttle:30,1'); // 30 validations per minute
+          Route::get('/syntax-help', 'syntaxHelp');
+      });
 
       // Users - Public profiles
       Route::get('/users/{user}', [UserController::class, 'show']);
@@ -120,5 +137,14 @@
           Route::post('/validateDrumRack', [DrumRackAnalyzerController::class, 'validate']);
           Route::post('/detect', [DrumRackAnalyzerController::class, 'detect']);
       });
+
+      // D2 Diagrams - Authenticated endpoints
+      Route::prefix('diagrams')->controller(D2DiagramController::class)->group(function () {
+          Route::post('/compare', 'generateComparisonDiagram')->middleware('throttle:10,1');
+          Route::post('/templates', 'saveTemplate')->middleware('throttle:20,1');
+      });
+
+      // D2 Diagrams for Racks - Authenticated rack-specific diagrams
+      Route::get('/racks/{rack}/diagram', [D2DiagramController::class, 'generateRackDiagram'])->middleware('throttle:30,1');
   });
 
