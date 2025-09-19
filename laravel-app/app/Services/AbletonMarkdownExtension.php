@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Rack;
 use League\CommonMark\Environment\Environment;
+use League\CommonMark\Environment\EnvironmentBuilderInterface;
 use League\CommonMark\Extension\ExtensionInterface;
 use League\Config\ConfigurationBuilderInterface;
 use League\Config\SchemaBuilderInterface;
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class AbletonMarkdownExtension implements ExtensionInterface
 {
-    public function register(Environment $environment): void
+    public function register(EnvironmentBuilderInterface $environment): void
     {
         // Get configuration from environment
         $config = $environment->getConfiguration()->get('ableton', []);

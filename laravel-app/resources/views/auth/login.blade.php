@@ -25,7 +25,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login') }}" class="space-y-6">
+            <form method="POST" action="{{ route('login') }}" class="space-y-6" x-data="{ submitting: false }" @submit="submitting = true">
                 @csrf
 
                 <!-- Email Field -->
@@ -51,15 +51,14 @@
                     <label for="password" class="block text-sm font-medium text-black mb-2">
                         {{ __('Password') }}
                     </label>
-                    <input 
-                        id="password" 
-                        type="password" 
-                        name="password" 
-                        required 
+                    <input
+                        id="password"
+                        type="password"
+                        name="password"
+                        required
                         autocomplete="current-password"
                         placeholder="Enter your password"
-                        class="input-field"
-                        :error="$errors->first('password')"
+                        class="input-field @error('password') border-red-500 @enderror"
                     />
                 </div>
 

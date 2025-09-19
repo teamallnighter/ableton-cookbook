@@ -3,18 +3,27 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-import Alpine from 'alpinejs';
+// Alpine is provided by Livewire, so we extend it instead of initializing our own
 import collapse from '@alpinejs/collapse';
 import focus from '@alpinejs/focus';
 
-Alpine.plugin(collapse);
-Alpine.plugin(focus);
+// Wait for Livewire to initialize Alpine, then add our plugins
+document.addEventListener('livewire:init', () => {
+    if (window.Alpine) {
+        window.Alpine.plugin(collapse);
+        window.Alpine.plugin(focus);
+    }
+});
 
-window.Alpine = Alpine;
-
-// Wait for DOM to be ready before starting Alpine
+// Fallback for pages without Livewire
 document.addEventListener('DOMContentLoaded', () => {
-    if (!window.Alpine.version) {
-        Alpine.start();
+    // Only initialize Alpine if Livewire hasn't already done it
+    if (!window.Alpine) {
+        import('alpinejs').then((Alpine) => {
+            Alpine.default.plugin(collapse);
+            Alpine.default.plugin(focus);
+            window.Alpine = Alpine.default;
+            Alpine.default.start();
+        });
     }
 });
