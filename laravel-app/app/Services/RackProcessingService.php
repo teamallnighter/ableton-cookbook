@@ -336,19 +336,24 @@ class RackProcessingService
             
             $isDrumRack = $rack->rack_type === 'drum_rack' || $rack->category === 'drums';
             
+            // Generate D2 code
+            $d2Code = '';
             if ($isDrumRack) {
-                return $this->d2Service->generateDrumRackDiagram($rackData, [
+                $d2Code = $this->d2Service->generateDrumRackDiagram($rackData, [
                     'style' => $style,
                     'format' => $format,
                     'include_tooltips' => true
                 ]);
             } else {
-                return $this->d2Service->generateRackDiagram($rackData, [
+                $d2Code = $this->d2Service->generateRackDiagram($rackData, [
                     'style' => $style, 
                     'format' => $format,
                     'include_tooltips' => true
                 ]);
             }
+            
+            // Render to requested format using D2
+            return $this->d2Service->renderDiagram($d2Code, $format);
             
         } catch (Exception $e) {
             \Log::error("Failed to get D2 diagram for rack {$rack->uuid}: " . $e->getMessage());

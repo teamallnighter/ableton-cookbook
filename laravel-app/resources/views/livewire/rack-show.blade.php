@@ -228,9 +228,8 @@
                 <!-- Compact Rating System -->
                 <div class="flex items-center gap-3" role="group" aria-labelledby="rating-label">
                     <span id="rating-label" class="text-sm font-medium text-black">Rate this rack:</span>
-                    <div class="flex items-center gap-1" 
-                         x-data="safeAlpineComponent({ showStars: false, hoveredStar: 0 }, 'rating-system')"
-                         x-init="$el._alpineInstance = $data">
+                    <div class="flex items-center gap-1"
+                         x-data="{ showStars: false, hoveredStar: 0 }">
                         @auth
                             <div 
                                 @mouseenter="showStars = true" 
@@ -291,10 +290,10 @@
         </div>
     </div>
 
-    <!-- Two-Column Content Layout -->
-    <div class="grid grid-cols-1 xl:grid-cols-5 gap-8">
-        <!-- Left Column: How-To Article -->
-        <div class="xl:col-span-3 order-2 xl:order-1">
+    <!-- Stacked Content Layout -->
+    <div class="space-y-8">
+        <!-- How-To Article Section (Full Width) -->
+        <div>
             @if($rack->how_to_article)
                 <div class="card card-body">
                     <div class="flex items-center justify-between mb-6">
@@ -326,7 +325,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                         <h3 class="text-lg font-medium text-gray-900 mb-2">No How-To Guide Available</h3>
-                        <p class="text-gray-600 mb-4">This rack doesn't have a detailed how-to guide yet. The device structure is still available on the right.</p>
+                        <p class="text-gray-600 mb-4">This rack doesn't have a detailed how-to guide yet. The device structure is available below.</p>
                         @if(auth()->check() && auth()->id() === $rack->user_id)
                             <a href="{{ route('racks.edit', $rack) }}" class="btn btn-primary">
                                 Add How-To Guide
@@ -337,158 +336,233 @@
             @endif
         </div>
 
-        <!-- Right Column: Rack Visualization -->
-        <div class="xl:col-span-2 order-1 xl:order-2">
-            <div class="sticky top-8">
+        <!-- Rack Visualization Section (Full Width) -->
+        <div>
+            {{-- Unified Rack Visualization --}}
+            <div class="card card-body" x-data="{ activeTab: 'diagram' }">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-black">Rack Visualization</h3>
+                        
+                        {{-- Visualization Mode Tabs --}}
+                        <div class="flex bg-gray-100 rounded-lg p-1">
+                            <button class="px-3 py-1 text-sm rounded-md transition-colors"
+                                    :class="{ 'bg-white shadow-sm text-vibrant-purple': activeTab === 'diagram', 'text-gray-600 hover:text-gray-900': activeTab !== 'diagram' }"
+                                    @click="activeTab = 'diagram'">
+                                <i class="fas fa-diagram-project mr-1"></i> D2 Diagram
+                            </button>
+                            <button class="px-3 py-1 text-sm rounded-md transition-colors"
+                                    :class="{ 'bg-white shadow-sm text-vibrant-purple': activeTab === 'tree', 'text-gray-600 hover:text-gray-900': activeTab !== 'tree' }"
+                                    @click="activeTab = 'tree'">
+                                <i class="fas fa-sitemap mr-1"></i> Tree View
+                            </button>
+                            <button class="px-3 py-1 text-sm rounded-md transition-colors"
+                                    :class="{ 'bg-white shadow-sm text-vibrant-purple': activeTab === 'cards', 'text-gray-600 hover:text-gray-900': activeTab !== 'cards' }"
+                                    @click="activeTab = 'cards'">
+                                <i class="fas fa-th-large mr-1"></i> Card View
+                            </button>
+                            <button class="px-3 py-1 text-sm rounded-md transition-colors"
+                                    :class="{ 'bg-white shadow-sm text-vibrant-purple': activeTab === 'ascii', 'text-gray-600 hover:text-gray-900': activeTab !== 'ascii' }"
+                                    @click="activeTab = 'ascii'">
+                                <i class="fas fa-terminal mr-1"></i> ASCII
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {{-- D2 Diagram Tab --}}
+                    <div x-show="activeTab === 'diagram'" x-transition>
+                        <div class="mb-3">
+                            <select wire:model.live="currentDiagramStyle"
+                                    class="text-sm border-gray-300 rounded-md focus:ring-vibrant-purple focus:border-vibrant-purple">
+                                @foreach($availableStyles as $style)
+                                    <option value="{{ $style }}">{{ ucfirst($style) }} Style</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-6 bg-gray-50 overflow-x-auto">
+                            @if($diagram = $this->getDiagramSvg())
+                                <div class="flex justify-center">
+                                    {!! $diagram !!}
+                                </div>
+                            @else
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-diagram-project text-4xl mb-3"></i>
+                                    <p>Diagram generation in progress...</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    {{-- Tree View Tab --}}
+                    <div x-show="activeTab === 'tree'" x-transition x-data="{ treeViewLoaded: true }">
+                        <div class="border border-gray-200 rounded-lg p-4 bg-white">
+                            @if(!empty($rackData['chains']))
+                                <div class="tree-structure">
+                                    @foreach($rackData['chains'] as $chainIndex => $chain)
+                                        <div class="chain-branch mb-3" x-data="{ expanded: true }">
+                                            <div class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded" @click="expanded = !expanded">
+                                                <svg class="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out" :class="expanded ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                </svg>
+                                                <span class="font-semibold text-sm">{{ $chain['name'] ?? "Chain " . ($chainIndex + 1) }}</span>
+                                                <span class="ml-auto text-xs text-gray-500">{{ count($chain['devices'] ?? []) }} devices</span>
+                                            </div>
+                                            
+                                            <div x-show="expanded" 
+                                                 x-transition:enter="transition ease-out duration-500"
+                                                 x-transition:enter-start="opacity-0 max-h-0"
+                                                 x-transition:enter-end="opacity-100 max-h-screen"
+                                                 x-transition:leave="transition ease-in duration-500"
+                                                 x-transition:leave-start="opacity-100 max-h-screen"
+                                                 x-transition:leave-end="opacity-0 max-h-0"
+                                                 class="ml-6 mt-1 overflow-hidden">
+                                                @if(!empty($chain['devices']))
+                                                    @foreach($chain['devices'] as $device)
+                                                        <div class="device-leaf flex items-center py-1 px-2 text-sm hover:bg-gray-50 rounded">
+                                                            <svg class="w-3 h-3 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                <circle cx="10" cy="10" r="3"/>
+                                                            </svg>
+                                                            <span class="text-gray-700">{{ $device['display_name'] ?? $device['name'] ?? $device['standard_name'] ?? 'Unknown Device' }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                @else
+                                                    <div class="text-xs text-gray-500 italic px-2">No devices</div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center text-gray-500 text-sm py-6">
+                                    <p>No device structure available for this rack</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    {{-- Card View Tab --}}
+                    <div x-show="activeTab === 'cards'" x-transition>
+                        <div class="border border-gray-200 rounded-lg p-4 bg-white">
+                            @if(!empty($rackData['chains']))
+                                <div class="space-y-3">
+                                    @foreach($rackData['chains'] as $chainIndex => $chain)
+                                        <div class="bg-gray-50 rounded-lg p-3">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <div class="w-3 h-3 rounded-full bg-vibrant-purple"></div>
+                                                <div class="text-sm font-medium text-black">
+                                                    @if(isset($rack->chain_annotations[$chainIndex]['custom_name']) && !empty($rack->chain_annotations[$chainIndex]['custom_name']))
+                                                        {{ $rack->chain_annotations[$chainIndex]['custom_name'] }}
+                                                    @else
+                                                        Chain {{ $chainIndex + 1 }}
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @if(!empty($chain['devices']))
+                                                <div class="space-y-1">
+                                                    @foreach($chain['devices'] as $device)
+                                                        <div class="flex items-center gap-2 text-xs text-gray-700">
+                                                            <div class="w-1 h-1 rounded-full bg-gray-400"></div>
+                                                            {{ $device['display_name'] ?? $device['name'] ?? $device['standard_name'] ?? 'Unknown Device' }}
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center text-gray-500 text-sm py-6">
+                                    <p>No device structure available for this rack</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    {{-- ASCII View Tab --}}
+                    <div x-show="activeTab === 'ascii'" x-transition>
+                        <div class="flex items-center justify-end mb-3">
+                            <button wire:click="copyAsciiDiagram"
+                                    class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                                <i class="fas fa-copy mr-1"></i> Copy ASCII
+                            </button>
+                        </div>
+                        <div class="bg-black text-green-400 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                            @if($asciiDiagram = $this->getAsciiDiagram())
+                                <pre class="whitespace-pre leading-tight m-0">{{ $asciiDiagram }}</pre>
+                            @else
+                                <div class="text-center py-8">
+                                    <i class="fas fa-terminal text-4xl mb-3"></i>
+                                    <p>ASCII diagram generation in progress...</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                
                 @if($this->isDrumRack())
                     {{-- Drum Rack Specific Visualization --}}
                     <div class="card card-body mb-6">
                         <x-drum-rack-visualizer :drumRackData="$this->getDrumRackData()" />
                     </div>
-                @else
-                    {{-- General Rack Visualization --}}
-                    <!-- View Mode Switcher -->
-                    <div class="card card-body mb-6" 
-                         x-data="{ 
-                            viewMode: 'card', 
-                            treeViewLoaded: false
-                         }"
-                         x-init="$el._alpineInstance = $data">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium text-black">Rack Structure</h3>
-                        <div class="flex items-center gap-2">
-                            <button 
-                                @click="viewMode = 'card'" 
-                                :class="viewMode === 'card' ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                                class="px-3 py-1 text-sm rounded transition-colors"
-                                title="Card View"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-4H5m14 8H5m14 4H5"/>
-                                </svg>
-                            </button>
-                            <button 
-                                @click="viewMode = 'tree'; if (!treeViewLoaded) { treeViewLoaded = true; }"
-                                :class="viewMode === 'tree' ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                                class="px-3 py-1 text-sm rounded transition-colors"
-                                title="Tree View"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Quick Stats -->
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-black">{{ $rack->device_count }}</div>
-                            <div class="text-xs text-gray-600">Devices</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-black">{{ $rack->chain_count }}</div>
-                            <div class="text-xs text-gray-600">Chains</div>
-                        </div>
-                    </div>
-
-                    <!-- Card View -->
-                    <div class="card-view" 
-                         x-show="viewMode === 'card'" 
-                         x-transition:enter="transition ease-out duration-300" 
-                         x-transition:enter-start="opacity-0 transform scale-95" 
-                         x-transition:enter-end="opacity-100 transform scale-100"
-                         >
-                        @if(!empty($rackData['chains']))
-                            <div class="space-y-3">
-                                @foreach($rackData['chains'] as $chainIndex => $chain)
-                                    <div class="bg-gray-50 rounded-lg p-3">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <div class="w-3 h-3 rounded-full bg-vibrant-purple"></div>
-                                            <div class="text-sm font-medium text-black">
-                                                @if(isset($rack->chain_annotations[$chainIndex]['custom_name']) && !empty($rack->chain_annotations[$chainIndex]['custom_name']))
-                                                    {{ $rack->chain_annotations[$chainIndex]['custom_name'] }}
-                                                @else
-                                                    Chain {{ $chainIndex + 1 }}
-                                                @endif
-                                            </div>
-                                        </div>
-                                        @if(!empty($chain['devices']))
-                                            <div class="space-y-1">
-                                                @foreach($chain['devices'] as $device)
-                                                    <div class="flex items-center gap-2 text-xs text-gray-700">
-                                                        <div class="w-1 h-1 rounded-full bg-gray-400"></div>
-                                                        {{ $device['display_name'] ?? $device['name'] ?? $device['standard_name'] ?? 'Unknown Device' }}
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="text-center text-gray-500 text-sm py-6" role="status" aria-live="polite">
-                                <p>No device structure available for this rack</p>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Tree View -->
-                    <div x-show="viewMode === 'tree'" 
-                         x-transition:enter="transition ease-out duration-300" 
-                         x-transition:enter-start="opacity-0 transform scale-95" 
-                         x-transition:enter-end="opacity-100 transform scale-100"
-                         @touchstart.passive
-                         @touchend.passive
-                         tabindex="0"
-                         role="tree"
-                         aria-label="Rack device structure">
-                        @if(!empty($rackData['chains']))
-                            <div class="tree-structure">
-                                @foreach($rackData['chains'] as $chainIndex => $chain)
-                                    <div class="chain-branch mb-3" x-data="{ expanded: true }">
-                                        <div class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded" @click="expanded = !expanded">
-                                            <svg class="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out" :class="expanded ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                            </svg>
-                                            <span class="font-semibold text-sm">{{ $chain['name'] ?? "Chain " . ($chainIndex + 1) }}</span>
-                                            <span class="ml-auto text-xs text-gray-500">{{ count($chain['devices'] ?? []) }} devices</span>
-                                        </div>
-                                        
-                                        <div x-show="expanded" 
-                                             x-transition:enter="transition ease-out duration-500"
-                                             x-transition:enter-start="opacity-0 max-h-0"
-                                             x-transition:enter-end="opacity-100 max-h-screen"
-                                             x-transition:leave="transition ease-in duration-500"
-                                             x-transition:leave-start="opacity-100 max-h-screen"
-                                             x-transition:leave-end="opacity-0 max-h-0"
-                                             class="ml-6 mt-1 overflow-hidden">
-                                            @if(!empty($chain['devices']))
-                                                @foreach($chain['devices'] as $device)
-                                                    <div class="device-leaf flex items-center py-1 px-2 text-sm hover:bg-gray-50 rounded">
-                                                        <svg class="w-3 h-3 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                                            <circle cx="10" cy="10" r="3"/>
-                                                        </svg>
-                                                        <span class="text-gray-700">{{ $device['display_name'] ?? $device['name'] ?? $device['standard_name'] ?? 'Unknown Device' }}</span>
-                                                    </div>
-                                                @endforeach
-                                            @else
-                                                <div class="text-xs text-gray-500 italic px-2">No devices</div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="text-center text-gray-500 text-sm py-6">
-                                <p>No device structure available for this rack</p>
-                            </div>
-                        @endif
-                    </div>
-                    </div>
                 @endif
-            </div>
         </div>
     </div>
     </main>
 </div>
+
+@push('scripts')
+<script>
+    // Listen for copy-to-clipboard event from Livewire
+    window.addEventListener('copy-to-clipboard', event => {
+        console.log('Copy event received:', event);
+        const text = event.detail.text;
+        console.log('Text to copy length:', text ? text.length : 'null');
+
+        if (text) {
+            // Check if clipboard API is available
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    // Show success message
+                    alert('ASCII diagram copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    // Fallback for clipboard API failure
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                // Fallback for older browsers or non-HTTPS
+                fallbackCopyTextToClipboard(text);
+            }
+        } else {
+            console.error('No text provided to copy');
+            alert('No ASCII diagram available to copy.');
+        }
+    });
+
+    // Fallback copy method for browsers without clipboard API
+    function fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                alert('ASCII diagram copied to clipboard!');
+            } else {
+                alert('Failed to copy to clipboard. Please try manually selecting and copying.');
+            }
+        } catch (err) {
+            console.error('Fallback copy failed: ', err);
+            alert('Failed to copy to clipboard. Please try manually selecting and copying.');
+        }
+
+        document.body.removeChild(textArea);
+    }
+</script>
+@endpush
