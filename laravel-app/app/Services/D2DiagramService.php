@@ -3,10 +3,81 @@
 namespace App\Services;
 
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class D2DiagramService 
+class D2DiagramService
 {
+    /**
+     * Configuration cache
+     */
+    private ?array $config = null;
+
+    /**
+     * Get D2 configuration with environment awareness
+     */
+    private function getConfig(): array
+    {
+        if ($this->config === null) {
+            $this->config = [
+                'binary_path' => config('d2.binary_path', '/usr/local/bin/d2'),
+                'temp_path' => config('d2.temp_path', sys_get_temp_dir()),
+                'timeout' => config('d2.timeout', 10),
+                'cache_enabled' => config('d2.cache_enabled', true),
+                'cache_ttl' => config('d2.cache_ttl', 3600),
+                'enabled' => config('d2.enabled', true),
+                'use_system_path' => config('d2.use_system_path', app()->environment('local')),
+            ];
+        }
+        return $this->config;
+    }
+
+    /**
+     * Get the D2 binary path based on environment
+     */
+    private function getD2Binary(): string
+    {
+        $config = $this->getConfig();
+
+        if ($config['use_system_path']) {
+            // Development: Use system PATH
+            return 'd2';
+        }
+
+        // Production: Use explicit path
+        return $config['binary_path'];
+    }
+
+    /**
+     * Get temp directory for D2 operations
+     */
+    private function getTempDirectory(): string
+    {
+        $config = $this->getConfig();
+        $tempPath = $config['temp_path'];
+
+        // Ensure the directory exists
+        if (!is_dir($tempPath)) {
+            mkdir($tempPath, 0755, true);
+        }
+
+        return $tempPath;
+    }
+
+    /**
+     * Check if D2 is available and working
+     */
+    public function isAvailable(): bool
+    {
+        try {
+            $command = $this->getD2Binary() . ' --version 2>&1';
+            exec($command, $output, $returnCode);
+            return $returnCode === 0;
+        } catch (Exception $e) {
+            Log::error('D2 availability check failed: ' . $e->getMessage());
+            return false;
+        }
+    }
     public function generateRackDiagram(array $rackData, array $options = []): string
     {
         $rackName = $rackData['title'] ?? 'Unknown Rack';
@@ -239,13 +310,35 @@ class D2DiagramService
 
     public function renderDiagram(string $d2Code, string $format = 'svg'): ?string
     {
+        $config = $this->getConfig();
+
+        // Check if D2 is enabled
+        if (!$config['enabled']) {
+            Log::warning('D2 rendering requested but D2 is disabled');
+            return null;
+        }
+
+        // Check cache if enabled
+        if ($config['cache_enabled']) {
+            $cacheKey = 'd2:' . md5($d2Code . $format);
+            $cached = Cache::get($cacheKey);
+            if ($cached !== null) {
+                Log::debug('D2 diagram served from cache', ['key' => $cacheKey]);
+                return $cached;
+            }
+        }
+
         try {
-            $tempFile = tempnam(sys_get_temp_dir(), 'd2_');
+            $tempDir = $this->getTempDirectory();
+            $tempFile = tempnam($tempDir, 'd2_');
             file_put_contents($tempFile . '.d2', $d2Code);
+
+            $d2Binary = $this->getD2Binary();
+            $timeout = $config['timeout'];
 
             // Handle ASCII format specially - use stdout
             if ($format === 'ascii') {
-                $command = "d2 --layout=elk --stdout-format ascii {$tempFile}.d2 - 2>&1";
+                $command = "timeout {$timeout} {$d2Binary} --layout=elk --stdout-format ascii {$tempFile}.d2 - 2>&1";
 
                 exec($command, $output, $returnCode);
                 unlink($tempFile . '.d2');
@@ -254,12 +347,21 @@ class D2DiagramService
                     // Remove the "success:" line that D2 adds at the end
                     $result = implode("\n", $output);
                     $result = preg_replace('/\nsuccess:.*$/m', '', $result);
-                    return trim($result);
+                    $result = trim($result);
+
+                    // Cache the result
+                    if ($config['cache_enabled'] && $result) {
+                        Cache::put($cacheKey, $result, $config['cache_ttl']);
+                    }
+
+                    return $result;
+                } elseif ($returnCode === 124) {
+                    Log::error('D2 rendering timeout', ['format' => $format, 'timeout' => $timeout]);
                 }
             } else {
                 // Handle other formats with file output
                 $outputFile = $tempFile . '.' . $format;
-                $command = "d2 --layout=elk {$tempFile}.d2 {$outputFile} 2>&1";
+                $command = "timeout {$timeout} {$d2Binary} --layout=elk {$tempFile}.d2 {$outputFile} 2>&1";
 
                 exec($command, $output, $returnCode);
 
@@ -267,17 +369,27 @@ class D2DiagramService
                     $result = file_get_contents($outputFile);
                     unlink($tempFile . '.d2');
                     unlink($outputFile);
+
+                    // Cache the result
+                    if ($config['cache_enabled'] && $result) {
+                        Cache::put($cacheKey, $result, $config['cache_ttl']);
+                    }
+
                     return $result;
+                } elseif ($returnCode === 124) {
+                    Log::error('D2 rendering timeout', ['format' => $format, 'timeout' => $timeout]);
                 }
 
-                unlink($tempFile . '.d2');
+                if (file_exists($tempFile . '.d2')) {
+                    unlink($tempFile . '.d2');
+                }
             }
 
             Log::error('D2 rendering failed', [
                 'return_code' => $returnCode,
                 'output' => $output,
-                'd2_code' => $d2Code,
-                'format' => $format
+                'format' => $format,
+                'binary' => $d2Binary
             ]);
 
             return null;
