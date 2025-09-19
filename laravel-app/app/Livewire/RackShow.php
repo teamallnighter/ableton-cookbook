@@ -416,40 +416,6 @@ class RackShow extends Component
         return $devices;
     }
 
-    /**
-     * Check if this rack is a drum rack
-     */
-    public function isDrumRack()
-    {
-        // Check if already determined from stored data
-        if (isset($this->rack->rack_type) && $this->rack->rack_type === 'drum_rack') {
-            return true;
-        }
-
-        // Check for drum rack indicators in the data
-        if ($this->rack->category === 'drums' || $this->rack->category === '3') {
-            return true;
-        }
-
-        // Check rack type field
-        if (in_array($this->rack->rack_type, ['DrumRack', 'DrumGroupDevice'])) {
-            return true;
-        }
-
-        // Check if file contains drum rack by analyzing it
-        if (Storage::disk('private')->exists($this->rack->file_path)) {
-            try {
-                $drumAnalyzer = app(DrumRackAnalyzerService::class);
-                $filePath = Storage::disk('private')->path($this->rack->file_path);
-                return $drumAnalyzer->isDrumRack($filePath);
-            } catch (\Exception $e) {
-                // Fall back to false if analysis fails
-                return false;
-            }
-        }
-
-        return false;
-    }
 
     /**
      * Get drum rack specific data for visualization
