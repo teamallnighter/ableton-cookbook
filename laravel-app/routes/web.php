@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 // Health check for Railway
 Route::get('/health', function () {
@@ -11,6 +13,7 @@ Route::get('/health', function () {
         'env' => config('app.env')
     ]);
 });
+
 
 Route::get('/', function () {
     try {

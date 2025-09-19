@@ -217,7 +217,7 @@ class MarkdownPreviewController extends Controller
             )
         ]
     )]
-    public function validate(Request $request): JsonResponse
+    public function validateMarkdown(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'markdown' => 'required|string|max:100000',

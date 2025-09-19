@@ -48,7 +48,7 @@
       // Markdown Preview - Public endpoints with rate limiting
       Route::prefix('markdown')->controller(MarkdownPreviewController::class)->group(function () {
           Route::post('/preview', 'preview')->middleware('throttle:60,1'); // 60 previews per minute
-          Route::post('/validate', 'validate')->middleware('throttle:30,1'); // 30 validations per minute
+          Route::post('/validate', 'validateMarkdown')->middleware('throttle:30,1'); // 30 validations per minute
           Route::get('/syntax-help', 'syntaxHelp');
       });
 

@@ -6,6 +6,7 @@ use App\Jobs\ProcessRackFileJob;
 use App\Models\Rack;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
