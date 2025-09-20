@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\AbletonRackAnalyzer\AbletonRackAnalyzer;
 use App\Services\DrumRackAnalyzerService;
 use App\Services\D2DiagramService;
+use App\Services\EnhancedRackAnalysisService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -18,12 +19,17 @@ class RackProcessingService
     protected AbletonRackAnalyzer $analyzer;
     protected DrumRackAnalyzerService $drumAnalyzer;
     protected D2DiagramService $d2Service;
+    protected EnhancedRackAnalysisService $enhancedAnalysisService;
 
-    public function __construct(DrumRackAnalyzerService $drumAnalyzer, D2DiagramService $d2Service)
-    {
+    public function __construct(
+        DrumRackAnalyzerService $drumAnalyzer,
+        D2DiagramService $d2Service,
+        EnhancedRackAnalysisService $enhancedAnalysisService
+    ) {
         $this->analyzer = new AbletonRackAnalyzer();
         $this->drumAnalyzer = $drumAnalyzer;
         $this->d2Service = $d2Service;
+        $this->enhancedAnalysisService = $enhancedAnalysisService;
     }
 
     /**
@@ -98,6 +104,7 @@ class RackProcessingService
                             'version_details' => $analysisResult['version_details'] ?? [],
                             'parsing_errors' => $analysisResult['parsing_errors'] ?? [],
                             'parsing_warnings' => $analysisResult['parsing_warnings'] ?? [],
+                            'analysis_complete' => true,
                             'status' => empty($analysisResult['parsing_errors']) ? 'approved' : 'pending',
                             'published_at' => empty($analysisResult['parsing_errors']) ? now() : null,
                         ]);
@@ -111,7 +118,10 @@ class RackProcessingService
                 
                 // Generate D2 diagrams for the analyzed rack
                 $this->generateRackDiagrams($rack, $analysisResult ?? [], $isDrumRack ?? false);
-                
+
+                // Perform enhanced nested chain analysis (constitutional requirement)
+                $this->performEnhancedAnalysis($rack);
+
             } catch (Exception $e) {
                 $rack->update([
                     'status' => 'failed',
@@ -377,5 +387,36 @@ class RackProcessingService
         // Future: Generate audio preview
         // This would require integration with audio processing tools
         // or user-uploaded preview files
+    }
+
+    /**
+     * Perform enhanced nested chain analysis (constitutional requirement)
+     */
+    protected function performEnhancedAnalysis(Rack $rack): void
+    {
+        try {
+            // Constitutional requirement: ALL CHAINS must be detected and analyzed
+            $enhancedResult = $this->enhancedAnalysisService->analyzeRack($rack);
+
+            if ($enhancedResult['analysis_complete']) {
+                Log::info('Enhanced nested chain analysis completed during upload', [
+                    'rack_uuid' => $rack->uuid,
+                    'constitutional_compliant' => $enhancedResult['constitutional_compliant'],
+                    'nested_chains_detected' => $enhancedResult['nested_chains_detected'] ?? 0,
+                    'analysis_duration_ms' => $enhancedResult['analysis_duration_ms'] ?? 0
+                ]);
+            } else {
+                Log::warning('Enhanced analysis failed during upload but rack processing continues', [
+                    'rack_uuid' => $rack->uuid,
+                    'error' => $enhancedResult['error'] ?? 'Unknown error'
+                ]);
+            }
+        } catch (Exception $e) {
+            // Don't fail the entire upload if enhanced analysis fails
+            Log::error('Enhanced analysis failed during upload processing', [
+                'rack_uuid' => $rack->uuid,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

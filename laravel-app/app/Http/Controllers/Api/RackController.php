@@ -11,6 +11,8 @@ use App\Http\Responses\ErrorResponse;
 use App\Jobs\IncrementRackViewsJob;
 use App\Models\Rack;
 use App\Services\RackProcessingService;
+use App\Services\EnhancedRackAnalysisService;
+use App\Services\ConstitutionalComplianceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -28,10 +30,17 @@ use Spatie\QueryBuilder\QueryBuilder;
 class RackController extends Controller
 {
     protected RackProcessingService $rackService;
+    protected EnhancedRackAnalysisService $enhancedAnalysisService;
+    protected ConstitutionalComplianceService $complianceService;
 
-    public function __construct(RackProcessingService $rackService)
-    {
+    public function __construct(
+        RackProcessingService $rackService,
+        EnhancedRackAnalysisService $enhancedAnalysisService,
+        ConstitutionalComplianceService $complianceService
+    ) {
         $this->rackService = $rackService;
+        $this->enhancedAnalysisService = $enhancedAnalysisService;
+        $this->complianceService = $complianceService;
     }
 
     /**
@@ -116,7 +125,7 @@ class RackController extends Controller
             
             $racks = QueryBuilder::for(Rack::class)
                 ->published()
-                ->with(['user:id,name,profile_photo_path', 'tags'])
+                ->with(['user:id,name,profile_photo_path', 'tags', 'enhancedAnalysis:rack_id,constitutional_compliant,nested_chains_detected,analysis_complete'])
                 ->allowedFilters([
                     AllowedFilter::exact('rack_type'),
                     AllowedFilter::exact('user_id'),
@@ -131,6 +140,20 @@ class RackController extends Controller
                     }),
                     AllowedFilter::callback('rating', function ($query, $value) {
                         $query->where('average_rating', '>=', $value);
+                    }),
+                    AllowedFilter::callback('constitutional_compliant', function ($query, $value) {
+                        $query->whereHas('enhancedAnalysis', function ($q) use ($value) {
+                            $q->where('constitutional_compliant', (bool) $value);
+                        });
+                    }),
+                    AllowedFilter::callback('has_enhanced_analysis', function ($query, $value) {
+                        if ($value) {
+                            $query->whereHas('enhancedAnalysis', function ($q) {
+                                $q->where('analysis_complete', true);
+                            });
+                        } else {
+                            $query->whereDoesntHave('enhancedAnalysis');
+                        }
                     }),
                 ])
                 ->allowedSorts(['created_at', 'downloads_count', 'average_rating', 'views_count'])
@@ -388,7 +411,12 @@ class RackController extends Controller
                 );
             }
 
-            $rack->load(['user:id,name,profile_photo_path,created_at', 'tags', 'comments.user:id,name,profile_photo_path']);
+            $rack->load([
+                'user:id,name,profile_photo_path,created_at',
+                'tags',
+                'comments.user:id,name,profile_photo_path',
+                'enhancedAnalysis:rack_id,constitutional_compliant,nested_chains_detected,max_nesting_depth,analysis_complete,processed_at'
+            ]);
             
             // Queue view increment to avoid blocking response (with error handling)
             try {
@@ -407,7 +435,10 @@ class RackController extends Controller
                 [
                     'view_incremented' => true,
                     'last_updated' => $rack->updated_at->toISOString(),
-                    'is_owner' => auth()->check() && auth()->id() === $rack->user_id
+                    'is_owner' => auth()->check() && auth()->id() === $rack->user_id,
+                    'enhanced_analysis_available' => $rack->hasEnhancedAnalysis(),
+                    'constitutional_compliant' => $rack->enhancedAnalysis?->constitutional_compliant ?? null,
+                    'nested_chains_count' => $rack->enhancedAnalysis?->nested_chains_detected ?? 0
                 ]
             );
             
@@ -948,5 +979,157 @@ class RackController extends Controller
         return response()->json([
             'message' => 'How-to article deleted successfully',
         ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/racks/{id}/analysis-status",
+     *     summary="Get rack enhanced analysis status",
+     *     description="Retrieve the enhanced nested chain analysis status for a rack",
+     *     operationId="getRackAnalysisStatus",
+     *     tags={"Racks"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Analysis status retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="has_enhanced_analysis", type="boolean"),
+     *             @OA\Property(property="constitutional_compliant", type="boolean"),
+     *             @OA\Property(property="nested_chains_detected", type="integer"),
+     *             @OA\Property(property="max_nesting_depth", type="integer"),
+     *             @OA\Property(property="analysis_complete", type="boolean"),
+     *             @OA\Property(property="processed_at", type="string", format="date-time"),
+     *             @OA\Property(property="compliance_score", type="number"),
+     *             @OA\Property(property="requires_reanalysis", type="boolean"),
+     *             @OA\Property(property="constitution_version", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Rack not found")
+     * )
+     */
+    public function getAnalysisStatus(Rack $rack): JsonResponse
+    {
+        // Check if rack is published or user owns it
+        if (!$rack->is_public || $rack->status !== 'approved') {
+            if (!auth()->check() || $rack->user_id !== auth()->id()) {
+                return ErrorResponse::create(
+                    ErrorCode::RESOURCE_NOT_FOUND,
+                    'This rack is not publicly available'
+                );
+            }
+        }
+
+        $rack->load('enhancedAnalysis');
+
+        if (!$rack->hasEnhancedAnalysis()) {
+            return response()->json([
+                'has_enhanced_analysis' => false,
+                'constitutional_compliant' => null,
+                'nested_chains_detected' => 0,
+                'max_nesting_depth' => 0,
+                'analysis_complete' => false,
+                'processed_at' => null,
+                'compliance_score' => null,
+                'requires_reanalysis' => true,
+                'constitution_version' => null,
+                'suggestion' => 'Trigger enhanced analysis using POST /racks/{uuid}/analyze-nested-chains'
+            ]);
+        }
+
+        $analysis = $rack->enhancedAnalysis;
+        $complianceStatus = $this->complianceService->getRackComplianceStatus($rack);
+
+        return response()->json([
+            'has_enhanced_analysis' => true,
+            'constitutional_compliant' => $analysis->constitutional_compliant,
+            'nested_chains_detected' => $analysis->nested_chains_detected,
+            'max_nesting_depth' => $analysis->max_nesting_depth,
+            'analysis_complete' => $analysis->analysis_complete,
+            'processed_at' => $analysis->processed_at,
+            'compliance_score' => $complianceStatus['compliance_score'] ?? null,
+            'requires_reanalysis' => $complianceStatus['requires_revalidation'] ?? false,
+            'constitution_version' => $analysis->constitution_version
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/racks/{id}/trigger-analysis",
+     *     summary="Trigger enhanced analysis for rack",
+     *     description="Manually trigger enhanced nested chain analysis for a rack (owner only)",
+     *     operationId="triggerRackAnalysis",
+     *     tags={"Racks"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Rack ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="force", type="boolean", default=false, description="Force reanalysis even if already completed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Analysis triggered successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="analysis_triggered", type="boolean"),
+     *             @OA\Property(property="constitutional_compliant", type="boolean"),
+     *             @OA\Property(property="nested_chains_detected", type="integer"),
+     *             @OA\Property(property="analysis_duration_ms", type="integer"),
+     *             @OA\Property(property="processed_at", type="string", format="date-time")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Forbidden - not the owner"),
+     *     @OA\Response(response=422, description="Analysis failed")
+     * )
+     */
+    public function triggerAnalysis(Request $request, Rack $rack): JsonResponse
+    {
+        Gate::authorize('update', $rack);
+
+        $request->validate([
+            'force' => 'sometimes|boolean'
+        ]);
+
+        $force = $request->boolean('force', false);
+
+        try {
+            $result = $this->enhancedAnalysisService->analyzeRack($rack, $force);
+
+            if (!$result['analysis_complete']) {
+                return ErrorResponse::create(
+                    ErrorCode::PROCESSING_FAILED,
+                    'Enhanced analysis failed',
+                    ['error' => $result['error'] ?? 'Unknown error occurred']
+                );
+            }
+
+            return response()->json([
+                'analysis_triggered' => true,
+                'constitutional_compliant' => $result['constitutional_compliant'],
+                'nested_chains_detected' => $result['nested_chains_detected'] ?? 0,
+                'analysis_duration_ms' => $result['analysis_duration_ms'] ?? 0,
+                'processed_at' => $result['processed_at']
+            ]);
+
+        } catch (\Exception $e) {
+            return ErrorResponse::create(
+                ErrorCode::PROCESSING_FAILED,
+                'Failed to trigger enhanced analysis',
+                ['error' => $e->getMessage()],
+                null,
+                $e
+            );
+        }
     }
 }

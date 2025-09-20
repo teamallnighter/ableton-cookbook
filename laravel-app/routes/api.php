@@ -9,6 +9,9 @@
   use App\Http\Controllers\DrumRackAnalyzerController;
   use App\Http\Controllers\Api\MarkdownPreviewController;
   use App\Http\Controllers\Api\D2DiagramController;
+  use App\Http\Controllers\Api\NestedChainAnalysisController;
+  use App\Http\Controllers\Api\BatchReprocessController;
+  use App\Http\Controllers\Api\ConstitutionalComplianceController;
   use Illuminate\Http\Request;
   use Illuminate\Support\Facades\Route;
 
@@ -27,6 +30,11 @@
 
   // Public routes with rate limiting
   Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
+      // Constitutional Compliance - Public information
+      Route::prefix('compliance')->controller(ConstitutionalComplianceController::class)->group(function () {
+          Route::get('/constitution', 'getConstitution');
+          Route::get('/version-history', 'getVersionHistory');
+      });
       // Racks - Public endpoints
       Route::get('/racks', [RackController::class, 'index']);
       Route::get('/racks/trending', [RackController::class, 'trending']);
@@ -146,5 +154,49 @@
 
       // D2 Diagrams for Racks - Authenticated rack-specific diagrams
       Route::get('/racks/{rack}/diagram', [D2DiagramController::class, 'generateRackDiagram'])->middleware('throttle:30,1');
+
+      // Enhanced Rack Analysis - RackController extensions
+      Route::get('/racks/{rack}/analysis-status', [RackController::class, 'getAnalysisStatus']);
+      Route::post('/racks/{rack}/trigger-analysis', [RackController::class, 'triggerAnalysis'])->middleware('throttle:10,1');
+
+      // Nested Chain Analysis - Enhanced analysis endpoints
+      Route::prefix('analysis')->controller(NestedChainAnalysisController::class)->group(function () {
+          // Individual rack analysis
+          Route::post('/racks/{uuid}/analyze-nested-chains', 'analyze')->middleware('throttle:60,1');
+          Route::get('/racks/{uuid}/nested-chains', 'getHierarchy');
+          Route::get('/racks/{uuid}/nested-chains/{chainId}', 'getChainDetails');
+          Route::post('/racks/{uuid}/reanalyze-nested-chains', 'reanalyze')->middleware('throttle:60,1');
+          Route::get('/racks/{uuid}/analysis-summary', 'getSummary');
+
+          // Bulk operations (admin only)
+          Route::get('/bulk-statistics', 'getBulkStatistics')->middleware(['can:viewAny,App\\Models\\Rack', 'throttle:30,1']);
+      });
+
+      // Batch Reprocessing - Enterprise batch operations
+      Route::prefix('analysis')->controller(BatchReprocessController::class)->group(function () {
+          Route::post('/batch-reprocess', 'submitBatch')->middleware('throttle:10,1'); // Max 10 batch submissions per minute
+          Route::get('/batch-status/{batchId}', 'getBatchStatus')->middleware('throttle:60,1');
+          Route::get('/batch-results/{batchId}', 'getBatchResults')->middleware('throttle:60,1');
+          Route::get('/batch-history', 'getBatchHistory');
+          Route::delete('/batch/{batchId}', 'cancelBatch')->middleware('throttle:30,1');
+      });
+
+      // Constitutional Compliance - Governance and compliance reporting
+      Route::prefix('compliance')->controller(ConstitutionalComplianceController::class)->group(function () {
+          // General compliance endpoints
+          Route::get('/constitution', 'getConstitution');
+          Route::get('/version-history', 'getVersionHistory');
+
+          // Rack-specific compliance
+          Route::post('/validate-rack/{uuid}', 'validateRack')->middleware('throttle:60,1');
+          Route::get('/rack/{uuid}', 'getRackCompliance')->middleware('throttle:60,1');
+
+          // System-wide compliance (admin only)
+          Route::get('/system-status', 'getSystemCompliance')->middleware(['can:viewAny,App\\Models\\Rack', 'throttle:30,1']);
+          Route::get('/report', 'getComplianceReport')->middleware(['can:viewAny,App\\Models\\Rack', 'throttle:30,1']);
+
+          // Audit logging
+          Route::post('/audit-log', 'logAuditEvent')->middleware('throttle:120,1');
+      });
   });
 
