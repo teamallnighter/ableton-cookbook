@@ -74,8 +74,8 @@ php artisan key:generate --force
 
 print_status "Phase 4: Frontend Assets"
 
-# Install Node.js dependencies
-npm ci --production
+# Install Node.js dependencies (including dev dependencies for build)
+npm ci
 
 # Build production assets
 print_status "Building frontend assets with Vite..."
@@ -86,6 +86,10 @@ if [ ! -d "public/build" ]; then
     print_error "Build directory not found! Asset compilation failed."
     exit 1
 fi
+
+# Clean up dev dependencies after build
+print_status "Cleaning up development dependencies..."
+npm prune --production
 
 print_status "Frontend assets built successfully"
 
