@@ -177,13 +177,24 @@ class D2DiagramService
     
     private function getChainData(array $rackData): array
     {
-        // Try to get from already parsed data
-        if (!empty($rackData['chains'])) {
+        // Try to get from already parsed data (this should now contain Enhanced Analysis data)
+        if (!empty($rackData['chains']) && is_array($rackData['chains'])) {
+            Log::info('D2 Diagram: Using provided chain data', [
+                'chain_count' => count($rackData['chains']),
+                'chains' => array_map(function($chain) {
+                    return [
+                        'name' => $chain['name'] ?? 'Unknown',
+                        'device_count' => count($chain['devices'] ?? []),
+                        'has_devices' => !empty($chain['devices'])
+                    ];
+                }, $rackData['chains'])
+            ]);
             return $rackData['chains'];
         }
-        
+
         // If no chains in rack data, try to analyze the file
         if (!empty($rackData['uuid'])) {
+            Log::info('D2 Diagram: Falling back to file analysis for UUID: ' . $rackData['uuid']);
             try {
                 $rack = \App\Models\Rack::where('uuid', $rackData['uuid'])->first();
                 if ($rack && $rack->file_path) {
@@ -194,15 +205,25 @@ class D2DiagramService
                         if ($xml) {
                             // Then parse the chains and devices
                             $result = \App\Services\AbletonRackAnalyzer\AbletonRackAnalyzer::parseChainsAndDevices($xml, $filePath);
-                            return $result['chains'] ?? [];
+                            $chains = $result['chains'] ?? [];
+                            Log::info('D2 Diagram: File analysis resulted in chains', [
+                                'chain_count' => count($chains)
+                            ]);
+                            return $chains;
                         }
                     }
                 }
             } catch (\Exception $e) {
-                \Log::error("Failed to analyze rack file: " . $e->getMessage());
+                Log::error('Failed to analyze rack file for D2 diagram: ' . $e->getMessage());
             }
         }
-        
+
+        Log::warning('D2 Diagram: No chain data available', [
+            'has_rack_chains' => !empty($rackData['chains']),
+            'has_uuid' => !empty($rackData['uuid']),
+            'rack_data_keys' => array_keys($rackData)
+        ]);
+
         return [];
     }
     

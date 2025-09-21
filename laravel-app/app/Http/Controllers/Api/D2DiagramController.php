@@ -451,10 +451,15 @@ class D2DiagramController extends Controller
      */
     private function prepareRackData(Rack $rack): array
     {
+        // Use Enhanced Analysis chain data if available, otherwise fall back to legacy chains
+        $chainData = $this->getEnhancedChainData($rack);
+
         return [
+            'uuid' => $rack->uuid, // Add UUID for D2DiagramService fallback
+            'title' => $rack->title,
             'rack_name' => $rack->title,
             'rack_type' => $rack->rack_type,
-            'chains' => $rack->chains ?? [],
+            'chains' => $chainData,
             'devices' => $rack->devices ?? [],
             'macro_controls' => $rack->macro_controls ?? [],
             'chain_annotations' => $rack->chain_annotations ?? [],
@@ -467,6 +472,91 @@ class D2DiagramController extends Controller
             ],
             'drum_statistics' => $this->extractDrumStatistics($rack)
         ];
+    }
+
+    /**
+     * Get chain data from Enhanced Analysis if available, otherwise use legacy data
+     */
+    private function getEnhancedChainData(Rack $rack): array
+    {
+        // First check if Enhanced Analysis has been completed
+        if ($rack->enhanced_analysis_complete && $rack->has_nested_chains) {
+            // Load the hierarchical nested chains with their devices
+            $nestedChains = $rack->rootNestedChains()
+                ->with(['childChains' => function($query) {
+                    $query->orderBy('depth_level')->orderBy('chain_identifier');
+                }])
+                ->orderBy('chain_identifier')
+                ->get();
+
+            if ($nestedChains->isNotEmpty()) {
+                return $this->convertNestedChainsToLegacyFormat($nestedChains);
+            }
+        }
+
+        // Fallback to legacy chains data if Enhanced Analysis not available
+        return $rack->chains ?? [];
+    }
+
+    /**
+     * Convert Enhanced Analysis NestedChain models to legacy chain format for D2 compatibility
+     */
+    private function convertNestedChainsToLegacyFormat($nestedChains): array
+    {
+        $chains = [];
+
+        foreach ($nestedChains as $nestedChain) {
+            $chainData = [
+                'name' => $nestedChain->chain_name ?: "Chain {$nestedChain->chain_identifier}",
+                'devices' => $this->convertDevicesForD2($nestedChain->devices ?? []),
+                'chain_identifier' => $nestedChain->chain_identifier,
+                'depth_level' => $nestedChain->depth_level,
+                'device_count' => $nestedChain->device_count,
+                'is_empty' => $nestedChain->is_empty,
+                'chain_type' => $nestedChain->chain_type
+            ];
+
+            // Add any child chains as nested devices if they exist
+            if ($nestedChain->childChains && $nestedChain->childChains->isNotEmpty()) {
+                foreach ($nestedChain->childChains as $childChain) {
+                    $chainData['devices'][] = [
+                        'name' => "📁 " . ($childChain->chain_name ?: "Chain {$childChain->chain_identifier}"),
+                        'type' => 'nested_rack',
+                        'device_count' => $childChain->device_count,
+                        'is_nested_chain' => true
+                    ];
+                }
+            }
+
+            $chains[] = $chainData;
+        }
+
+        return $chains;
+    }
+
+    /**
+     * Convert Enhanced Analysis device format to legacy format for D2 compatibility
+     */
+    private function convertDevicesForD2(array $devices): array
+    {
+        if (empty($devices)) {
+            return [];
+        }
+
+        $convertedDevices = [];
+        foreach ($devices as $device) {
+            // Handle both array and object formats
+            $deviceData = is_array($device) ? $device : (array) $device;
+
+            $convertedDevices[] = [
+                'name' => $deviceData['name'] ?? $deviceData['device_name'] ?? 'Unknown Device',
+                'type' => $deviceData['type'] ?? $deviceData['device_type'] ?? 'unknown',
+                'parameters' => $deviceData['parameters'] ?? [],
+                'is_enabled' => $deviceData['is_enabled'] ?? true
+            ];
+        }
+
+        return $convertedDevices;
     }
 
     /**
