@@ -124,7 +124,7 @@ return new class extends Migration
             $table->index(['status', 'moderated_at']);
             $table->index(['helpful_count', 'total_votes']);
             $table->index(['is_spam', 'report_count']);
-            $table->index(['review_outdated', 'collection_version_reviewed']);
+            $table->index(['review_outdated', 'collection_version_reviewed'], 'idx_review_outdated_version');
             $table->index(['verified_reviewer', 'is_verified_purchase']);
             $table->index(['completed_collection', 'user_experience_level']);
             
