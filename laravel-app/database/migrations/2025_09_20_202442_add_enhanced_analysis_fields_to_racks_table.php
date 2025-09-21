@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('racks', function (Blueprint $table) {
             // Enhanced analysis tracking
-            $table->boolean('enhanced_analysis_complete')->default(false)->after('analysis_complete');
+            $table->boolean('enhanced_analysis_complete')->default(false)->after('processing_status');
             $table->timestamp('enhanced_analysis_started_at')->nullable()->after('enhanced_analysis_complete');
             $table->timestamp('enhanced_analysis_completed_at')->nullable()->after('enhanced_analysis_started_at');
 
