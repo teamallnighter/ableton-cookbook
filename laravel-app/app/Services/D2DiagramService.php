@@ -138,12 +138,34 @@ class D2DiagramService
                         $uniqueDeviceNames[$index] = $uniqueName;
                     }
 
-                    // Second pass: create the diagram with unique names
+                    // Second pass: create the diagram with unique names and handle nested racks
                     $prevDevice = null;
                     foreach ($devices as $index => $device) {
                         $deviceName = $uniqueDeviceNames[$index];
                         $displayName = $device['name'] ?? 'Unknown';
-                        $d2 .= "    {$deviceName}: \"{$displayName}\"\n";
+
+                        // Check if this is a nested rack
+                        $isNestedRack = isset($device['is_nested_chain']) && $device['is_nested_chain'] === true;
+
+                        if ($isNestedRack) {
+                            // Create a container for the nested rack
+                            $d2 .= "    {$deviceName}: {$displayName} {\n";
+                            $d2 .= "      style.fill: '#f39c12'\n";
+                            $d2 .= "      style.stroke: '#e67e22'\n";
+                            $d2 .= "      style.stroke-width: 2\n";
+
+                            // If we have device information for the nested rack, show it
+                            if (isset($device['device_count']) && $device['device_count'] > 0) {
+                                $d2 .= "      devices: \"{$device['device_count']} devices\"\n";
+                            } else {
+                                $d2 .= "      content: \"Nested Rack\"\n";
+                            }
+
+                            $d2 .= "    }\n";
+                        } else {
+                            // Regular device
+                            $d2 .= "    {$deviceName}: \"{$displayName}\"\n";
+                        }
 
                         if ($prevDevice) {
                             $d2 .= "    {$prevDevice} -> {$deviceName}\n";
@@ -319,7 +341,15 @@ class D2DiagramService
                     $connector = $isLast ? '└──' : '├──';
                     $arrow = $isLast ? '' : ' ↓';
 
-                    $ascii .= "│   {$connector} {$deviceName}{$arrow}\n";
+                    // Check if this is a nested rack
+                    $isNestedRack = isset($device['is_nested_chain']) && $device['is_nested_chain'] === true;
+
+                    if ($isNestedRack) {
+                        $deviceCount = isset($device['device_count']) ? " ({$device['device_count']} devices)" : '';
+                        $ascii .= "│   {$connector} 📁 {$deviceName}{$deviceCount} [NESTED RACK]{$arrow}\n";
+                    } else {
+                        $ascii .= "│   {$connector} {$deviceName}{$arrow}\n";
+                    }
                 }
             }
         }
