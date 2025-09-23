@@ -60,7 +60,7 @@ class D2HealthCheck extends Command
 
         // 2. Check if D2 is enabled
         if (!config('d2.enabled')) {
-            $this->warning('⚠️  D2 is disabled in configuration');
+            $this->warn('⚠️  D2 is disabled in configuration');
             $checks['Service Status'] = '⚠️  Disabled';
         } else {
             $checks['Service Status'] = '✅ Enabled';
@@ -171,7 +171,7 @@ class D2HealthCheck extends Command
             } else {
                 $checks['Web User'] = '⚠️  Not www-data (' . $currentUser . ')';
                 if (app()->environment('production')) {
-                    $this->warning('  In production, ensure www-data can execute D2');
+                    $this->warn('  In production, ensure www-data can execute D2');
                 }
             }
         }
